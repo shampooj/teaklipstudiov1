@@ -191,21 +191,21 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="py-8 text-center">
+      <header className="py-10 text-center">
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-display text-5xl md:text-7xl font-bold text-foreground tracking-tight"
+          className="font-display text-4xl md:text-5xl font-semibold text-foreground tracking-wide"
         >
-          Lip <span className="text-primary italic">Studio</span>
+          TEAK
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-3 text-muted-foreground font-sans text-lg"
+          className="mt-3 text-muted-foreground font-sans text-sm tracking-[0.2em] uppercase"
         >
-          Upload your photo. Pick a look. See the magic.
+          Virtual Lip Studio
         </motion.p>
       </header>
 
@@ -225,7 +225,7 @@ const Index = () => {
                 <label
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
-                  className="group relative block cursor-pointer rounded-2xl border-2 border-dashed border-primary/30 bg-card p-16 text-center transition-all duration-300 hover:border-primary/60 hover:bg-primary/5"
+                  className="group relative block cursor-pointer border border-border bg-background p-16 text-center transition-all duration-300 hover:border-foreground/40"
                 >
                   <input
                     type="file"
@@ -233,15 +233,13 @@ const Index = () => {
                     className="hidden"
                     onChange={handleInputChange}
                   />
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="rounded-full bg-primary/10 p-5 transition-colors group-hover:bg-primary/20">
-                      <Upload className="h-8 w-8 text-primary" />
-                    </div>
+                  <div className="flex flex-col items-center gap-6">
+                    <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                     <div>
-                      <p className="font-display text-2xl font-semibold text-foreground">
+                      <p className="font-display text-xl font-medium text-foreground tracking-wide">
                         Drop your photo here
                       </p>
-                      <p className="mt-1 text-muted-foreground">
+                      <p className="mt-2 text-muted-foreground text-sm tracking-wide">
                         or click to browse · JPG, PNG up to 10MB
                       </p>
                     </div>
@@ -260,7 +258,7 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center gap-8"
               >
-                <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-xl border border-border">
+                <div className="w-48 h-48 overflow-hidden border border-border">
                   <img
                     src={originalImage}
                     alt="Your photo"
@@ -268,12 +266,12 @@ const Index = () => {
                   />
                 </div>
 
-                <div className="w-full max-w-sm flex flex-col gap-4">
-                  <label className="font-display text-lg font-semibold text-foreground text-center">
+                <div className="w-full max-w-sm flex flex-col gap-5">
+                  <label className="font-sans text-xs font-medium text-muted-foreground text-center tracking-[0.2em] uppercase">
                     Choose your lipstick look
                   </label>
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
-                    <SelectTrigger className="w-full text-base">
+                    <SelectTrigger className="w-full text-sm border-foreground/20">
                       <SelectValue placeholder="Select a look" />
                     </SelectTrigger>
                     <SelectContent>
@@ -292,13 +290,11 @@ const Index = () => {
                     <Button
                       onClick={applyLipstick}
                       size="lg"
-                      className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans gap-2"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-xs tracking-[0.15em] uppercase gap-2 px-8"
                     >
-                      <Sparkles className="h-4 w-4" />
                       Apply Look
                     </Button>
-                    <Button onClick={reset} size="lg" variant="outline" className="font-sans gap-2">
-                      <RotateCcw className="h-4 w-4" />
+                    <Button onClick={reset} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                       Start Over
                     </Button>
                   </div>
@@ -316,18 +312,17 @@ const Index = () => {
                 className="flex flex-col items-center gap-8 py-12"
               >
                 {originalImage && (
-                  <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-xl">
+                  <div className="relative w-64 h-64 overflow-hidden border border-border">
                     <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+                    <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
                 )}
                 <div className="flex flex-col items-center gap-3">
-                  <div className="h-1.5 w-48 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full w-full bg-gradient-to-r from-primary via-accent to-primary rounded-full animate-shimmer bg-[length:200%_100%]" />
+                  <div className="h-px w-48 bg-border overflow-hidden">
+                    <div className="h-full w-full bg-foreground/40 animate-shimmer bg-[length:200%_100%]" />
                   </div>
-                  <p className="text-muted-foreground font-sans flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    Applying {currentLookLabel}...
+                  <p className="text-muted-foreground font-sans text-sm tracking-wide">
+                    Applying {currentLookLabel}…
                   </p>
                 </div>
               </motion.div>
@@ -343,33 +338,31 @@ const Index = () => {
                 className="flex flex-col items-center gap-8"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-sans text-muted-foreground uppercase tracking-widest">Before</span>
-                    <div className="rounded-2xl overflow-hidden shadow-lg border border-border">
+                  <div className="flex flex-col items-center gap-3">
+                    <span className="text-xs font-sans text-muted-foreground uppercase tracking-[0.2em]">Before</span>
+                    <div className="overflow-hidden border border-border">
                       <img src={originalImage!} alt="Before" className="w-full aspect-square object-cover" />
                     </div>
                   </div>
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-sans text-primary uppercase tracking-widest font-semibold">
+                  <div className="flex flex-col items-center gap-3">
+                    <span className="text-xs font-sans text-foreground uppercase tracking-[0.2em] font-medium">
                       {currentLookLabel}
                     </span>
-                    <div className="rounded-2xl overflow-hidden shadow-lg border border-primary/30 animate-pulse-glow">
+                    <div className="overflow-hidden border border-foreground/30">
                       <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full aspect-square object-cover" />
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-4 justify-center">
-                  <Button onClick={downloadResult} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans gap-2">
+                  <Button onClick={downloadResult} size="lg" className="bg-foreground text-background hover:bg-foreground/85 font-sans text-xs tracking-[0.15em] uppercase gap-2 px-8">
                     <Download className="h-4 w-4" />
                     Download
                   </Button>
-                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans gap-2">
-                    <Sparkles className="h-4 w-4" />
+                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     Try Another Look
                   </Button>
-                  <Button onClick={reset} size="lg" variant="outline" className="font-sans gap-2">
-                    <RotateCcw className="h-4 w-4" />
+                  <Button onClick={reset} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     New Photo
                   </Button>
                 </div>
