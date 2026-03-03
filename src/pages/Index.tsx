@@ -341,10 +341,8 @@ const Index = () => {
                     <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
                 )}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="h-px w-48 bg-border overflow-hidden">
-                    <div className="h-full w-full bg-foreground/40 animate-shimmer bg-[length:200%_100%]" />
-                  </div>
+                <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+                  <Progress value={progress} className="h-2 w-full" />
                   <p className="text-muted-foreground font-display text-sm">
                     Applying {currentLookLabel}…
                   </p>
