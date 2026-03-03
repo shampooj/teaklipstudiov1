@@ -60,7 +60,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const editedData = editedCtx.getImageData(0, 0, width, height);
   const outputData = outputCtx.createImageData(width, height);
 
-  const blendOpacity = look === "berry-wine" ? 0.64 : 1;
+  const baseBlendOpacity = look === "berry-wine" ? 0.64 : 1;
 
   for (let i = 0; i < originalData.data.length; i += 4) {
     const r0 = originalData.data[i];
