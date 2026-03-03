@@ -8,13 +8,13 @@ const corsHeaders = {
 
 const LOOK_PROMPTS: Record<string, string> = {
   "classic-red":
-    "Edit this photo to add beautiful, classic bold red lipstick to the person's lips. A timeless, saturated true red. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
+    "Edit this photo to change ONLY the color of the person's lips to a classic bold red lipstick. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
   "berry-wine":
-    "Edit this photo to add a deep berry-wine / dark plum lipstick to the person's lips. Rich, moody, and luxurious — think burgundy-berry tones. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
+    "Edit this photo to change ONLY the color of the person's lips to a deep berry-wine / dark plum lipstick. Rich, moody, and luxurious — think burgundy-berry tones. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
   "nude-rose":
-    "Edit this photo to add a soft nude-rosé / pinkish-nude lipstick to the person's lips. Subtle, natural, and effortless — a 'my lips but better' shade. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
+    "Edit this photo to change ONLY the color of the person's lips to a soft nude-rosé / pinkish-nude lipstick. Subtle, natural, and effortless — a 'my lips but better' shade. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
   "coral-sunset":
-    "Edit this photo to add a warm terracotta-brick matte lipstick to the person's lips. The shade is a muted earthy coral-brown — not bright orange, but a rich, warm burnt sienna / terracotta tone with a velvety matte finish. Think 90s supermodel brown-red lip. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
+    "Edit this photo to change ONLY the color of the person's lips to a warm terracotta-brick matte lipstick — a muted earthy coral-brown, rich burnt sienna / terracotta tone with a velvety matte finish. Think 90s supermodel brown-red lip. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
 };
 
 serve(async (req) => {
