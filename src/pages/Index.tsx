@@ -80,7 +80,11 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const isTeethLike = lightness0 > 165 && saturation0 < 0.2;
     const rednessGain = (r1 - Math.max(g1, b1)) - (r0 - Math.max(g0, b0));
     const warmTintGain = (r1 - b1) - (r0 - b0);
-    const isLipTintPixel = diff > 28 && (rednessGain > 8 || warmTintGain > 10);
+    // For darker shades (like Riya), the edit darkens pixels rather than adding redness,
+    // so also detect significant darkening as a lip-color change.
+    const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
+    const isDarkeningLipPixel = diff > 28 && darkeningAmount > 30 && saturation0 < 0.6;
+    const isLipTintPixel = diff > 28 && (rednessGain > 8 || warmTintGain > 10 || isDarkeningLipPixel);
 
     if (isLipTintPixel && !isTeethLike) {
       outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity);
