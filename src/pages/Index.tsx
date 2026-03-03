@@ -9,7 +9,7 @@ import { toast } from "sonner";
 type AppState = "idle" | "uploaded" | "processing" | "done";
 
 const LIPSTICK_LOOKS = [
-  { id: "classic-red", label: "Classic Red", description: "Timeless, bold red — think Old Hollywood glamour" },
+  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour" },
   { id: "berry-wine", label: "Berry Wine", description: "Deep berry-plum with a luxurious, moody vibe" },
   { id: "nude-rose", label: "Nude Rosé", description: "Soft pinkish-nude for a natural, effortless look" },
   { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brick matte with a 90s supermodel vibe" },
