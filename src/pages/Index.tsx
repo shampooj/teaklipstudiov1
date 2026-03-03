@@ -60,7 +60,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const editedData = editedCtx.getImageData(0, 0, width, height);
   const outputData = outputCtx.createImageData(width, height);
 
-  const blendOpacity = look === "berry-wine" ? 0.64 : 1;
+  const baseBlendOpacity = look === "berry-wine" ? 0.64 : 1;
 
   for (let i = 0; i < originalData.data.length; i += 4) {
     const r0 = originalData.data[i];
@@ -88,6 +88,19 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const isLipTintPixel = diff > 28 && (rednessGain > 8 || warmTintGain > 10 || isDarkeningLipPixel);
 
     if (isLipTintPixel && !isTeethLike) {
+      // For Amira (nude-rose), reduce opacity on darker/browner lip pixels for a sheerer application
+      let blendOpacity = baseBlendOpacity;
+      if (look === "nude-rose") {
+        const isDarkerLip = lightness0 < 140;
+        const isBrowny = (r0 - b0) > 20 && saturation0 > 0.15;
+        if (isDarkerLip && isBrowny) {
+          // Scale sheerness: darker & browner = more sheer (down to 0.45)
+          const darkFactor = Math.max(0, (140 - lightness0) / 100); // 0–1
+          blendOpacity = Math.max(0.45, 1 - darkFactor * 0.55);
+        } else if (isDarkerLip) {
+          blendOpacity = 0.72;
+        }
+      }
       outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity);
       outputData.data[i + 1] = Math.round(g0 + (g1 - g0) * blendOpacity);
       outputData.data[i + 2] = Math.round(b0 + (b1 - b0) * blendOpacity);
