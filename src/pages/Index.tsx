@@ -269,7 +269,7 @@ const Index = () => {
                 </div>
 
                 <div className="w-full max-w-sm flex flex-col gap-5">
-                   <label className="font-display text-lg text-muted-foreground text-center">
+                   <label className="font-display text-lg text-foreground text-center">
                      Choose your lipstick look
                    </label>
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
