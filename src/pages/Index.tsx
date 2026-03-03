@@ -137,7 +137,7 @@ const Index = () => {
 
       let finalImage = data.resultImage as string;
       try {
-        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string);
+        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
       } catch (blendError) {
         console.warn("Blend step failed, using AI output directly:", blendError);
       }
