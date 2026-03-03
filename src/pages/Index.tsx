@@ -193,13 +193,12 @@ const Index = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="py-10 text-center">
-        <motion.h1
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="font-display text-4xl md:text-5xl font-semibold text-foreground tracking-wide"
         >
-          TEAK
-        </motion.h1>
+          <img src={teakLogo} alt="TEAK" className="h-10 md:h-12 mx-auto" />
+        </motion.div>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
