@@ -15,7 +15,7 @@ const LIPSTICK_LOOKS = [
   { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe" },
   { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish" },
   { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe" },
-  { id: "deep-terracotta", label: "Color Study Demi-Satin in Aaliyah", description: "Deep rich terracotta-brick with chocolate undertones" },
+  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones" },
 ] as const;
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
