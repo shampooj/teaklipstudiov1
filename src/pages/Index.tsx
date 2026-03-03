@@ -15,7 +15,7 @@ const LIPSTICK_LOOKS = [
   { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe" },
   { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish" },
   { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe" },
-  { id: "deep-terracotta", label: "Color Study Demi-Satin in Aaliyah", description: "Deep rich terracotta-brick with chocolate undertones" },
+  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones" },
 ] as const;
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
@@ -94,11 +94,25 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
         const isDarkerLip = lightness0 < 140;
         const isBrowny = (r0 - b0) > 20 && saturation0 > 0.15;
         if (isDarkerLip && isBrowny) {
-          // Scale sheerness: darker & browner = more sheer (down to 0.45)
-          const darkFactor = Math.max(0, (140 - lightness0) / 100); // 0–1
+          const darkFactor = Math.max(0, (140 - lightness0) / 100);
           blendOpacity = Math.max(0.45, 1 - darkFactor * 0.55);
         } else if (isDarkerLip) {
           blendOpacity = 0.72;
+        }
+      }
+      // For Amrit (deep-terracotta) on darker/browner lips, push result toward purple
+      if (look === "deep-terracotta") {
+        const isDarkerLip = lightness0 < 140;
+        const isBrowny = (r0 - b0) > 15 && saturation0 > 0.12;
+        if (isDarkerLip && isBrowny) {
+          // Shift toward purple: boost blue, reduce red slightly
+          const darkFactor = Math.min(1, Math.max(0, (140 - lightness0) / 100));
+          const purpleShift = darkFactor * 0.35;
+          outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity * (1 - purpleShift * 0.3));
+          outputData.data[i + 1] = Math.round(g0 + (g1 - g0) * blendOpacity * (1 - purpleShift * 0.2));
+          outputData.data[i + 2] = Math.round(Math.min(255, b0 + (b1 - b0) * blendOpacity + purpleShift * 18));
+          outputData.data[i + 3] = originalData.data[i + 3];
+          continue;
         }
       }
       outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity);
