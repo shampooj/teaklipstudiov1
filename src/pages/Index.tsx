@@ -104,6 +104,24 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [progress, setProgress] = useState(0);
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const startProgress = useCallback(() => {
+    setProgress(0);
+    progressInterval.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 8;
+      });
+    }, 500);
+  }, []);
+
+  const stopProgress = useCallback(() => {
+    if (progressInterval.current) clearInterval(progressInterval.current);
+    progressInterval.current = null;
+    setProgress(100);
+  }, []);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
