@@ -6,16 +6,22 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const LOOK_PROMPTS: Record<string, string> = {
-  "classic-red":
-    "Edit this photo to change ONLY the color of the person's lips to a classic bold red lipstick. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
-  "berry-wine":
-    "Edit this photo to change ONLY the color of the person's lips to a deep berry-wine / dark plum lipstick. Rich, moody, and luxurious — think burgundy-berry tones. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
-  "nude-rose":
-    "Edit this photo to change ONLY the color of the person's lips to a soft nude-rosé / pinkish-nude lipstick. Subtle, natural, and effortless — a 'my lips but better' shade. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
-  "coral-sunset":
-    "Edit this photo to change ONLY the color of the person's lips to a warm terracotta-brick matte lipstick — a muted earthy coral-brown, rich burnt sienna / terracotta tone with a velvety matte finish. Think 90s supermodel brown-red lip. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
+const LOOK_SHADES: Record<string, string> = {
+  "classic-red": "classic bold red lipstick, timeless and saturated true red",
+  "berry-wine": "deep berry-wine / dark plum lipstick, rich burgundy-berry tone",
+  "nude-rose": "soft nude-rosé / pinkish-nude lipstick, natural 'my lips but better' tone",
+  "coral-sunset": "warm terracotta-brick matte lipstick, muted earthy coral-brown with burnt sienna tone",
 };
+
+const SHAPE_LOCK_RULES = `
+CRITICAL GEOMETRY LOCK (MUST FOLLOW):
+- Change ONLY lipstick color/finish inside the existing lip pixels.
+- Keep lip shape, size, thickness, contour, and outline EXACTLY unchanged.
+- Do NOT enlarge, plump, slim, sharpen, overline, underline, or reshape lips.
+- Do NOT alter mouth width/height, cupid's bow, corners, teeth visibility, or expression.
+- Preserve the exact original lip boundary and proportions.
+- If the requested color cannot be applied without changing geometry, keep original lip geometry unchanged and apply the closest possible color within current boundaries.
+`.trim();
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,7 +38,8 @@ serve(async (req) => {
       );
     }
 
-    const prompt = LOOK_PROMPTS[look] || LOOK_PROMPTS["classic-red"];
+    const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
+    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else exactly the same — same face, expression, lighting, background, and skin texture. Make it photorealistic.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -44,7 +51,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           {
             role: "user",
