@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const LOOK_SHADES: Record<string, string> = {
-  "classic-red": "classic bold red lipstick, timeless and saturated true red",
+  "classic-red": "classic bold red MATTE lipstick, timeless and saturated true red with a completely matte, velvety, non-shiny finish — zero gloss, zero shine, zero sheen, pure flat matte texture",
   "berry-wine": "extremely sheer, barely-there berry-red lip tint — almost transparent, like a single swipe of tinted lip oil. The natural lip color and texture must remain clearly visible underneath. Only the faintest hint of warm cranberry-red. Think 'just bitten lips', not lipstick. Glossy, dewy, ultra-sheer — absolutely no opacity or full coverage",
   "nude-rose": "medium-pink demi-satin lipstick, a warm rosy-pink with soft mauve undertones — distinctly pink, not nude or brown. Think a warm medium pink with a subtle dusty-mauve tint. Light-medium coverage with a refined satin sheen. The color should read clearly as PINK first, mauve second. Warm peachy-pink warmth, never cool or brown",
   "coral-sunset": "warm terracotta-brown matte lipstick, medium-deep earthy brown with warm terracotta and burnt sienna undertone, slightly rich and moody but not full dark brick",
