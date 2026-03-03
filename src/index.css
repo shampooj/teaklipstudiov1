@@ -1,9 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@font-face {
+  font-family: 'ABC ROM';
+  src: url('/fonts/ABCROM-Medium.woff2') format('woff2'),
+       url('/fonts/ABCROM-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Wolpe Pegasus';
+  src: url('/fonts/WolpePegasus-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ... keep existing code (all @layer base rules) */
 @layer base {
   :root {
     --background: 0 0% 100%;
