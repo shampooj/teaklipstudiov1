@@ -11,7 +11,7 @@ const LOOK_SHADES: Record<string, string> = {
   "berry-wine": "extremely sheer, barely-there berry-red lip tint — almost transparent, like a single swipe of tinted lip oil. The natural lip color and texture must remain clearly visible underneath. Only the faintest hint of warm cranberry-red. Think 'just bitten lips', not lipstick. Glossy, dewy, ultra-sheer — absolutely no opacity or full coverage",
   "nude-rose": "medium-pink demi-satin lipstick, a warm rosy-pink with soft mauve undertones — distinctly pink, not nude or brown. Think a warm medium pink with a subtle dusty-mauve tint. Light-medium coverage with a refined satin sheen. The color should read clearly as PINK first, mauve second. Warm peachy-pink warmth, never cool or brown",
   "coral-sunset": "warm terracotta-brown matte lipstick, medium-deep earthy brown with warm terracotta and burnt sienna undertone, slightly rich and moody but not full dark brick",
-  "deep-terracotta": "deep warm terracotta-brick matte lipstick, rich dark earthy brown-red with deep burnt sienna and chocolate undertone, noticeably darker than a typical terracotta",
+  "deep-terracotta": "deep warm terracotta-plum matte lipstick, rich dark earthy brown-red with a distinct purple-plum undertone — more purple than brick, with deep berry and chocolate notes. On darker skin tones the purple should be clearly visible, shifting away from orange-brick toward a cool plum-berry direction",
 };
 
 const SHAPE_LOCK_RULES = `
