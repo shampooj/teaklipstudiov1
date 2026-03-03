@@ -61,8 +61,8 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const editedData = editedCtx.getImageData(0, 0, width, height);
   const outputData = outputCtx.createImageData(width, height);
 
-  const baseBlendOpacity = look === "berry-wine" ? 0.64 : 1;
   const isNeha = look === "berry-wine";
+  const baseBlendOpacity = isNeha ? 0.64 : 1;
 
   // Pass 1: build a strict lip-candidate mask from strong, lipstick-like color deltas only.
   const candidateMask = new Uint8Array(pixelCount);
