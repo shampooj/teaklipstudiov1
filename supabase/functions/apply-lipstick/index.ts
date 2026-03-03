@@ -20,9 +20,11 @@ CRITICAL RULES (MUST FOLLOW WITHOUT EXCEPTION):
 - NEVER alter, invent, remove, smooth, whiten, blur, resize, reshape, or restyle teeth.
 - LIP GEOMETRY LOCK: keep lip shape/size/thickness/outline/cupid's bow/corners exactly unchanged.
 - MOUTH LOCK: do not change mouth openness, expression, tongue, or inner mouth.
-- Keep all non-lip regions unchanged (skin, eyes, nose, hair, jawline, clothing, background, lighting).
+- NO FACIAL ENHANCEMENTS: do NOT smooth skin, remove blemishes, reduce wrinkles, brighten eyes, reshape face, slim nose, enhance eyebrows, add makeup to any area other than lips, adjust skin tone, or improve appearance in any way.
+- NO BEAUTIFICATION: the output must look exactly like the input photo with ONLY the lip color changed. Do not make the person look "better" or more attractive.
+- Keep all non-lip regions pixel-identical to the original (skin, eyes, nose, hair, jawline, clothing, background, lighting, skin texture, pores, imperfections).
 - Only recolor lip surface within the exact existing lip boundary.
-- If any of the above cannot be satisfied, return an unchanged image rather than modifying teeth or geometry.
+- If any of the above cannot be satisfied, return an unchanged image rather than modifying teeth, geometry, or facial appearance.
 `.trim();
 
 serve(async (req) => {
