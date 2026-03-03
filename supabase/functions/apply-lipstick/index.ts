@@ -38,7 +38,8 @@ serve(async (req) => {
       );
     }
 
-    const prompt = LOOK_PROMPTS[look] || LOOK_PROMPTS["classic-red"];
+    const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
+    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else exactly the same — same face, expression, lighting, background, and skin texture. Make it photorealistic.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
@@ -50,7 +51,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3-pro-image-preview",
         messages: [
           {
             role: "user",
