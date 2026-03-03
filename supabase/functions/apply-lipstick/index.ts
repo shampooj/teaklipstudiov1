@@ -14,7 +14,7 @@ const LOOK_PROMPTS: Record<string, string> = {
   "nude-rose":
     "Edit this photo to add a soft nude-rosé / pinkish-nude lipstick to the person's lips. Subtle, natural, and effortless — a 'my lips but better' shade. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
   "coral-sunset":
-    "Edit this photo to add a warm coral-orange lipstick to the person's lips. Vibrant and summery with a warm, energetic glow. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
+    "Edit this photo to add a warm terracotta-brick matte lipstick to the person's lips. The shade is a muted earthy coral-brown — not bright orange, but a rich, warm burnt sienna / terracotta tone with a velvety matte finish. Think 90s supermodel brown-red lip. Keep everything else exactly the same — same face, expression, lighting, background. Make it look natural and realistic.",
 };
 
 serve(async (req) => {
