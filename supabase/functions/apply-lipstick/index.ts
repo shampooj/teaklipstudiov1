@@ -15,13 +15,14 @@ const LOOK_SHADES: Record<string, string> = {
 
 const SHAPE_LOCK_RULES = `
 CRITICAL RULES (MUST FOLLOW WITHOUT EXCEPTION):
-- Change ONLY the color/finish of the lip skin. Nothing else in the image should change AT ALL.
-- TEETH: Do NOT alter teeth in any way — do not whiten, straighten, resize, recolor, add, remove, blur, sharpen, or modify teeth. Teeth must be pixel-identical to the original.
-- LIP GEOMETRY: Keep lip shape, size, thickness, contour, outline, cupid's bow, and corners EXACTLY as they are. Do NOT enlarge, plump, slim, sharpen, overline, underline, or reshape lips.
-- MOUTH: Do NOT change mouth openness, width, height, or expression. Do NOT change tongue or inner mouth visibility.
-- FACE & BODY: Do NOT change skin, eyes, nose, hair, jawline, ears, clothing, or any other feature.
-- BACKGROUND & LIGHTING: Keep background, lighting, shadows, and reflections identical.
-- Only recolor the lip surface within the existing lip boundary. Think of it like a digital color overlay on the lip pixels only.
+- Edit method: perform a localized lip-color edit only, not a global face regeneration.
+- TEETH ARE LOCKED: every teeth pixel must remain identical to the original photo (shape, contour, spacing, texture, color, brightness, sharpness).
+- NEVER alter, invent, remove, smooth, whiten, blur, resize, reshape, or restyle teeth.
+- LIP GEOMETRY LOCK: keep lip shape/size/thickness/outline/cupid's bow/corners exactly unchanged.
+- MOUTH LOCK: do not change mouth openness, expression, tongue, or inner mouth.
+- Keep all non-lip regions unchanged (skin, eyes, nose, hair, jawline, clothing, background, lighting).
+- Only recolor lip surface within the exact existing lip boundary.
+- If any of the above cannot be satisfied, return an unchanged image rather than modifying teeth or geometry.
 `.trim();
 
 serve(async (req) => {

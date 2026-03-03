@@ -17,6 +17,84 @@ const LIPSTICK_LOOKS = [
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
 
+const loadImage = (src: string) =>
+  new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Failed to load image"));
+    image.src = src;
+  });
+
+const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string) => {
+  const [original, edited] = await Promise.all([loadImage(originalSrc), loadImage(editedSrc)]);
+
+  const width = original.naturalWidth || original.width;
+  const height = original.naturalHeight || original.height;
+
+  const originalCanvas = document.createElement("canvas");
+  originalCanvas.width = width;
+  originalCanvas.height = height;
+  const originalCtx = originalCanvas.getContext("2d");
+
+  const editedCanvas = document.createElement("canvas");
+  editedCanvas.width = width;
+  editedCanvas.height = height;
+  const editedCtx = editedCanvas.getContext("2d");
+
+  const outputCanvas = document.createElement("canvas");
+  outputCanvas.width = width;
+  outputCanvas.height = height;
+  const outputCtx = outputCanvas.getContext("2d");
+
+  if (!originalCtx || !editedCtx || !outputCtx) {
+    throw new Error("Canvas context unavailable");
+  }
+
+  originalCtx.drawImage(original, 0, 0, width, height);
+  editedCtx.drawImage(edited, 0, 0, width, height);
+
+  const originalData = originalCtx.getImageData(0, 0, width, height);
+  const editedData = editedCtx.getImageData(0, 0, width, height);
+  const outputData = outputCtx.createImageData(width, height);
+
+  for (let i = 0; i < originalData.data.length; i += 4) {
+    const r0 = originalData.data[i];
+    const g0 = originalData.data[i + 1];
+    const b0 = originalData.data[i + 2];
+
+    const r1 = editedData.data[i];
+    const g1 = editedData.data[i + 1];
+    const b1 = editedData.data[i + 2];
+
+    const diff = Math.abs(r1 - r0) + Math.abs(g1 - g0) + Math.abs(b1 - b0);
+
+    const max0 = Math.max(r0, g0, b0);
+    const min0 = Math.min(r0, g0, b0);
+    const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
+    const lightness0 = (max0 + min0) / 2;
+
+    const isTeethLike = lightness0 > 165 && saturation0 < 0.2;
+    const rednessGain = (r1 - Math.max(g1, b1)) - (r0 - Math.max(g0, b0));
+    const warmTintGain = (r1 - b1) - (r0 - b0);
+    const isLipTintPixel = diff > 28 && (rednessGain > 8 || warmTintGain > 10);
+
+    if (isLipTintPixel && !isTeethLike) {
+      outputData.data[i] = r1;
+      outputData.data[i + 1] = g1;
+      outputData.data[i + 2] = b1;
+      outputData.data[i + 3] = 255;
+    } else {
+      outputData.data[i] = r0;
+      outputData.data[i + 1] = g0;
+      outputData.data[i + 2] = b0;
+      outputData.data[i + 3] = originalData.data[i + 3];
+    }
+  }
+
+  outputCtx.putImageData(outputData, 0, 0);
+  return outputCanvas.toDataURL("image/png");
+};
+
 const Index = () => {
   const [state, setState] = useState<AppState>("idle");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -52,8 +130,16 @@ const Index = () => {
 
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
+      if (!data?.resultImage) throw new Error("No edited image returned.");
 
-      setResultImage(data.resultImage);
+      let finalImage = data.resultImage as string;
+      try {
+        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string);
+      } catch (blendError) {
+        console.warn("Blend step failed, using AI output directly:", blendError);
+      }
+
+      setResultImage(finalImage);
       setState("done");
       toast.success("Lipstick applied!");
     } catch (err: any) {
