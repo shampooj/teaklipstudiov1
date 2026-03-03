@@ -26,7 +26,7 @@ const loadImage = (src: string) =>
     image.src = src;
   });
 
-const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string) => {
+const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string, look: LookId) => {
   const [original, edited] = await Promise.all([loadImage(originalSrc), loadImage(editedSrc)]);
 
   const width = original.naturalWidth || original.width;
@@ -58,6 +58,8 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const editedData = editedCtx.getImageData(0, 0, width, height);
   const outputData = outputCtx.createImageData(width, height);
 
+  const blendOpacity = look === "berry-wine" ? 0.28 : 1;
+
   for (let i = 0; i < originalData.data.length; i += 4) {
     const r0 = originalData.data[i];
     const g0 = originalData.data[i + 1];
@@ -80,10 +82,10 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const isLipTintPixel = diff > 28 && (rednessGain > 8 || warmTintGain > 10);
 
     if (isLipTintPixel && !isTeethLike) {
-      outputData.data[i] = r1;
-      outputData.data[i + 1] = g1;
-      outputData.data[i + 2] = b1;
-      outputData.data[i + 3] = 255;
+      outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity);
+      outputData.data[i + 1] = Math.round(g0 + (g1 - g0) * blendOpacity);
+      outputData.data[i + 2] = Math.round(b0 + (b1 - b0) * blendOpacity);
+      outputData.data[i + 3] = originalData.data[i + 3];
     } else {
       outputData.data[i] = r0;
       outputData.data[i + 1] = g0;
@@ -135,7 +137,7 @@ const Index = () => {
 
       let finalImage = data.resultImage as string;
       try {
-        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string);
+        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
       } catch (blendError) {
         console.warn("Blend step failed, using AI output directly:", blendError);
       }
