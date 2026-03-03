@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Upload, Download, Sparkles, RotateCcw } from "lucide-react";
-import teakLogo from "@/assets/teak-logo.png";
+import { Upload, Download, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import teakLogo from "@/assets/teak-logo.png";
 
 type AppState = "idle" | "uploaded" | "processing" | "done";
 
@@ -203,7 +203,7 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-3 text-muted-foreground font-sans text-sm tracking-[0.2em] uppercase"
+          className="mt-4 text-muted-foreground font-sans text-[9px] uppercase"
         >
           Virtual Lip Studio
         </motion.p>
@@ -236,10 +236,10 @@ const Index = () => {
                   <div className="flex flex-col items-center gap-6">
                     <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                     <div>
-                      <p className="font-display text-xl font-medium text-foreground tracking-wide">
+                      <p className="font-display text-xl text-foreground">
                         Drop your photo here
                       </p>
-                      <p className="mt-2 text-muted-foreground text-sm tracking-wide">
+                      <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                         or click to browse · JPG, PNG up to 10MB
                       </p>
                     </div>
@@ -267,19 +267,19 @@ const Index = () => {
                 </div>
 
                 <div className="w-full max-w-sm flex flex-col gap-5">
-                  <label className="font-sans text-xs font-medium text-muted-foreground text-center tracking-[0.2em] uppercase">
+                  <label className="font-sans text-[9px] text-muted-foreground text-center uppercase">
                     Choose your lipstick look
                   </label>
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
-                    <SelectTrigger className="w-full text-sm border-foreground/20">
+                    <SelectTrigger className="w-full font-sans text-[9px] uppercase border-foreground/20">
                       <SelectValue placeholder="Select a look" />
                     </SelectTrigger>
                     <SelectContent>
                       {LIPSTICK_LOOKS.map((look) => (
                         <SelectItem key={look.id} value={look.id}>
                           <div className="flex flex-col">
-                            <span className="font-medium">{look.label}</span>
-                            <span className="text-xs text-muted-foreground">{look.description}</span>
+                            <span className="font-display text-sm">{look.label}</span>
+                            <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
                           </div>
                         </SelectItem>
                       ))}
@@ -290,11 +290,11 @@ const Index = () => {
                     <Button
                       onClick={applyLipstick}
                       size="lg"
-                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-xs tracking-[0.15em] uppercase gap-2 px-8"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
                     >
                       Apply Look
                     </Button>
-                    <Button onClick={reset} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                       Start Over
                     </Button>
                   </div>
@@ -321,7 +321,7 @@ const Index = () => {
                   <div className="h-px w-48 bg-border overflow-hidden">
                     <div className="h-full w-full bg-foreground/40 animate-shimmer bg-[length:200%_100%]" />
                   </div>
-                  <p className="text-muted-foreground font-sans text-sm tracking-wide">
+                  <p className="text-muted-foreground font-display text-sm">
                     Applying {currentLookLabel}…
                   </p>
                 </div>
@@ -339,13 +339,13 @@ const Index = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                   <div className="flex flex-col items-center gap-3">
-                    <span className="text-xs font-sans text-muted-foreground uppercase tracking-[0.2em]">Before</span>
+                    <span className="font-sans text-[9px] text-muted-foreground uppercase">Before</span>
                     <div className="overflow-hidden border border-border">
                       <img src={originalImage!} alt="Before" className="w-full aspect-square object-cover" />
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-3">
-                    <span className="text-xs font-sans text-foreground uppercase tracking-[0.2em] font-medium">
+                    <span className="font-sans text-[9px] text-foreground uppercase">
                       {currentLookLabel}
                     </span>
                     <div className="overflow-hidden border border-foreground/30">
@@ -355,14 +355,14 @@ const Index = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-4 justify-center">
-                  <Button onClick={downloadResult} size="lg" className="bg-foreground text-background hover:bg-foreground/85 font-sans text-xs tracking-[0.15em] uppercase gap-2 px-8">
+                  <Button onClick={downloadResult} size="lg" className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
                     <Download className="h-4 w-4" />
                     Download
                   </Button>
-                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     Try Another Look
                   </Button>
-                  <Button onClick={reset} size="lg" variant="outline" className="font-sans text-xs tracking-[0.15em] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                  <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     New Photo
                   </Button>
                 </div>

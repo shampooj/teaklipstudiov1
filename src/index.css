@@ -19,82 +19,95 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ... keep existing code (all @layer base rules) */
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 24 12% 20%;
+    /* Background: Sand 30% #EAE9E2 */
+    --background: 50 12% 90%;
+    /* Foreground: Black #000000 */
+    --foreground: 0 0% 0%;
 
-    --card: 30 10% 97%;
-    --card-foreground: 24 12% 20%;
+    /* Card: Sand 50% #DCDBCF */
+    --card: 55 11% 84%;
+    --card-foreground: 0 0% 0%;
 
+    /* Popover: White */
     --popover: 0 0% 100%;
-    --popover-foreground: 24 12% 20%;
+    --popover-foreground: 0 0% 0%;
 
-    --primary: 24 12% 20%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Chocolate #503413 */
+    --primary: 24 60% 19%;
+    --primary-foreground: 50 12% 90%;
 
-    --secondary: 30 8% 94%;
-    --secondary-foreground: 24 12% 20%;
+    /* Secondary: Sand #BAB79D */
+    --secondary: 52 16% 67%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 30 6% 94%;
-    --muted-foreground: 24 6% 50%;
+    /* Muted: Sand 50% #DCDBCF */
+    --muted: 55 11% 84%;
+    --muted-foreground: 0 0% 35%;
 
-    --accent: 24 12% 20%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent: Mulberry #480409 */
+    --accent: 356 89% 15%;
+    --accent-foreground: 50 12% 90%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 8% 88%;
-    --input: 30 8% 88%;
-    --ring: 24 12% 20%;
+    /* Border: Sand #BAB79D */
+    --border: 52 16% 67%;
+    --input: 52 16% 67%;
+    --ring: 24 60% 19%;
 
     --radius: 0rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 24 12% 20%;
-    --sidebar-primary: 24 12% 20%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 30 6% 95%;
-    --sidebar-accent-foreground: 24 12% 20%;
-    --sidebar-border: 30 8% 90%;
-    --sidebar-ring: 24 12% 20%;
+    --sidebar-background: 50 12% 90%;
+    --sidebar-foreground: 0 0% 0%;
+    --sidebar-primary: 24 60% 19%;
+    --sidebar-primary-foreground: 50 12% 90%;
+    --sidebar-accent: 55 11% 84%;
+    --sidebar-accent-foreground: 0 0% 0%;
+    --sidebar-border: 52 16% 67%;
+    --sidebar-ring: 24 60% 19%;
 
-    --lipstick: 24 12% 20%;
-    --lipstick-glow: 24 18% 35%;
-    --cream: 30 10% 97%;
-    --warm-dark: 24 12% 20%;
+    /* Brand palette */
+    --teak-pear: 48 49% 40%;
+    --teak-steel: 189 27% 48%;
+    --teak-plum: 311 34% 38%;
+    --teak-chocolate: 24 60% 19%;
+    --teak-moss: 41 35% 35%;
+    --teak-mulberry: 356 89% 15%;
+    --teak-sapphire: 203 100% 25%;
+    --teak-sand: 52 16% 67%;
   }
 
   .dark {
     --background: 24 10% 6%;
-    --foreground: 30 10% 90%;
+    --foreground: 50 12% 90%;
     --card: 24 10% 10%;
-    --card-foreground: 30 10% 90%;
+    --card-foreground: 50 12% 90%;
     --popover: 24 10% 6%;
-    --popover-foreground: 30 10% 90%;
-    --primary: 30 10% 90%;
+    --popover-foreground: 50 12% 90%;
+    --primary: 52 16% 67%;
     --primary-foreground: 24 10% 6%;
     --secondary: 24 8% 16%;
-    --secondary-foreground: 30 10% 90%;
+    --secondary-foreground: 50 12% 90%;
     --muted: 24 8% 16%;
-    --muted-foreground: 30 6% 55%;
-    --accent: 30 10% 90%;
-    --accent-foreground: 24 10% 6%;
-    --destructive: 0 62.8% 30.6%;
+    --muted-foreground: 52 16% 55%;
+    --accent: 356 60% 25%;
+    --accent-foreground: 50 12% 90%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
-    --border: 24 8% 18%;
-    --input: 24 8% 18%;
-    --ring: 30 10% 90%;
+    --border: 24 8% 20%;
+    --input: 24 8% 20%;
+    --ring: 52 16% 67%;
     --sidebar-background: 24 10% 8%;
-    --sidebar-foreground: 30 10% 90%;
-    --sidebar-primary: 30 10% 90%;
+    --sidebar-foreground: 50 12% 90%;
+    --sidebar-primary: 52 16% 67%;
     --sidebar-primary-foreground: 24 10% 6%;
     --sidebar-accent: 24 8% 14%;
-    --sidebar-accent-foreground: 30 10% 90%;
+    --sidebar-accent-foreground: 50 12% 90%;
     --sidebar-border: 24 8% 16%;
-    --sidebar-ring: 30 10% 90%;
+    --sidebar-ring: 52 16% 67%;
   }
 }
 
