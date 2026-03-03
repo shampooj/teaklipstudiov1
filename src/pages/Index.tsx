@@ -2,17 +2,28 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Download, Sparkles, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type AppState = "idle" | "uploading" | "processing" | "done";
+type AppState = "idle" | "uploaded" | "processing" | "done";
+
+const LIPSTICK_LOOKS = [
+  { id: "classic-red", label: "Classic Red", description: "Timeless, bold red — think Old Hollywood glamour" },
+  { id: "berry-wine", label: "Berry Wine", description: "Deep berry-plum with a luxurious, moody vibe" },
+  { id: "nude-rose", label: "Nude Rosé", description: "Soft pinkish-nude for a natural, effortless look" },
+  { id: "coral-sunset", label: "Coral Sunset", description: "Warm coral-orange that radiates summer energy" },
+] as const;
+
+type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
 
 const Index = () => {
   const [state, setState] = useState<AppState>("idle");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
+  const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
 
-  const handleFile = useCallback(async (file: File) => {
+  const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
@@ -22,33 +33,35 @@ const Index = () => {
       return;
     }
 
-    setState("uploading");
-
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64 = e.target?.result as string;
-      setOriginalImage(base64);
-      setState("processing");
-
-      try {
-        const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-          body: { imageBase64: base64 },
-        });
-
-        if (error) throw error;
-        if (data?.error) throw new Error(data.error);
-
-        setResultImage(data.resultImage);
-        setState("done");
-        toast.success("Lipstick applied!");
-      } catch (err: any) {
-        console.error(err);
-        toast.error(err.message || "Something went wrong. Please try again.");
-        setState("idle");
-      }
+    reader.onload = (e) => {
+      setOriginalImage(e.target?.result as string);
+      setState("uploaded");
     };
     reader.readAsDataURL(file);
   }, []);
+
+  const applyLipstick = useCallback(async () => {
+    if (!originalImage) return;
+    setState("processing");
+
+    try {
+      const { data, error } = await supabase.functions.invoke("apply-lipstick", {
+        body: { imageBase64: originalImage, look: selectedLook },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResultImage(data.resultImage);
+      setState("done");
+      toast.success("Lipstick applied!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.message || "Something went wrong. Please try again.");
+      setState("uploaded");
+    }
+  }, [originalImage, selectedLook]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -71,15 +84,23 @@ const Index = () => {
     setState("idle");
     setOriginalImage(null);
     setResultImage(null);
+    setSelectedLook("classic-red");
+  };
+
+  const tryAnotherLook = () => {
+    setState("uploaded");
+    setResultImage(null);
   };
 
   const downloadResult = () => {
     if (!resultImage) return;
     const link = document.createElement("a");
     link.href = resultImage;
-    link.download = "red-lipstick-result.png";
+    link.download = `lipstick-${selectedLook}.png`;
     link.click();
   };
+
+  const currentLookLabel = LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -90,7 +111,7 @@ const Index = () => {
           animate={{ opacity: 1, y: 0 }}
           className="font-display text-5xl md:text-7xl font-bold text-foreground tracking-tight"
         >
-          Red <span className="text-primary italic">Lip</span>
+          Lip <span className="text-primary italic">Studio</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0 }}
@@ -98,7 +119,7 @@ const Index = () => {
           transition={{ delay: 0.2 }}
           className="mt-3 text-muted-foreground font-sans text-lg"
         >
-          Upload your photo. Get the perfect red lip.
+          Upload your photo. Pick a look. See the magic.
         </motion.p>
       </header>
 
@@ -106,6 +127,7 @@ const Index = () => {
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait">
+            {/* Step 1: Upload */}
             {state === "idle" && (
               <motion.div
                 key="upload"
@@ -142,6 +164,63 @@ const Index = () => {
               </motion.div>
             )}
 
+            {/* Step 2: Pick a look */}
+            {state === "uploaded" && originalImage && (
+              <motion.div
+                key="pick-look"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-8"
+              >
+                <div className="w-48 h-48 rounded-2xl overflow-hidden shadow-xl border border-border">
+                  <img
+                    src={originalImage}
+                    alt="Your photo"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                <div className="w-full max-w-sm flex flex-col gap-4">
+                  <label className="font-display text-lg font-semibold text-foreground text-center">
+                    Choose your lipstick look
+                  </label>
+                  <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
+                    <SelectTrigger className="w-full text-base">
+                      <SelectValue placeholder="Select a look" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LIPSTICK_LOOKS.map((look) => (
+                        <SelectItem key={look.id} value={look.id}>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{look.label}</span>
+                            <span className="text-xs text-muted-foreground">{look.description}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex gap-3 justify-center pt-2">
+                    <Button
+                      onClick={applyLipstick}
+                      size="lg"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans gap-2"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Apply Look
+                    </Button>
+                    <Button onClick={reset} size="lg" variant="outline" className="font-sans gap-2">
+                      <RotateCcw className="h-4 w-4" />
+                      Start Over
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Processing */}
             {state === "processing" && (
               <motion.div
                 key="processing"
@@ -152,11 +231,7 @@ const Index = () => {
               >
                 {originalImage && (
                   <div className="relative w-64 h-64 rounded-2xl overflow-hidden shadow-xl">
-                    <img
-                      src={originalImage}
-                      alt="Your photo"
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-primary/20 animate-pulse" />
                   </div>
                 )}
@@ -166,12 +241,13 @@ const Index = () => {
                   </div>
                   <p className="text-muted-foreground font-sans flex items-center gap-2">
                     <Sparkles className="h-4 w-4 text-primary" />
-                    Applying the perfect red lip...
+                    Applying {currentLookLabel}...
                   </p>
                 </div>
               </motion.div>
             )}
 
+            {/* Result */}
             {state === "done" && resultImage && (
               <motion.div
                 key="result"
@@ -180,52 +256,35 @@ const Index = () => {
                 exit={{ opacity: 0 }}
                 className="flex flex-col items-center gap-8"
               >
-                {/* Before / After */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-sans text-muted-foreground uppercase tracking-widest">
-                      Before
-                    </span>
+                    <span className="text-sm font-sans text-muted-foreground uppercase tracking-widest">Before</span>
                     <div className="rounded-2xl overflow-hidden shadow-lg border border-border">
-                      <img
-                        src={originalImage!}
-                        alt="Before"
-                        className="w-full aspect-square object-cover"
-                      />
+                      <img src={originalImage!} alt="Before" className="w-full aspect-square object-cover" />
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-sm font-sans text-primary uppercase tracking-widest font-semibold">
-                      After
+                      {currentLookLabel}
                     </span>
                     <div className="rounded-2xl overflow-hidden shadow-lg border border-primary/30 animate-pulse-glow">
-                      <img
-                        src={resultImage}
-                        alt="With red lipstick"
-                        className="w-full aspect-square object-cover"
-                      />
+                      <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full aspect-square object-cover" />
                     </div>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex gap-4">
-                  <Button
-                    onClick={downloadResult}
-                    size="lg"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans gap-2"
-                  >
+                <div className="flex flex-wrap gap-4 justify-center">
+                  <Button onClick={downloadResult} size="lg" className="bg-primary text-primary-foreground hover:bg-primary/90 font-sans gap-2">
                     <Download className="h-4 w-4" />
                     Download
                   </Button>
-                  <Button
-                    onClick={reset}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans gap-2"
-                  >
+                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Try Another Look
+                  </Button>
+                  <Button onClick={reset} size="lg" variant="outline" className="font-sans gap-2">
                     <RotateCcw className="h-4 w-4" />
-                    Try Another
+                    New Photo
                   </Button>
                 </div>
               </motion.div>
