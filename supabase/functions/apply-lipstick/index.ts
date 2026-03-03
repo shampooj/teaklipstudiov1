@@ -89,7 +89,24 @@ serve(async (req) => {
       });
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!responseText || responseText.trim() === "") {
+      console.error("Empty response from AI gateway");
+      return new Response(JSON.stringify({ error: "Empty response from AI. Please try again with a smaller or clearer photo." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch (parseErr) {
+      console.error("Failed to parse AI response:", responseText.substring(0, 500));
+      return new Response(JSON.stringify({ error: "Failed to parse AI response. Please try again." }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const resultImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!resultImage) {
