@@ -163,10 +163,12 @@ const Index = () => {
       }
 
       setResultImage(finalImage);
+      stopProgress();
       setState("done");
       toast.success("Lipstick applied!");
     } catch (err: any) {
       console.error(err);
+      stopProgress();
       toast.error(err.message || "Something went wrong. Please try again.");
       setState("uploaded");
     }
