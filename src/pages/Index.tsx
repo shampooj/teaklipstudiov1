@@ -250,9 +250,38 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       }
     }
 
-    outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity);
-    outputData.data[i + 1] = Math.round(g0 + (g1 - g0) * blendOpacity);
-    outputData.data[i + 2] = Math.round(b0 + (b1 - b0) * blendOpacity);
+    let finalR = Math.round(r0 + (r1 - r0) * blendOpacity);
+    let finalG = Math.round(g0 + (g1 - g0) * blendOpacity);
+    let finalB = Math.round(b0 + (b1 - b0) * blendOpacity);
+
+    // De-shine pass for matte looks (Jiya / classic-red): suppress specular highlights
+    if (look === "classic-red") {
+      const maxC = Math.max(finalR, finalG, finalB);
+      const minC = Math.min(finalR, finalG, finalB);
+      const lum = (maxC + minC) / 2;
+      const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
+
+      // Detect specular highlight: high luminance + low saturation = white shine
+      if (lum > 170 && sat < 0.35) {
+        // Pull luminance down aggressively to kill the shine
+        const targetLum = 140;
+        const factor = targetLum / Math.max(lum, 1);
+        finalR = Math.round(Math.min(255, finalR * factor));
+        finalG = Math.round(Math.min(255, finalG * factor));
+        finalB = Math.round(Math.min(255, finalB * factor));
+      } else if (lum > 150 && sat < 0.45) {
+        // Mild shine — reduce partially
+        const targetLum = 145;
+        const factor = targetLum / Math.max(lum, 1);
+        finalR = Math.round(Math.min(255, finalR * factor));
+        finalG = Math.round(Math.min(255, finalG * factor));
+        finalB = Math.round(Math.min(255, finalB * factor));
+      }
+    }
+
+    outputData.data[i] = finalR;
+    outputData.data[i + 1] = finalG;
+    outputData.data[i + 2] = finalB;
     outputData.data[i + 3] = originalData.data[i + 3];
   }
 
