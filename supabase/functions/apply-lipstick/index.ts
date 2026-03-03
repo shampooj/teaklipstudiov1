@@ -43,7 +43,7 @@ serve(async (req) => {
     }
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
-    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else exactly the same — same face, expression, lighting, background, and skin texture. Make it photorealistic.`;
+    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, skin imperfections, pores, and blemishes. Do NOT beautify, enhance, smooth, or improve any aspect of the face. Make the lip color change photorealistic but change NOTHING else.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
