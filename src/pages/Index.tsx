@@ -78,18 +78,17 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
     const lightness0 = (max0 + min0) / 2;
 
-    // Strict teeth/highlight protection
-    const isTeethLike = lightness0 > 155 && saturation0 < 0.25;
-    // Skin protection: if the edited pixel still looks very similar to original, keep original
-    const isSkinLike = diff < 45;
+    // Very strict teeth/highlight protection
+    const isTeethLike = lightness0 > 150 && saturation0 < 0.28;
+    // Aggressive skin protection: keep original unless change is very large
+    const isSkinLike = diff < 65;
 
     const rednessGain = (r1 - Math.max(g1, b1)) - (r0 - Math.max(g0, b0));
     const warmTintGain = (r1 - b1) - (r0 - b0);
-    // For darker shades (like Riya), the edit darkens pixels rather than adding redness
     const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
-    const isDarkeningLipPixel = diff > 45 && darkeningAmount > 40 && saturation0 < 0.6;
-    // Require stronger evidence of lip-color change (higher thresholds)
-    const isLipTintPixel = diff > 45 && (rednessGain > 12 || warmTintGain > 15 || isDarkeningLipPixel) && !isSkinLike;
+    const isDarkeningLipPixel = diff > 65 && darkeningAmount > 60 && saturation0 < 0.6;
+    // Require very strong evidence of lip-color change
+    const isLipTintPixel = diff > 65 && (rednessGain > 20 || warmTintGain > 25 || isDarkeningLipPixel) && !isSkinLike;
 
     if (isLipTintPixel && !isTeethLike) {
       // For Amira (nude-rose), reduce opacity on darker/browner lip pixels for a sheerer application

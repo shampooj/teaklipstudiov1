@@ -16,16 +16,17 @@ const LOOK_SHADES: Record<string, string> = {
 
 const SHAPE_LOCK_RULES = `
 CRITICAL RULES (MUST FOLLOW WITHOUT EXCEPTION):
-- Edit method: perform a localized lip-color edit only, not a global face regeneration. This is a RECOLOR operation — change hue/saturation of existing lip pixels only.
-- ABSOLUTE LIP GEOMETRY LOCK: The lip outline, shape, size, thickness, cupid's bow, corners, and contour must remain PIXEL-PERFECT identical to the original. Do NOT redraw, reshape, enlarge, shrink, smooth edges, or alter lip boundaries in ANY way — regardless of the person's natural lip color, skin tone, or lip darkness. Dark lips, uneven lips, asymmetric lips — all must keep their EXACT original shape.
-- TEETH ARE LOCKED: every teeth pixel must remain identical to the original photo (shape, contour, spacing, texture, color, brightness, sharpness). NEVER alter, invent, remove, smooth, whiten, blur, resize, reshape, or restyle teeth.
+- This is ONLY a lip RECOLOR. Change ONLY the hue and saturation of existing lip pixels. Do NOT regenerate, redraw, or reconstruct any part of the image.
+- ABSOLUTE LIP GEOMETRY LOCK: The lip outline, shape, size, thickness, cupid's bow, corners, and contour must remain PIXEL-PERFECT identical to the original. Do NOT redraw, reshape, enlarge, shrink, smooth edges, or alter lip boundaries in ANY way.
+- TEETH ARE 100% LOCKED: Every single teeth pixel must remain byte-identical to the original photo. NEVER alter, invent, remove, smooth, whiten, blur, resize, reshape, or restyle teeth. If teeth are visible, they must be completely untouched.
 - MOUTH LOCK: do not change mouth openness, expression, tongue, or inner mouth.
-- FACE GEOMETRY LOCK: do NOT change ANY facial feature shape — no reshaping of nose, jawline, chin, eyes, eyebrows, or face contour. The face structure must be pixel-identical.
-- NO FACIAL ENHANCEMENTS: do NOT smooth skin, remove blemishes, reduce wrinkles, brighten eyes, reshape face, slim nose, enhance eyebrows, add makeup to any area other than lips, adjust skin tone, or improve appearance in any way.
-- NO BEAUTIFICATION: the output must look exactly like the input photo with ONLY the lip color changed. Do not make the person look "better" or more attractive.
-- Keep all non-lip regions pixel-identical to the original (skin, eyes, nose, hair, jawline, clothing, background, lighting, skin texture, pores, imperfections).
+- FACE GEOMETRY IS 100% LOCKED: do NOT change ANY facial feature — no reshaping of nose, jawline, chin, eyes, eyebrows, ears, or face contour. Every non-lip pixel must be identical to the input.
+- NO FACIAL ENHANCEMENTS OF ANY KIND: do NOT smooth skin, remove blemishes, reduce wrinkles, brighten eyes, reshape face, slim nose, enhance eyebrows, add makeup to any area other than lips, adjust skin tone, or improve appearance in any way.
+- NO BEAUTIFICATION: the output must look exactly like the input photo with ONLY the lip color changed.
+- Keep ALL non-lip regions pixel-identical to the original (skin, eyes, nose, hair, jawline, clothing, background, lighting, skin texture, pores, every imperfection).
 - Only recolor lip surface within the exact existing lip boundary. Do NOT extend color beyond the natural lip line.
-- If any of the above cannot be satisfied, return an unchanged image rather than modifying teeth, geometry, or facial appearance.
+- If you cannot recolor lips without altering other facial features, return the image UNCHANGED rather than modifying anything else.
+- The person's face shape, skin texture, and all features must be INDISTINGUISHABLE from the original — only lip color should differ.
 `.trim();
 
 serve(async (req) => {
