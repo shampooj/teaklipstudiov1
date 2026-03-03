@@ -273,7 +273,7 @@ const Index = () => {
                     Choose your lipstick look
                   </label>
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
-                    <SelectTrigger className="w-full font-sans text-[9px] uppercase border-foreground/20">
+                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20">
                       <SelectValue placeholder="Select a look" />
                     </SelectTrigger>
                     <SelectContent>
