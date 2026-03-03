@@ -10,7 +10,7 @@ const LOOK_SHADES: Record<string, string> = {
   "classic-red": "classic bold red lipstick, timeless and saturated true red",
   "berry-wine": "extremely sheer, barely-there berry-red lip tint — almost transparent, like a single swipe of tinted lip oil. The natural lip color and texture must remain clearly visible underneath. Only the faintest hint of warm cranberry-red. Think 'just bitten lips', not lipstick. Glossy, dewy, ultra-sheer — absolutely no opacity or full coverage",
   "nude-rose": "soft nude-rosé / pinkish-nude lipstick, natural 'my lips but better' tone",
-  "coral-sunset": "warm terracotta-brown matte lipstick, medium-depth earthy brown with warm terracotta and subtle burnt sienna undertone, richer than nude but not as dark as brick",
+  "coral-sunset": "warm terracotta-brown matte lipstick, medium-deep earthy brown with warm terracotta and burnt sienna undertone, slightly rich and moody but not full dark brick",
   "deep-terracotta": "deep warm terracotta-brick matte lipstick, rich dark earthy brown-red with deep burnt sienna and chocolate undertone, noticeably darker than a typical terracotta",
 };
 
