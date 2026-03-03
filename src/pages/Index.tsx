@@ -133,8 +133,8 @@ const Index = () => {
       toast.error("Please upload an image file");
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be under 10MB");
+    if (file.size > 15 * 1024 * 1024) {
+      toast.error("Image must be under 15MB");
       return;
     }
 
