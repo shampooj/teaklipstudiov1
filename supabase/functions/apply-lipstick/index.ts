@@ -16,7 +16,6 @@ const LOOK_PROMPTS: Record<string, string> = {
   "coral-sunset":
     "Edit this photo to change ONLY the color of the person's lips to a warm terracotta-brick matte lipstick — a muted earthy coral-brown, rich burnt sienna / terracotta tone with a velvety matte finish. Think 90s supermodel brown-red lip. Do NOT change the shape, size, thickness, or outline of the lips in any way. Do NOT enlarge, plump, reshape, or redefine the lip edges. Only alter the color/finish within the existing lip area. Keep everything else exactly the same — same face, expression, lighting, background, skin texture. Make it look natural and realistic.",
 };
-};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
