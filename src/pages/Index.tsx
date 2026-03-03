@@ -269,9 +269,9 @@ const Index = () => {
                 </div>
 
                 <div className="w-full max-w-sm flex flex-col gap-5">
-                  <label className="font-sans text-[9px] text-muted-foreground text-center uppercase">
-                    Choose your lipstick look
-                  </label>
+                   <label className="font-display text-lg text-muted-foreground text-center">
+                     Choose your lipstick look
+                   </label>
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
                     <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
                       <SelectValue placeholder="Select a look" />
