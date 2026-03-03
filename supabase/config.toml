@@ -1,1 +1,4 @@
 project_id = "yzmedvbrjhxhnrentwfi"
+
+[functions.apply-lipstick]
+verify_jwt = false
