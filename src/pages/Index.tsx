@@ -62,6 +62,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const outputData = outputCtx.createImageData(width, height);
 
   const baseBlendOpacity = look === "berry-wine" ? 0.64 : 1;
+  const isNeha = look === "berry-wine";
 
   // Pass 1: build a strict lip-candidate mask from strong, lipstick-like color deltas only.
   const candidateMask = new Uint8Array(pixelCount);
@@ -276,6 +277,19 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
         finalR = Math.round(Math.min(255, finalR * factor));
         finalG = Math.round(Math.min(255, finalG * factor));
         finalB = Math.round(Math.min(255, finalB * factor));
+      }
+    }
+
+    // Rosy-pink boost for Neha on brown/darker lips: push toward pink, away from muddy brown
+    if (isNeha) {
+      const avgOrig = (r0 + g0 + b0) / 3;
+      const isBrownish = r0 > b0 + 15 && avgOrig < 160;
+      if (isBrownish) {
+        // Boost red and slightly reduce green to shift brown → rosy pink
+        const boostStrength = Math.min(1, Math.max(0, (160 - avgOrig) / 120)) * 0.35;
+        finalR = Math.round(Math.min(255, finalR + boostStrength * 28));
+        finalG = Math.round(Math.max(0, finalG - boostStrength * 8));
+        finalB = Math.round(Math.min(255, finalB + boostStrength * 12));
       }
     }
 
