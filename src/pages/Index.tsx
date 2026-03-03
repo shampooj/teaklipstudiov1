@@ -91,10 +91,10 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const warmTintGain = (r1 - b1) - (r0 - b0);
       const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
 
-      const isTeethLike = lightness0 > 150 && saturation0 < 0.28;
+      const isTeethLike = lightness0 > 170 && saturation0 < 0.20;
       const strongLipShift =
-        diff > 60 &&
-        (rednessGain > 18 || warmTintGain > 22 || darkeningAmount > 55);
+        diff > 25 &&
+        (rednessGain > 8 || warmTintGain > 10 || darkeningAmount > 25 || diff > 50);
 
       // Keep mask restricted to likely mouth region to avoid face-wide drift.
       const inMouthBand = y > height * 0.30 && y < height * 0.88 && x > width * 0.10 && x < width * 0.90;
