@@ -162,9 +162,9 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   components.sort((a, b) => b.score - a.score);
 
-  // Safety-first: if we cannot isolate lips confidently, return exact original image unchanged.
+  // If we cannot isolate lips, return the AI output directly rather than the original.
   if (components.length === 0) {
-    return originalSrc;
+    return editedSrc;
   }
 
   const finalMask = new Uint8Array(pixelCount);
