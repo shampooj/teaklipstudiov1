@@ -8,7 +8,7 @@ const corsHeaders = {
 
 const LOOK_SHADES: Record<string, string> = {
   "classic-red": "classic bold red lipstick, timeless and saturated true red",
-  "berry-wine": "sheer berry-red lip tint, a translucent wash of warm cranberry-red that lets the natural lip texture and color show through — very sheer, glossy, like a tinted lip balm or lip oil, not opaque or full-coverage",
+  "berry-wine": "extremely sheer, barely-there berry-red lip tint — almost transparent, like a single swipe of tinted lip oil. The natural lip color and texture must remain clearly visible underneath. Only the faintest hint of warm cranberry-red. Think 'just bitten lips', not lipstick. Glossy, dewy, ultra-sheer — absolutely no opacity or full coverage",
   "nude-rose": "soft nude-rosé / pinkish-nude lipstick, natural 'my lips but better' tone",
   "coral-sunset": "warm terracotta-brick matte lipstick, muted earthy coral-brown with burnt sienna tone",
 };
