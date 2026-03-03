@@ -144,6 +144,7 @@ const Index = () => {
   const applyLipstick = useCallback(async () => {
     if (!originalImage) return;
     setState("processing");
+    startProgress();
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
