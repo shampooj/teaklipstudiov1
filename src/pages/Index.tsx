@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Download, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -103,6 +104,24 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [progress, setProgress] = useState(0);
+  const progressInterval = useRef<NodeJS.Timeout | null>(null);
+
+  const startProgress = useCallback(() => {
+    setProgress(0);
+    progressInterval.current = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 90) return prev;
+        return prev + Math.random() * 8;
+      });
+    }, 500);
+  }, []);
+
+  const stopProgress = useCallback(() => {
+    if (progressInterval.current) clearInterval(progressInterval.current);
+    progressInterval.current = null;
+    setProgress(100);
+  }, []);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -125,6 +144,7 @@ const Index = () => {
   const applyLipstick = useCallback(async () => {
     if (!originalImage) return;
     setState("processing");
+    startProgress();
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
@@ -143,10 +163,12 @@ const Index = () => {
       }
 
       setResultImage(finalImage);
+      stopProgress();
       setState("done");
       toast.success("Lipstick applied!");
     } catch (err: any) {
       console.error(err);
+      stopProgress();
       toast.error(err.message || "Something went wrong. Please try again.");
       setState("uploaded");
     }
@@ -319,10 +341,8 @@ const Index = () => {
                     <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
                 )}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="h-px w-48 bg-border overflow-hidden">
-                    <div className="h-full w-full bg-foreground/40 animate-shimmer bg-[length:200%_100%]" />
-                  </div>
+                <div className="flex flex-col items-center gap-4 w-full max-w-xs">
+                  <Progress value={progress} className="h-2 w-full" />
                   <p className="text-muted-foreground font-display text-sm">
                     Applying {currentLookLabel}…
                   </p>
