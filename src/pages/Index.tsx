@@ -91,10 +91,10 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const warmTintGain = (r1 - b1) - (r0 - b0);
       const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
 
-      const isTeethLike = lightness0 > 150 && saturation0 < 0.28;
+      const isTeethLike = lightness0 > 170 && saturation0 < 0.20;
       const strongLipShift =
-        diff > 60 &&
-        (rednessGain > 18 || warmTintGain > 22 || darkeningAmount > 55);
+        diff > 25 &&
+        (rednessGain > 8 || warmTintGain > 10 || darkeningAmount > 25 || diff > 50);
 
       // Keep mask restricted to likely mouth region to avoid face-wide drift.
       const inMouthBand = y > height * 0.30 && y < height * 0.88 && x > width * 0.10 && x < width * 0.90;
@@ -148,7 +148,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
     const area = indices.length;
     const areaRatio = area / pixelCount;
-    if (areaRatio < 0.00012 || areaRatio > 0.05) continue;
+    if (areaRatio < 0.00005 || areaRatio > 0.08) continue;
 
     const cx = sumX / area;
     const cy = sumY / area;
@@ -162,9 +162,9 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   components.sort((a, b) => b.score - a.score);
 
-  // Safety-first: if we cannot isolate lips confidently, return exact original image unchanged.
+  // If we cannot isolate lips, return the AI output directly rather than the original.
   if (components.length === 0) {
-    return originalSrc;
+    return editedSrc;
   }
 
   const finalMask = new Uint8Array(pixelCount);
