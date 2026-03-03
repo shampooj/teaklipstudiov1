@@ -269,7 +269,7 @@ const Index = () => {
                         Drop your photo here
                       </p>
                       <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                        or click to browse · JPG, PNG up to 10MB
+                        or click to browse · JPG, PNG up to 15MB
                       </p>
                     </div>
                   </div>
