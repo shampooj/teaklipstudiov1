@@ -148,7 +148,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
     const area = indices.length;
     const areaRatio = area / pixelCount;
-    if (areaRatio < 0.00012 || areaRatio > 0.05) continue;
+    if (areaRatio < 0.00005 || areaRatio > 0.08) continue;
 
     const cx = sumX / area;
     const cy = sumY / area;
