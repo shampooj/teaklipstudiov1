@@ -283,9 +283,21 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     // Rosy-pink boost for Neha on brown/darker lips: push toward pink, away from muddy brown
     if (isNeha) {
       const avgOrig = (r0 + g0 + b0) / 3;
+      const pinkness = (r0 + b0) / 2 - g0;
       const isBrownish = r0 > b0 + 15 && avgOrig < 160;
-      if (isBrownish) {
-        // Boost red and slightly reduce green to shift brown → rosy pink
+      const isDarkBrown = isBrownish && avgOrig < 110 && pinkness < 15;
+
+      if (isDarkBrown) {
+        // Very dark brown lips with no pink — go opaque with strong rosy-pink overlay
+        const darkness = Math.min(1, Math.max(0, (110 - avgOrig) / 80));
+        const opaqueStrength = 0.45 + darkness * 0.25;
+        const targetR = 175;
+        const targetG = 80;
+        const targetB = 110;
+        finalR = Math.round(finalR + (targetR - finalR) * opaqueStrength);
+        finalG = Math.round(finalG + (targetG - finalG) * opaqueStrength);
+        finalB = Math.round(finalB + (targetB - finalB) * opaqueStrength);
+      } else if (isBrownish) {
         const boostStrength = Math.min(1, Math.max(0, (160 - avgOrig) / 120)) * 0.35;
         finalR = Math.round(Math.min(255, finalR + boostStrength * 28));
         finalG = Math.round(Math.max(0, finalG - boostStrength * 8));
