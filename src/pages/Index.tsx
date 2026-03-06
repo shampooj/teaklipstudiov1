@@ -260,7 +260,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   }
 
   const finalMaskRatio = finalMaskArea / pixelCount;
-  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.04) {
+  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.05) {
     return originalSrc;
   }
 
@@ -290,13 +290,10 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   const baseBlendOpacity =
     look === "classic-red"
-      ? 0.9
+      ? 0.94
       : look === "berry-wine"
-        ? 0.86
-        : 0.82;
-
-  let changedPixels = 0;
-  let deltaTotal = 0;
+        ? 0.9
+        : 0.88;
 
   for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
     const i = pixelIndex * 4;
@@ -331,37 +328,22 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const originalHsl = rgbToHsl(r0, g0, b0);
     const towardShade = shortestHueDelta(originalHsl.h, shadeHsl.h);
 
-    const targetHue = normalizeHue(originalHsl.h + towardShade * 0.88 + avgHueDelta * 0.08);
-    const targetSat = clamp(originalHsl.s * 0.18 + shadeHsl.s * 0.82, 0.14, 0.96);
-    const targetLight = clamp(originalHsl.l * 0.86 + shadeHsl.l * 0.14 + avgLightShift * 0.05, 0.02, 0.9);
+    const targetHue = normalizeHue(originalHsl.h + towardShade * 0.9 + avgHueDelta * 0.08);
+    const targetSat = clamp(originalHsl.s * 0.12 + shadeHsl.s * 0.88, 0.18, 0.98);
+    const targetLight = clamp(originalHsl.l * 0.84 + shadeHsl.l * 0.16 + avgLightShift * 0.05, 0.02, 0.9);
 
     const tinted = hslToRgb(targetHue, targetSat, targetLight);
 
     const blendOpacity = clamp(
       baseBlendOpacity + (look === "nude-rose" && lightness0 < 120 ? -0.06 : 0),
-      0.68,
-      0.92,
+      0.72,
+      0.96,
     );
 
-    const finalR = Math.round(r0 + (tinted.r - r0) * blendOpacity);
-    const finalG = Math.round(g0 + (tinted.g - g0) * blendOpacity);
-    const finalB = Math.round(b0 + (tinted.b - b0) * blendOpacity);
-
-    outputData.data[i] = finalR;
-    outputData.data[i + 1] = finalG;
-    outputData.data[i + 2] = finalB;
+    outputData.data[i] = Math.round(r0 + (tinted.r - r0) * blendOpacity);
+    outputData.data[i + 1] = Math.round(g0 + (tinted.g - g0) * blendOpacity);
+    outputData.data[i + 2] = Math.round(b0 + (tinted.b - b0) * blendOpacity);
     outputData.data[i + 3] = originalData.data[i + 3];
-
-    const delta = Math.abs(finalR - r0) + Math.abs(finalG - g0) + Math.abs(finalB - b0);
-    deltaTotal += delta;
-    if (delta >= 10) changedPixels++;
-  }
-
-  const minimumChangedPixels = Math.max(30, Math.floor(finalMaskArea * 0.08));
-  const averageDelta = finalMaskArea > 0 ? deltaTotal / finalMaskArea : 0;
-
-  if (changedPixels < minimumChangedPixels || averageDelta < 9) {
-    return originalSrc;
   }
 
   outputCtx.putImageData(outputData, 0, 0);
