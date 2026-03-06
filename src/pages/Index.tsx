@@ -208,22 +208,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     for (const idx of secondary.indices) finalMask[idx] = 1;
   }
 
-  // Optional tiny dilation, but only into already lipstick-like candidate pixels.
-  for (let idx = 0; idx < pixelCount; idx++) {
-    if (!finalMask[idx]) continue;
-    const x = idx % width;
-    const y = Math.floor(idx / width);
-
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        const nx = x + dx;
-        const ny = y + dy;
-        if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-        const nIdx = ny * width + nx;
-        if (candidateMask[nIdx]) finalMask[nIdx] = 1;
-      }
-    }
-  }
+  // No dilation: keeping mask unexpanded prevents lip-boundary growth and teeth bleed.
 
   // Pass 3: blend only inside final lip mask; every other pixel remains byte-for-byte original.
   for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
