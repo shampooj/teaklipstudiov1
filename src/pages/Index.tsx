@@ -29,6 +29,90 @@ const loadImage = (src: string) =>
     image.src = src;
   });
 
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+const normalizeHue = (hue: number) => {
+  const wrapped = hue % 360;
+  return wrapped < 0 ? wrapped + 360 : wrapped;
+};
+
+const shortestHueDelta = (from: number, to: number) => {
+  const delta = ((to - from + 540) % 360) - 180;
+  return delta;
+};
+
+const rgbToHsl = (r: number, g: number, b: number) => {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const l = (max + min) / 2;
+
+  if (max === min) {
+    return { h: 0, s: 0, l };
+  }
+
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+  let h = 0;
+  switch (max) {
+    case rn:
+      h = (gn - bn) / d + (gn < bn ? 6 : 0);
+      break;
+    case gn:
+      h = (bn - rn) / d + 2;
+      break;
+    default:
+      h = (rn - gn) / d + 4;
+      break;
+  }
+
+  return { h: h * 60, s, l };
+};
+
+const hslToRgb = (h: number, s: number, l: number) => {
+  const hue = normalizeHue(h) / 360;
+
+  if (s === 0) {
+    const gray = Math.round(l * 255);
+    return { r: gray, g: gray, b: gray };
+  }
+
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+
+  const hueToRgb = (t: number) => {
+    let tn = t;
+    if (tn < 0) tn += 1;
+    if (tn > 1) tn -= 1;
+    if (tn < 1 / 6) return p + (q - p) * 6 * tn;
+    if (tn < 1 / 2) return q;
+    if (tn < 2 / 3) return p + (q - p) * (2 / 3 - tn) * 6;
+    return p;
+  };
+
+  return {
+    r: Math.round(hueToRgb(hue + 1 / 3) * 255),
+    g: Math.round(hueToRgb(hue) * 255),
+    b: Math.round(hueToRgb(hue - 1 / 3) * 255),
+  };
+};
+
+const hexToRgb = (hex: string) => {
+  const clean = hex.replace("#", "");
+  const normalized = clean.length === 3
+    ? clean.split("").map((c) => `${c}${c}`).join("")
+    : clean;
+
+  return {
+    r: parseInt(normalized.slice(0, 2), 16),
+    g: parseInt(normalized.slice(2, 4), 16),
+    b: parseInt(normalized.slice(4, 6), 16),
+  };
+};
 
 const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string, look: LookId) => {
   const [original, edited] = await Promise.all([loadImage(originalSrc), loadImage(editedSrc)]);
@@ -63,12 +147,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const editedData = editedCtx.getImageData(0, 0, width, height);
   const outputData = outputCtx.createImageData(width, height);
 
-  const isNeha = look === "berry-wine";
-  const baseBlendOpacity = isNeha ? 0.64 : 1;
-
-  // Pass 1: build a strict lip-candidate mask from strong, lipstick-like color deltas only.
-  const candidateMask = new Uint8Array(pixelCount);
-  const originalLipPriorMask = new Uint8Array(pixelCount);
+  const lipPriorMask = new Uint8Array(pixelCount);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -79,76 +158,46 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const g0 = originalData.data[i + 1];
       const b0 = originalData.data[i + 2];
 
-      const r1 = editedData.data[i];
-      const g1 = editedData.data[i + 1];
-      const b1 = editedData.data[i + 2];
-
-      const diff = Math.abs(r1 - r0) + Math.abs(g1 - g0) + Math.abs(b1 - b0);
-
       const max0 = Math.max(r0, g0, b0);
       const min0 = Math.min(r0, g0, b0);
-      const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
       const lightness0 = (max0 + min0) / 2;
       const chroma0 = max0 - min0;
-
-      const max1 = Math.max(r1, g1, b1);
-      const min1 = Math.min(r1, g1, b1);
-      const saturation1 = max1 === 0 ? 0 : (max1 - min1) / max1;
-      const lightness1 = (max1 + min1) / 2;
-
-      const rednessGain = (r1 - Math.max(g1, b1)) - (r0 - Math.max(g0, b0));
-      const warmTintGain = (r1 - b1) - (r0 - b0);
-      const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
-      const hueShiftStrength = Math.abs((r1 - g1) - (r0 - g0)) + Math.abs((r1 - b1) - (r0 - b0));
-
+      const saturation0 = max0 === 0 ? 0 : chroma0 / max0;
       const neutrality0 = Math.abs(r0 - g0) + Math.abs(g0 - b0) + Math.abs(r0 - b0);
-      const isTeethLikeOriginal = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 65;
-      const isTeethLikeEdited = lightness1 > 150 && saturation1 < 0.30;
 
-      // Keep mask restricted to likely mouth region to avoid any face-wide drift.
-      const inMouthBand = y > height * 0.30 && y < height * 0.88 && x > width * 0.10 && x < width * 0.90;
+      const isTeethLike = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 62;
+      const inMouthBand = y > height * 0.42 && y < height * 0.86 && x > width * 0.18 && x < width * 0.82;
+      const likelyLipTone =
+        lightness0 > 18 &&
+        lightness0 < 205 &&
+        saturation0 > 0.07 &&
+        chroma0 > 10 &&
+        (r0 >= g0 - 20 || b0 >= g0 - 12);
 
-      const isLipToneLikeOriginal =
-        inMouthBand &&
-        !isTeethLikeOriginal &&
-        (
-          ((r0 >= g0 - 24 && r0 >= b0 - 26) && chroma0 > 10) ||
-          (lightness0 < 125 && saturation0 > 0.07)
-        ) &&
-        lightness0 < 210;
-
-      if (isLipToneLikeOriginal) {
-        originalLipPriorMask[pixelIndex] = 1;
-      }
-
-      const strongLipShift =
-        diff > 22 &&
-        (hueShiftStrength > 16 || rednessGain > 7 || warmTintGain > 8 || darkeningAmount > 20 || diff > 48);
-
-      if (isLipToneLikeOriginal && !isTeethLikeEdited && strongLipShift) {
-        candidateMask[pixelIndex] = 1;
+      if (inMouthBand && likelyLipTone && !isTeethLike) {
+        lipPriorMask[pixelIndex] = 1;
       }
     }
   }
 
-  // Pass 2: connected components -> keep only the most lip-like component(s).
+  // Connected components on original-only lip prior (no geometry from edited image is used).
   const visited = new Uint8Array(pixelCount);
   const components: Array<{ indices: number[]; area: number; cx: number; cy: number; score: number }> = [];
 
   const tryVisit = (from: number, to: number, queue: number[]) => {
     if (to < 0 || to >= pixelCount) return;
-    if (visited[to] || !candidateMask[to]) return;
+    if (visited[to] || !lipPriorMask[to]) return;
 
     const fromX = from % width;
     const toX = to % width;
-    if (Math.abs(fromX - toX) > 1) return; // prevent row wrapping
+    if (Math.abs(fromX - toX) > 1) return;
 
     visited[to] = 1;
     queue.push(to);
   };
 
   for (let idx = 0; idx < pixelCount; idx++) {
-    if (!candidateMask[idx] || visited[idx]) continue;
+    if (!lipPriorMask[idx] || visited[idx]) continue;
 
     const queue = [idx];
     visited[idx] = 1;
@@ -174,21 +223,19 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
     const area = indices.length;
     const areaRatio = area / pixelCount;
-    if (areaRatio < 0.00005 || areaRatio > 0.08) continue;
+    if (areaRatio < 0.00006 || areaRatio > 0.08) continue;
 
     const cx = sumX / area;
     const cy = sumY / area;
-
-    const centerXAffinity = 1 - Math.min(1, Math.abs(cx / width - 0.5) / 0.5);
-    const centerYAffinity = 1 - Math.min(1, Math.abs(cy / height - 0.62) / 0.62);
-    const score = area * (0.65 * centerXAffinity + 0.35 * centerYAffinity);
+    const centerXAffinity = 1 - Math.min(1, Math.abs(cx / width - 0.5) / 0.45);
+    const centerYAffinity = 1 - Math.min(1, Math.abs(cy / height - 0.67) / 0.28);
+    const score = area * (0.6 * centerXAffinity + 0.4 * centerYAffinity);
 
     components.push({ indices, area, cx, cy, score });
   }
 
   components.sort((a, b) => b.score - a.score);
 
-  // If we cannot isolate lips safely, return original unchanged (strict integrity guard).
   if (components.length === 0) {
     return originalSrc;
   }
@@ -197,36 +244,86 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const primary = components[0];
   for (const idx of primary.indices) finalMask[idx] = 1;
 
-  // Often upper/lower lip can split into two nearby components; merge a valid secondary cluster.
   const secondary = components[1];
   if (
     secondary &&
-    secondary.area > primary.area * 0.15 &&
-    Math.abs(secondary.cx - primary.cx) < width * 0.2 &&
-    Math.abs(secondary.cy - primary.cy) < height * 0.14
+    secondary.area > primary.area * 0.14 &&
+    Math.abs(secondary.cx - primary.cx) < width * 0.24 &&
+    Math.abs(secondary.cy - primary.cy) < height * 0.16
   ) {
     for (const idx of secondary.indices) finalMask[idx] = 1;
   }
 
-  // Hard safety clamp: never allow edits outside original lip-toned pixels.
-  let finalMaskArea = 0;
-  for (let idx = 0; idx < pixelCount; idx++) {
-    if (finalMask[idx] && originalLipPriorMask[idx]) {
-      finalMaskArea++;
-    } else {
-      finalMask[idx] = 0;
+  // One-pass erosion to keep edits safely inside the natural lip interior.
+  const erodedMask = new Uint8Array(finalMask);
+  for (let y = 1; y < height - 1; y++) {
+    for (let x = 1; x < width - 1; x++) {
+      const idx = y * width + x;
+      if (!finalMask[idx]) continue;
+
+      let neighbors = 0;
+      for (let oy = -1; oy <= 1; oy++) {
+        for (let ox = -1; ox <= 1; ox++) {
+          if (ox === 0 && oy === 0) continue;
+          if (finalMask[(y + oy) * width + (x + ox)]) neighbors++;
+        }
+      }
+
+      if (neighbors < 4) {
+        erodedMask[idx] = 0;
+      }
     }
   }
 
-  // If the resulting mask is suspiciously tiny/huge, abort to preserve integrity.
+  let finalMaskArea = 0;
+  for (let idx = 0; idx < pixelCount; idx++) {
+    finalMask[idx] = erodedMask[idx];
+    if (finalMask[idx]) finalMaskArea++;
+  }
+
   const finalMaskRatio = finalMaskArea / pixelCount;
-  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.035) {
+  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.025) {
     return originalSrc;
   }
 
-  // No dilation: keeping mask unexpanded prevents lip-boundary growth and teeth bleed.
+  const selectedLook = LIPSTICK_LOOKS.find((item) => item.id === look);
+  const shadeRgb = hexToRgb(selectedLook?.color ?? "#b91c1c");
+  const shadeHsl = rgbToHsl(shadeRgb.r, shadeRgb.g, shadeRgb.b);
 
-  // Pass 3: blend only inside final lip mask; every other pixel remains byte-for-byte original.
+  // Estimate only global color trend from edited output (never pixel geometry).
+  let hueDeltaSum = 0;
+  let satRatioSum = 0;
+  let lightShiftSum = 0;
+  let trendCount = 0;
+
+  for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
+    if (!finalMask[pixelIndex]) continue;
+
+    const i = pixelIndex * 4;
+    const r0 = originalData.data[i];
+    const g0 = originalData.data[i + 1];
+    const b0 = originalData.data[i + 2];
+
+    const r1 = editedData.data[i];
+    const g1 = editedData.data[i + 1];
+    const b1 = editedData.data[i + 2];
+
+    const o = rgbToHsl(r0, g0, b0);
+    const e = rgbToHsl(r1, g1, b1);
+
+    hueDeltaSum += clamp(shortestHueDelta(o.h, e.h), -60, 60);
+    satRatioSum += clamp((e.s + 0.001) / (o.s + 0.001), 0.75, 1.8);
+    lightShiftSum += clamp(e.l - o.l, -0.2, 0.2);
+    trendCount++;
+  }
+
+  const avgHueDelta = trendCount ? hueDeltaSum / trendCount : 0;
+  const avgSatRatio = trendCount ? satRatioSum / trendCount : 1;
+  const avgLightShift = trendCount ? lightShiftSum / trendCount : 0;
+
+  const isNeha = look === "berry-wine";
+  const baseBlendOpacity = isNeha ? 0.62 : look === "classic-red" ? 0.84 : 0.76;
+
   for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
     const i = pixelIndex * 4;
 
@@ -242,99 +339,43 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       continue;
     }
 
-    const r1 = editedData.data[i];
-    const g1 = editedData.data[i + 1];
-    const b1 = editedData.data[i + 2];
-
     const max0 = Math.max(r0, g0, b0);
     const min0 = Math.min(r0, g0, b0);
-    const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
     const lightness0 = (max0 + min0) / 2;
+    const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
+    const neutrality0 = Math.abs(r0 - g0) + Math.abs(g0 - b0) + Math.abs(r0 - b0);
+    const isTeethLike = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 62;
 
-    let blendOpacity = baseBlendOpacity;
-
-    if (look === "nude-rose") {
-      const isDarkerLip = lightness0 < 140;
-      const isBrowny = (r0 - b0) > 20 && saturation0 > 0.15;
-      if (isDarkerLip && isBrowny) {
-        const darkFactor = Math.max(0, (140 - lightness0) / 100);
-        blendOpacity = Math.max(0.45, 1 - darkFactor * 0.55);
-      } else if (isDarkerLip) {
-        blendOpacity = 0.72;
-      }
+    if (isTeethLike) {
+      outputData.data[i] = r0;
+      outputData.data[i + 1] = g0;
+      outputData.data[i + 2] = b0;
+      outputData.data[i + 3] = originalData.data[i + 3];
+      continue;
     }
 
-    if (look === "deep-terracotta") {
-      const isDarkerLip = lightness0 < 140;
-      const isBrowny = (r0 - b0) > 15 && saturation0 > 0.12;
-      if (isDarkerLip && isBrowny) {
-        const darkFactor = Math.min(1, Math.max(0, (140 - lightness0) / 100));
-        const purpleShift = darkFactor * 0.35;
-        outputData.data[i] = Math.round(r0 + (r1 - r0) * blendOpacity * (1 - purpleShift * 0.3));
-        outputData.data[i + 1] = Math.round(g0 + (g1 - g0) * blendOpacity * (1 - purpleShift * 0.2));
-        outputData.data[i + 2] = Math.round(Math.min(255, b0 + (b1 - b0) * blendOpacity + purpleShift * 18));
-        outputData.data[i + 3] = originalData.data[i + 3];
-        continue;
-      }
-    }
+    const originalHsl = rgbToHsl(r0, g0, b0);
+    const towardShade = shortestHueDelta(originalHsl.h, shadeHsl.h);
 
-    let finalR = Math.round(r0 + (r1 - r0) * blendOpacity);
-    let finalG = Math.round(g0 + (g1 - g0) * blendOpacity);
-    let finalB = Math.round(b0 + (b1 - b0) * blendOpacity);
+    const targetHue = normalizeHue(originalHsl.h + towardShade * 0.68 + avgHueDelta * 0.12);
+    const targetSat = clamp(
+      originalHsl.s * 0.42 + shadeHsl.s * 0.58 * avgSatRatio,
+      0.08,
+      0.92,
+    );
+    const targetLight = clamp(originalHsl.l + avgLightShift * 0.1, 0.03, 0.95);
 
-    // De-shine pass for matte looks (Jiya / classic-red): suppress specular highlights
-    if (look === "classic-red") {
-      const maxC = Math.max(finalR, finalG, finalB);
-      const minC = Math.min(finalR, finalG, finalB);
-      const lum = (maxC + minC) / 2;
-      const sat = maxC === 0 ? 0 : (maxC - minC) / maxC;
+    const tinted = hslToRgb(targetHue, targetSat, targetLight);
 
-      // Detect specular highlight: high luminance + low saturation = white shine
-      if (lum > 170 && sat < 0.35) {
-        // Pull luminance down aggressively to kill the shine
-        const targetLum = 140;
-        const factor = targetLum / Math.max(lum, 1);
-        finalR = Math.round(Math.min(255, finalR * factor));
-        finalG = Math.round(Math.min(255, finalG * factor));
-        finalB = Math.round(Math.min(255, finalB * factor));
-      } else if (lum > 150 && sat < 0.45) {
-        // Mild shine — reduce partially
-        const targetLum = 145;
-        const factor = targetLum / Math.max(lum, 1);
-        finalR = Math.round(Math.min(255, finalR * factor));
-        finalG = Math.round(Math.min(255, finalG * factor));
-        finalB = Math.round(Math.min(255, finalB * factor));
-      }
-    }
+    const blendOpacity = clamp(
+      baseBlendOpacity + (look === "nude-rose" && lightness0 < 120 ? -0.12 : 0),
+      0.5,
+      0.88,
+    );
 
-    // Rosy-pink boost for Neha on brown/darker lips: push toward pink, away from muddy brown
-    if (isNeha) {
-      const avgOrig = (r0 + g0 + b0) / 3;
-      const pinkness = (r0 + b0) / 2 - g0;
-      const isBrownish = r0 > b0 + 15 && avgOrig < 160;
-      const isDarkBrown = isBrownish && avgOrig < 110 && pinkness < 15;
-
-      if (isDarkBrown) {
-        // Very dark brown lips with no pink — go opaque with strong rosy-pink overlay
-        const darkness = Math.min(1, Math.max(0, (110 - avgOrig) / 80));
-        const opaqueStrength = 0.45 + darkness * 0.25;
-        const targetR = 175;
-        const targetG = 80;
-        const targetB = 110;
-        finalR = Math.round(finalR + (targetR - finalR) * opaqueStrength);
-        finalG = Math.round(finalG + (targetG - finalG) * opaqueStrength);
-        finalB = Math.round(finalB + (targetB - finalB) * opaqueStrength);
-      } else if (isBrownish) {
-        const boostStrength = Math.min(1, Math.max(0, (160 - avgOrig) / 120)) * 0.35;
-        finalR = Math.round(Math.min(255, finalR + boostStrength * 28));
-        finalG = Math.round(Math.max(0, finalG - boostStrength * 8));
-        finalB = Math.round(Math.min(255, finalB + boostStrength * 12));
-      }
-    }
-
-    outputData.data[i] = finalR;
-    outputData.data[i + 1] = finalG;
-    outputData.data[i + 2] = finalB;
+    outputData.data[i] = Math.round(r0 + (tinted.r - r0) * blendOpacity);
+    outputData.data[i + 1] = Math.round(g0 + (tinted.g - g0) * blendOpacity);
+    outputData.data[i + 2] = Math.round(b0 + (tinted.b - b0) * blendOpacity);
     outputData.data[i + 3] = originalData.data[i + 3];
   }
 
