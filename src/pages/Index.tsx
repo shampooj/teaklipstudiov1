@@ -453,7 +453,7 @@ const Index = () => {
           transition={{ delay: 0.35 }}
           className="mt-2 text-foreground font-sans text-sm max-w-md mx-auto"
         >
-          See what some of our bestselling lipstick shades look like on you by uploading a well-lit selfie!
+          BETA
         </motion.p>
       </header>
 
