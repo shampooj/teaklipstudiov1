@@ -595,7 +595,7 @@ const Index = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                   <div className="flex flex-col items-center gap-3">
                     <span className="font-sans text-[9px] text-muted-foreground uppercase">Before</span>
-                    <div className="overflow-hidden border border-border">
+                    <div className="overflow-hidden">
                       <img src={originalImage!} alt="Before" className="w-full aspect-square object-cover" />
                     </div>
                   </div>
@@ -603,7 +603,7 @@ const Index = () => {
                     <span className="font-sans text-[9px] text-foreground uppercase">
                       {currentLookLabel}
                     </span>
-                    <div className="overflow-hidden border border-foreground/30">
+                    <div className="overflow-hidden">
                       <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full aspect-square object-cover" />
                     </div>
                   </div>
