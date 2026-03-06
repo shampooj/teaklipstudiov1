@@ -322,6 +322,7 @@ const Index = () => {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [progress, setProgress] = useState(0);
+  const [addedToCart, setAddedToCart] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
