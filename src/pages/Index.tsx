@@ -374,11 +374,13 @@ const Index = () => {
       if (data?.error) throw new Error(data.error);
       if (!data?.resultImage) throw new Error("No edited image returned.");
 
-      let finalImage = data.resultImage as string;
-      try {
-        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
-      } catch (blendError) {
-        console.warn("Blend step failed, using AI output directly:", blendError);
+      const finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
+
+      if (finalImage === originalImage) {
+        toast.error("Couldn't safely isolate lips without changing facial features. Try a clearer front-facing photo.");
+        stopProgress();
+        setState("uploaded");
+        return;
       }
 
       setResultImage(finalImage);
