@@ -611,17 +611,23 @@ const Index = () => {
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
                   <Button
-                    asChild
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8 w-full"
+                    onClick={() => {
+                      const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
+                      if (!look) return;
+                      supabase.from("cart_click_events").insert({
+                        shade_id: look.id,
+                        shade_label: look.label,
+                        variant_id: look.variantId,
+                      }).then(({ error }) => {
+                        if (error) console.error("Failed to track cart click:", error);
+                      });
+                      const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
+                      if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                    }}
                   >
-                    <a
-                      href={`https://teakbeauty.com/cart/${LIPSTICK_LOOKS.find(l => l.id === selectedLook)?.variantId}:1`}
-                      target="_top"
-                      rel="noopener noreferrer"
-                    >
-                      Add to Cart — {currentLookLabel}
-                    </a>
+                    Add to Cart — {currentLookLabel}
                   </Button>
 
                   <Select value="" onValueChange={(v) => {
