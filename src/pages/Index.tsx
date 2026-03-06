@@ -569,7 +569,7 @@ const Index = () => {
                 className="flex flex-col items-center gap-8 py-12"
               >
                 {originalImage && (
-                  <div className="relative w-64 h-64 overflow-hidden border border-border">
+                  <div className="relative w-64 h-64 overflow-hidden">
                     <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
