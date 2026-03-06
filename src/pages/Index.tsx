@@ -617,7 +617,7 @@ const Index = () => {
                   >
                     <a
                       href={`https://teakbeauty.com/cart/${LIPSTICK_LOOKS.find(l => l.id === selectedLook)?.variantId}:1`}
-                      target="_blank"
+                      target="_top"
                       rel="noopener noreferrer"
                     >
                       Add to Cart — {currentLookLabel}
