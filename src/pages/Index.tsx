@@ -609,14 +609,33 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <Button onClick={downloadResult} size="lg" className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    <Download className="h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button onClick={tryAnotherLook} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    Try Another Look
-                  </Button>
+                <div className="flex flex-col items-center gap-5 w-full max-w-sm mx-auto">
+                  <Select value={selectedLook} onValueChange={(v) => {
+                    setSelectedLook(v as LookId);
+                    setResultImage(null);
+                    setState("uploaded");
+                  }}>
+                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
+                      <SelectValue placeholder="Select a look" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LIPSTICK_LOOKS.map((look) => (
+                        <SelectItem key={look.id} value={look.id}>
+                          <div className="flex items-start gap-2.5">
+                            <span
+                              className="mt-1 h-3 w-3 rounded-full shrink-0"
+                              style={{ backgroundColor: look.color }}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-display text-sm">{look.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
                   <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     New Photo
                   </Button>
