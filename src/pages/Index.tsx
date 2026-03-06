@@ -509,7 +509,7 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center gap-8"
               >
-                <div className="w-64 h-64 overflow-hidden border border-border">
+                <div className="w-64 h-64 overflow-hidden">
                   <img
                     src={originalImage}
                     alt="Your photo"
