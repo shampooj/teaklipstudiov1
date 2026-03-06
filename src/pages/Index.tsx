@@ -34,104 +34,48 @@ async function cropToFace(dataUrl: string): Promise<string> {
   const img = await loadImage(dataUrl);
   const { width, height } = img;
 
-  let faceX = 0, faceY = 0, faceW = width, faceH = height;
-  let detected = false;
-
-  // Try browser FaceDetector API (Chrome/Edge)
+  // 1) Try native face detection when available
   if ("FaceDetector" in window) {
     try {
-      // @ts-ignore
+      // @ts-ignore - FaceDetector isn't in all TS DOM libs yet
       const detector = new window.FaceDetector({ maxDetectedFaces: 1 });
       const faces = await detector.detect(img);
+
       if (faces.length > 0) {
         const box = faces[0].boundingBox;
-        faceX = box.x;
-        faceY = box.y;
-        faceW = box.width;
-        faceH = box.height;
-        detected = true;
+        const padX = box.width * 0.55;
+        const padTop = box.height * 0.65;
+        const padBottom = box.height * 0.55;
+
+        const cropX = Math.max(0, box.x - padX);
+        const cropY = Math.max(0, box.y - padTop);
+        const cropW = Math.min(width - cropX, box.width + padX * 2);
+        const cropH = Math.min(height - cropY, box.height + padTop + padBottom);
+
+        const faceCanvas = document.createElement("canvas");
+        faceCanvas.width = Math.floor(cropW);
+        faceCanvas.height = Math.floor(cropH);
+        const faceCtx = faceCanvas.getContext("2d")!;
+        faceCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, faceCanvas.width, faceCanvas.height);
+        return faceCanvas.toDataURL("image/jpeg", 0.92);
       }
     } catch {
-      // not available
+      // Fall through to deterministic selfie crop
     }
   }
 
-  if (detected) {
-    // Pad generously around detected face
-    const padX = faceW * 0.5;
-    const padY = faceH * 0.6;
-    const cropX = Math.max(0, faceX - padX);
-    const cropY = Math.max(0, faceY - padY);
-    const cropW = Math.min(width - cropX, faceW + padX * 2);
-    const cropH = Math.min(height - cropY, faceH + padY * 2);
+  // 2) Reliable fallback: deterministic selfie crop (always removes background)
+  const cropW = width * 0.68;
+  const cropH = height * 0.82;
+  const cropX = (width - cropW) / 2;
+  const cropY = height * 0.04;
 
-    const canvas = document.createElement("canvas");
-    canvas.width = cropW;
-    canvas.height = cropH;
-    const ctx = canvas.getContext("2d")!;
-    ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-    return canvas.toDataURL("image/jpeg", 0.92);
-  }
-
-  // No FaceDetector: use skin-tone detection to find the face region
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0);
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-
-  // Sample every 4th pixel for speed
-  let minX = width, minY = height, maxX = 0, maxY = 0;
-  let skinCount = 0;
-
-  for (let y = 0; y < height; y += 4) {
-    for (let x = 0; x < width; x += 4) {
-      const i = (y * width + x) * 4;
-      const r = data[i], g = data[i + 1], b = data[i + 2];
-      // Broad skin-tone detection (works across diverse skin tones)
-      if (
-        r > 60 && g > 30 && b > 15 &&
-        r > g && r > b &&
-        (r - g) > 5 &&
-        Math.max(r, g, b) - Math.min(r, g, b) > 15 &&
-        Math.abs(r - g) < 170
-      ) {
-        skinCount++;
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
-        if (y > maxY) maxY = y;
-      }
-    }
-  }
-
-  // If enough skin pixels found, crop to that region with padding
-  const totalSampled = (width / 4) * (height / 4);
-  if (skinCount > totalSampled * 0.05 && maxX > minX && maxY > minY) {
-    const skinW = maxX - minX;
-    const skinH = maxY - minY;
-    const padX = skinW * 0.2;
-    const padY = skinH * 0.2;
-    const cropX = Math.max(0, minX - padX);
-    const cropY = Math.max(0, minY - padY);
-    const cropW = Math.min(width - cropX, skinW + padX * 2);
-    const cropH = Math.min(height - cropY, skinH + padY * 2);
-
-    // Only crop if it actually removes significant background
-    if (cropW < width * 0.9 || cropH < height * 0.9) {
-      const outCanvas = document.createElement("canvas");
-      outCanvas.width = cropW;
-      outCanvas.height = cropH;
-      const outCtx = outCanvas.getContext("2d")!;
-      outCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-      return outCanvas.toDataURL("image/jpeg", 0.92);
-    }
-  }
-
-  // Couldn't detect face — return original
-  return dataUrl;
+  const fallbackCanvas = document.createElement("canvas");
+  fallbackCanvas.width = Math.floor(cropW);
+  fallbackCanvas.height = Math.floor(cropH);
+  const fallbackCtx = fallbackCanvas.getContext("2d")!;
+  fallbackCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, fallbackCanvas.width, fallbackCanvas.height);
+  return fallbackCanvas.toDataURL("image/jpeg", 0.92);
 }
 
 const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string, look: LookId) => {
