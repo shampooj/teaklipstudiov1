@@ -603,8 +603,8 @@ const Index = () => {
                     <span className="font-sans text-[9px] text-foreground uppercase">
                       {currentLookLabel}
                     </span>
-                    <div className="overflow-hidden">
-                      <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full aspect-square object-cover" />
+                    <div className="w-64 h-64 overflow-hidden">
+                      <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full h-full object-cover" />
                     </div>
                   </div>
                 </div>
