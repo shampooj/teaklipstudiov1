@@ -641,8 +641,12 @@ const Index = () => {
                         if (uploadError) {
                           console.error("Failed to upload image:", uploadError);
                         } else {
-                          const { data: urlData } = supabase.storage.from("cart-images").getPublicUrl(uploadData.path);
-                          imageUrl = urlData.publicUrl;
+                          const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from("cart-images").createSignedUrl(uploadData.path, 60 * 60 * 24 * 365);
+                          if (signedUrlError) {
+                            console.error("Failed to create signed URL:", signedUrlError);
+                          } else {
+                            imageUrl = signedUrlData.signedUrl;
+                          }
                         }
                       } catch (e) {
                         console.error("Failed to crop/upload image:", e);
