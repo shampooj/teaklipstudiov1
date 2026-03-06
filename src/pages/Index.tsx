@@ -613,14 +613,44 @@ const Index = () => {
                   <Button
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8 w-full"
-                    onClick={() => {
+                    onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
-                      if (!look) return;
+                      if (!look || !resultImage) return;
+
+                      // Crop bottom half of the result image
+                      let imageUrl: string | null = null;
+                      try {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous";
+                        await new Promise<void>((resolve, reject) => {
+                          img.onload = () => resolve();
+                          img.onerror = reject;
+                          img.src = resultImage;
+                        });
+                        const canvas = document.createElement("canvas");
+                        canvas.width = img.width;
+                        canvas.height = Math.floor(img.height / 2);
+                        const ctx = canvas.getContext("2d")!;
+                        ctx.drawImage(img, 0, Math.floor(img.height / 2), img.width, Math.floor(img.height / 2), 0, 0, canvas.width, canvas.height);
+                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
+                        const fileName = `${look.id}_${Date.now()}.jpg`;
+                        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+                        if (uploadError) {
+                          console.error("Failed to upload image:", uploadError);
+                        } else {
+                          const { data: urlData } = supabase.storage.from("cart-images").getPublicUrl(uploadData.path);
+                          imageUrl = urlData.publicUrl;
+                        }
+                      } catch (e) {
+                        console.error("Failed to crop/upload image:", e);
+                      }
+
                       supabase.from("cart_click_events").insert({
                         shade_id: look.id,
                         shade_label: look.label,
                         variant_id: look.variantId,
-                      }).then(({ error }) => {
+                        image_url: imageUrl,
+                      } as any).then(({ error }) => {
                         if (error) console.error("Failed to track cart click:", error);
                       });
                       const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
