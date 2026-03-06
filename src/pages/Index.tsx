@@ -594,7 +594,7 @@ const Index = () => {
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                   <div className="flex flex-col items-center gap-3">
-                    <span className="font-sans text-[9px] text-muted-foreground uppercase">Before</span>
+                    <span className="font-sans text-[9px] text-foreground uppercase">Before</span>
                     <div className="w-64 h-64 overflow-hidden">
                       <img src={originalImage!} alt="Before" className="w-full h-full object-cover" />
                     </div>
