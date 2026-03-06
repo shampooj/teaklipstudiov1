@@ -164,9 +164,9 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   components.sort((a, b) => b.score - a.score);
 
-  // If we cannot isolate lips, return the AI output directly rather than the original.
+  // If we cannot isolate lips safely, return original unchanged (strict integrity guard).
   if (components.length === 0) {
-    return editedSrc;
+    return originalSrc;
   }
 
   const finalMask = new Uint8Array(pixelCount);
@@ -374,11 +374,13 @@ const Index = () => {
       if (data?.error) throw new Error(data.error);
       if (!data?.resultImage) throw new Error("No edited image returned.");
 
-      let finalImage = data.resultImage as string;
-      try {
-        finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
-      } catch (blendError) {
-        console.warn("Blend step failed, using AI output directly:", blendError);
+      const finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
+
+      if (finalImage === originalImage) {
+        toast.error("Couldn't safely isolate lips without changing facial features. Try a clearer front-facing photo.");
+        stopProgress();
+        setState("uploaded");
+        return;
       }
 
       setResultImage(finalImage);
