@@ -620,7 +620,7 @@ const Index = () => {
                       // Generate a unique image ID
                       const imageId = crypto.randomUUID();
 
-                      // Crop bottom half of the result image and store as base64 data URL
+                      // Crop bottom half of the result image
                       let imageUrl: string | null = null;
                       try {
                         const img = new Image();
@@ -635,9 +635,17 @@ const Index = () => {
                         canvas.height = Math.floor(img.height / 2);
                         const ctx = canvas.getContext("2d")!;
                         ctx.drawImage(img, 0, Math.floor(img.height / 2), img.width, Math.floor(img.height / 2), 0, 0, canvas.width, canvas.height);
-                        imageUrl = canvas.toDataURL("image/jpeg", 0.85);
+                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
+                        const fileName = `${imageId}.jpg`;
+                        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+                        if (uploadError) {
+                          console.error("Failed to upload image:", uploadError);
+                        } else {
+                          const { data: urlData } = supabase.storage.from("cart-images").getPublicUrl(uploadData.path);
+                          imageUrl = urlData.publicUrl;
+                        }
                       } catch (e) {
-                        console.error("Failed to crop image:", e);
+                        console.error("Failed to crop/upload image:", e);
                       }
 
                       supabase.from("cart_click_events").insert({
