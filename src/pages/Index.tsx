@@ -663,8 +663,27 @@ const Index = () => {
                       } as any).then(({ error }) => {
                         if (error) console.error("Failed to track cart click:", error);
                       });
-                      const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
-                      if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                      try {
+                        const res = await fetch("https://teakbeauty.com/cart/add.js", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            items: [{ id: parseInt(look.variantId), quantity: 1 }],
+                          }),
+                        });
+                        if (res.ok) {
+                          // Notify parent page to update cart count if needed
+                          window.top?.postMessage({ type: "cart-updated" }, "*");
+                        } else {
+                          // Fallback: redirect to cart
+                          const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
+                          if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                        }
+                      } catch {
+                        // Fallback: redirect to cart
+                        const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
+                        if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                      }
                     }}
                   >
                     Add to Cart — {currentLookLabel}
