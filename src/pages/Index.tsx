@@ -631,10 +631,12 @@ const Index = () => {
                           img.src = resultImage;
                         });
                         const canvas = document.createElement("canvas");
+                        const cropStartY = Math.floor(img.height * 0.55);
+                        const cropHeight = img.height - cropStartY;
                         canvas.width = img.width;
-                        canvas.height = Math.floor(img.height / 2);
+                        canvas.height = cropHeight;
                         const ctx = canvas.getContext("2d")!;
-                        ctx.drawImage(img, 0, Math.floor(img.height / 2), img.width, Math.floor(img.height / 2), 0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, 0, cropStartY, img.width, cropHeight, 0, 0, canvas.width, canvas.height);
                         const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
                         const fileName = `${imageId}.jpg`;
                         const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
