@@ -443,7 +443,7 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 text-muted-foreground font-display text-lg tracking-wide"
+          className="mt-4 text-foreground font-display text-lg tracking-wide"
         >
           Virtual Lip Studio
         </motion.p>
