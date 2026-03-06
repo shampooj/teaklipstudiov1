@@ -353,14 +353,8 @@ const Index = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const rawDataUrl = e.target?.result as string;
-      try {
-        const croppedDataUrl = await cropToFace(rawDataUrl);
-        setOriginalImage(croppedDataUrl);
-      } catch {
-        setOriginalImage(rawDataUrl);
-      }
+    reader.onload = (e) => {
+      setOriginalImage(e.target?.result as string);
       setState("uploaded");
     };
     reader.readAsDataURL(file);
