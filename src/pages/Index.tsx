@@ -11,11 +11,11 @@ import teakLogo from "@/assets/teak-logo.png";
 type AppState = "idle" | "uploaded" | "processing" | "done";
 
 const LIPSTICK_LOOKS = [
-  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c" },
-  { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b" },
-  { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a" },
-  { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d" },
-  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533" },
+  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
+  { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b", variantId: "45733508546713" },
+  { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
+  { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
+  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
 ] as const;
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
@@ -610,6 +610,20 @@ const Index = () => {
                 </div>
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8 w-full"
+                  >
+                    <a
+                      href={`https://teakbeauty.com/cart/${LIPSTICK_LOOKS.find(l => l.id === selectedLook)?.variantId}:1`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Add to Cart — {currentLookLabel}
+                    </a>
+                  </Button>
+
                   <Select value="" onValueChange={(v) => {
                     if (!v) return;
                     setSelectedLook(v as LookId);
