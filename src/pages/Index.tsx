@@ -617,6 +617,9 @@ const Index = () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
 
+                      // Generate a unique image ID
+                      const imageId = crypto.randomUUID();
+
                       // Crop bottom half of the result image
                       let imageUrl: string | null = null;
                       try {
@@ -633,7 +636,7 @@ const Index = () => {
                         const ctx = canvas.getContext("2d")!;
                         ctx.drawImage(img, 0, Math.floor(img.height / 2), img.width, Math.floor(img.height / 2), 0, 0, canvas.width, canvas.height);
                         const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
-                        const fileName = `${look.id}_${Date.now()}.jpg`;
+                        const fileName = `${imageId}.jpg`;
                         const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
                         if (uploadError) {
                           console.error("Failed to upload image:", uploadError);
@@ -650,6 +653,7 @@ const Index = () => {
                         shade_label: look.label,
                         variant_id: look.variantId,
                         image_url: imageUrl,
+                        image_id: imageId,
                       } as any).then(({ error }) => {
                         if (error) console.error("Failed to track cart click:", error);
                       });
