@@ -22,7 +22,7 @@
 @layer base {
   :root {
     /* Background: Sand 30% #EAE9E2 */
-    --background: 50 12% 90%;
+    --background: 0 0% 100%;
     /* Foreground: Black #000000 */
     --foreground: 0 0% 0%;
 
