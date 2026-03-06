@@ -11,11 +11,11 @@ import teakLogo from "@/assets/teak-logo.png";
 type AppState = "idle" | "uploaded" | "processing" | "done";
 
 const LIPSTICK_LOOKS = [
-  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour" },
-  { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe" },
-  { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish" },
-  { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe" },
-  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones" },
+  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c" },
+  { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b" },
+  { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a" },
+  { id: "coral-sunset", label: "Soft Matte Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d" },
+  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533" },
 ] as const;
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
@@ -528,9 +528,15 @@ const Index = () => {
                     <SelectContent>
                       {LIPSTICK_LOOKS.map((look) => (
                         <SelectItem key={look.id} value={look.id}>
-                          <div className="flex flex-col">
-                            <span className="font-display text-sm">{look.label}</span>
-                            <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                          <div className="flex items-start gap-2.5">
+                            <span
+                              className="mt-1 h-3 w-3 rounded-full shrink-0"
+                              style={{ backgroundColor: look.color }}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-display text-sm">{look.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                            </div>
                           </div>
                         </SelectItem>
                       ))}
