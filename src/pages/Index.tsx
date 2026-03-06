@@ -29,6 +29,64 @@ const loadImage = (src: string) =>
     image.src = src;
   });
 
+/** Crop an image data URL to just the face region. */
+async function cropToFace(dataUrl: string): Promise<string> {
+  const img = await loadImage(dataUrl);
+  const { width, height } = img;
+
+  let faceX = 0, faceY = 0, faceW = width, faceH = height;
+  let detected = false;
+
+  // Try browser FaceDetector API (Chrome/Edge)
+  if ("FaceDetector" in window) {
+    try {
+      // @ts-ignore - FaceDetector is not in TS lib
+      const detector = new window.FaceDetector({ maxDetectedFaces: 1 });
+      const faces = await detector.detect(img);
+      if (faces.length > 0) {
+        const box = faces[0].boundingBox;
+        faceX = box.x;
+        faceY = box.y;
+        faceW = box.width;
+        faceH = box.height;
+        detected = true;
+      }
+    } catch {
+      // FaceDetector not available or failed
+    }
+  }
+
+  if (!detected) {
+    // Fallback: assume face is roughly in the center-top area
+    // Crop to center 70% width, top 80% height
+    faceW = width * 0.7;
+    faceH = height * 0.8;
+    faceX = (width - faceW) / 2;
+    faceY = 0;
+    detected = true;
+  }
+
+  // Add generous padding around the face (40% of face dimensions)
+  const padX = faceW * 0.4;
+  const padY = faceH * 0.4;
+  let cropX = Math.max(0, faceX - padX);
+  let cropY = Math.max(0, faceY - padY);
+  let cropW = Math.min(width - cropX, faceW + padX * 2);
+  let cropH = Math.min(height - cropY, faceH + padY * 2);
+
+  // Ensure we don't crop to something too small
+  if (cropW < width * 0.3 || cropH < height * 0.3) {
+    return dataUrl; // face region too small, return original
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = cropW;
+  canvas.height = cropH;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+  return canvas.toDataURL("image/jpeg", 0.92);
+}
+
 const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string, look: LookId) => {
   const [original, edited] = await Promise.all([loadImage(originalSrc), loadImage(editedSrc)]);
 
@@ -352,8 +410,14 @@ const Index = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setOriginalImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const rawDataUrl = e.target?.result as string;
+      try {
+        const croppedDataUrl = await cropToFace(rawDataUrl);
+        setOriginalImage(croppedDataUrl);
+      } catch {
+        setOriginalImage(rawDataUrl);
+      }
       setState("uploaded");
     };
     reader.readAsDataURL(file);
