@@ -614,7 +614,12 @@ const Index = () => {
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
                   <Button
                     size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8 w-full"
+                    className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
+                      addedToCart
+                        ? "bg-green-700 text-white hover:bg-green-700 border-green-700"
+                        : "bg-foreground text-background hover:bg-foreground/85"
+                    }`}
+                    disabled={addedToCart}
                     onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
@@ -674,7 +679,7 @@ const Index = () => {
                           }),
                         });
                         if (res.ok) {
-                          // Notify parent page to update cart count if needed
+                          setAddedToCart(true);
                           window.top?.postMessage({ type: "cart-updated" }, "*");
                         } else {
                           // Fallback: redirect to cart
@@ -688,7 +693,14 @@ const Index = () => {
                       }
                     }}
                   >
-                    Add to Cart — {currentLookLabel}
+                    {addedToCart ? (
+                      <>
+                        <Check className="w-3 h-3" />
+                        Added to Cart
+                      </>
+                    ) : (
+                      <>Add to Cart — {currentLookLabel}</>
+                    )}
                   </Button>
 
                   <Select value="" onValueChange={(v) => {
