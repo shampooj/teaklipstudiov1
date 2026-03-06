@@ -208,6 +208,22 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     for (const idx of secondary.indices) finalMask[idx] = 1;
   }
 
+  // Hard safety clamp: never allow edits outside original lip-toned pixels.
+  let finalMaskArea = 0;
+  for (let idx = 0; idx < pixelCount; idx++) {
+    if (finalMask[idx] && originalLipPriorMask[idx]) {
+      finalMaskArea++;
+    } else {
+      finalMask[idx] = 0;
+    }
+  }
+
+  // If the resulting mask is suspiciously tiny/huge, abort to preserve integrity.
+  const finalMaskRatio = finalMaskArea / pixelCount;
+  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.035) {
+    return originalSrc;
+  }
+
   // No dilation: keeping mask unexpanded prevents lip-boundary growth and teeth bleed.
 
   // Pass 3: blend only inside final lip mask; every other pixel remains byte-for-byte original.
