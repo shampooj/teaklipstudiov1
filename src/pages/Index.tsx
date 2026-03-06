@@ -609,14 +609,18 @@ const Index = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-col items-center gap-5 w-full max-w-sm mx-auto">
-                  <Select value={selectedLook} onValueChange={(v) => {
+                <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
+                  <label className="font-display text-lg text-foreground text-center">
+                    Try another look
+                  </label>
+                  <Select value="placeholder" onValueChange={(v) => {
+                    if (v === "placeholder") return;
                     setSelectedLook(v as LookId);
                     setResultImage(null);
                     setState("uploaded");
                   }}>
                     <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
-                      <SelectValue placeholder="Select a look" />
+                      <SelectValue placeholder="Try another look" />
                     </SelectTrigger>
                     <SelectContent>
                       {LIPSTICK_LOOKS.map((look) => (
