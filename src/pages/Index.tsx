@@ -485,10 +485,13 @@ const Index = () => {
                     <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                     <div>
                       <p className="font-display text-xl text-foreground">
-                        Drop your photo here
+                        Drop your selfie here
                       </p>
                       <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                         or click to browse · JPG, PNG up to 15MB
+                      </p>
+                      <p className="mt-3 text-muted-foreground font-sans text-[10px]">
+                        Please make sure you aren't wearing a white t-shirt in the photo, as it confuses the technology.
                       </p>
                     </div>
                   </div>
