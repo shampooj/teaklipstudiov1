@@ -447,6 +447,14 @@ const Index = () => {
         >
           Virtual Lip Studio
         </motion.p>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          className="mt-2 text-muted-foreground font-sans text-sm max-w-md mx-auto"
+        >
+          See what some of our bestselling lipstick shades look like on you by uploading a well-lit selfie!
+        </motion.p>
       </header>
 
       {/* Main Content */}
