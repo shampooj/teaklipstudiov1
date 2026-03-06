@@ -610,8 +610,8 @@ const Index = () => {
                 </div>
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
-                  <Select value="placeholder" onValueChange={(v) => {
-                    if (v === "placeholder") return;
+                  <Select value="" onValueChange={(v) => {
+                    if (!v) return;
                     setSelectedLook(v as LookId);
                     setResultImage(null);
                     setState("uploaded");
