@@ -610,6 +610,20 @@ const Index = () => {
                 </div>
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
+                  <Button
+                    asChild
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8 w-full"
+                  >
+                    <a
+                      href={`https://teakbeauty.com/cart/${LIPSTICK_LOOKS.find(l => l.id === selectedLook)?.variantId}:1`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Add to Cart — {currentLookLabel}
+                    </a>
+                  </Button>
+
                   <Select value="" onValueChange={(v) => {
                     if (!v) return;
                     setSelectedLook(v as LookId);
