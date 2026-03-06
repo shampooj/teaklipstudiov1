@@ -610,9 +610,6 @@ const Index = () => {
                 </div>
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
-                  <label className="font-display text-lg text-foreground text-center">
-                    Try another look
-                  </label>
                   <Select value="placeholder" onValueChange={(v) => {
                     if (v === "placeholder") return;
                     setSelectedLook(v as LookId);
