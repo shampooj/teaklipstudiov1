@@ -706,6 +706,7 @@ const Index = () => {
                   <Select value="" onValueChange={(v) => {
                     if (!v) return;
                     setSelectedLook(v as LookId);
+                    setAddedToCart(false);
                     setResultImage(null);
                     setState("uploaded");
                   }}>
