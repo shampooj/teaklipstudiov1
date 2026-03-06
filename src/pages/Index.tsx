@@ -166,13 +166,13 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const neutrality0 = Math.abs(r0 - g0) + Math.abs(g0 - b0) + Math.abs(r0 - b0);
 
       const isTeethLike = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 62;
-      const inMouthBand = y > height * 0.42 && y < height * 0.86 && x > width * 0.18 && x < width * 0.82;
+      const inMouthBand = y > height * 0.32 && y < height * 0.90 && x > width * 0.1 && x < width * 0.9;
       const likelyLipTone =
-        lightness0 > 18 &&
-        lightness0 < 205 &&
-        saturation0 > 0.07 &&
-        chroma0 > 10 &&
-        (r0 >= g0 - 20 || b0 >= g0 - 12);
+        lightness0 > 12 &&
+        lightness0 < 215 &&
+        saturation0 > 0.04 &&
+        chroma0 > 6 &&
+        (r0 >= g0 - 30 || b0 >= g0 - 20 || lightness0 < 96);
 
       if (inMouthBand && likelyLipTone && !isTeethLike) {
         lipPriorMask[pixelIndex] = 1;
@@ -180,7 +180,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     }
   }
 
-  // Connected components on original-only lip prior (no geometry from edited image is used).
+  // Connected components on original-only lip prior (no edited-image geometry is used).
   const visited = new Uint8Array(pixelCount);
   const components: Array<{ indices: number[]; area: number; cx: number; cy: number; score: number }> = [];
 
@@ -223,12 +223,12 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
     const area = indices.length;
     const areaRatio = area / pixelCount;
-    if (areaRatio < 0.00006 || areaRatio > 0.08) continue;
+    if (areaRatio < 0.00004 || areaRatio > 0.09) continue;
 
     const cx = sumX / area;
     const cy = sumY / area;
-    const centerXAffinity = 1 - Math.min(1, Math.abs(cx / width - 0.5) / 0.45);
-    const centerYAffinity = 1 - Math.min(1, Math.abs(cy / height - 0.67) / 0.28);
+    const centerXAffinity = 1 - Math.min(1, Math.abs(cx / width - 0.5) / 0.48);
+    const centerYAffinity = 1 - Math.min(1, Math.abs(cy / height - 0.67) / 0.33);
     const score = area * (0.6 * centerXAffinity + 0.4 * centerYAffinity);
 
     components.push({ indices, area, cx, cy, score });
@@ -247,42 +247,20 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const secondary = components[1];
   if (
     secondary &&
-    secondary.area > primary.area * 0.14 &&
-    Math.abs(secondary.cx - primary.cx) < width * 0.24 &&
-    Math.abs(secondary.cy - primary.cy) < height * 0.16
+    secondary.area > primary.area * 0.12 &&
+    Math.abs(secondary.cx - primary.cx) < width * 0.26 &&
+    Math.abs(secondary.cy - primary.cy) < height * 0.18
   ) {
     for (const idx of secondary.indices) finalMask[idx] = 1;
   }
 
-  // One-pass erosion to keep edits safely inside the natural lip interior.
-  const erodedMask = new Uint8Array(finalMask);
-  for (let y = 1; y < height - 1; y++) {
-    for (let x = 1; x < width - 1; x++) {
-      const idx = y * width + x;
-      if (!finalMask[idx]) continue;
-
-      let neighbors = 0;
-      for (let oy = -1; oy <= 1; oy++) {
-        for (let ox = -1; ox <= 1; ox++) {
-          if (ox === 0 && oy === 0) continue;
-          if (finalMask[(y + oy) * width + (x + ox)]) neighbors++;
-        }
-      }
-
-      if (neighbors < 4) {
-        erodedMask[idx] = 0;
-      }
-    }
-  }
-
   let finalMaskArea = 0;
   for (let idx = 0; idx < pixelCount; idx++) {
-    finalMask[idx] = erodedMask[idx];
     if (finalMask[idx]) finalMaskArea++;
   }
 
   const finalMaskRatio = finalMaskArea / pixelCount;
-  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.025) {
+  if (finalMaskRatio < 0.00005 || finalMaskRatio > 0.04) {
     return originalSrc;
   }
 
@@ -290,9 +268,8 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const shadeRgb = hexToRgb(selectedLook?.color ?? "#b91c1c");
   const shadeHsl = rgbToHsl(shadeRgb.r, shadeRgb.g, shadeRgb.b);
 
-  // Estimate only global color trend from edited output (never pixel geometry).
+  // Estimate mild global trend from AI output, but never use AI geometry.
   let hueDeltaSum = 0;
-  let satRatioSum = 0;
   let lightShiftSum = 0;
   let trendCount = 0;
 
@@ -300,29 +277,26 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     if (!finalMask[pixelIndex]) continue;
 
     const i = pixelIndex * 4;
-    const r0 = originalData.data[i];
-    const g0 = originalData.data[i + 1];
-    const b0 = originalData.data[i + 2];
+    const o = rgbToHsl(originalData.data[i], originalData.data[i + 1], originalData.data[i + 2]);
+    const e = rgbToHsl(editedData.data[i], editedData.data[i + 1], editedData.data[i + 2]);
 
-    const r1 = editedData.data[i];
-    const g1 = editedData.data[i + 1];
-    const b1 = editedData.data[i + 2];
-
-    const o = rgbToHsl(r0, g0, b0);
-    const e = rgbToHsl(r1, g1, b1);
-
-    hueDeltaSum += clamp(shortestHueDelta(o.h, e.h), -60, 60);
-    satRatioSum += clamp((e.s + 0.001) / (o.s + 0.001), 0.75, 1.8);
-    lightShiftSum += clamp(e.l - o.l, -0.2, 0.2);
+    hueDeltaSum += clamp(shortestHueDelta(o.h, e.h), -40, 40);
+    lightShiftSum += clamp(e.l - o.l, -0.1, 0.1);
     trendCount++;
   }
 
   const avgHueDelta = trendCount ? hueDeltaSum / trendCount : 0;
-  const avgSatRatio = trendCount ? satRatioSum / trendCount : 1;
   const avgLightShift = trendCount ? lightShiftSum / trendCount : 0;
 
-  const isNeha = look === "berry-wine";
-  const baseBlendOpacity = isNeha ? 0.62 : look === "classic-red" ? 0.84 : 0.76;
+  const baseBlendOpacity =
+    look === "classic-red"
+      ? 0.9
+      : look === "berry-wine"
+        ? 0.86
+        : 0.82;
+
+  let changedPixels = 0;
+  let deltaTotal = 0;
 
   for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
     const i = pixelIndex * 4;
@@ -357,26 +331,37 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const originalHsl = rgbToHsl(r0, g0, b0);
     const towardShade = shortestHueDelta(originalHsl.h, shadeHsl.h);
 
-    const targetHue = normalizeHue(originalHsl.h + towardShade * 0.68 + avgHueDelta * 0.12);
-    const targetSat = clamp(
-      originalHsl.s * 0.42 + shadeHsl.s * 0.58 * avgSatRatio,
-      0.08,
-      0.92,
-    );
-    const targetLight = clamp(originalHsl.l + avgLightShift * 0.1, 0.03, 0.95);
+    const targetHue = normalizeHue(originalHsl.h + towardShade * 0.88 + avgHueDelta * 0.08);
+    const targetSat = clamp(originalHsl.s * 0.18 + shadeHsl.s * 0.82, 0.14, 0.96);
+    const targetLight = clamp(originalHsl.l * 0.86 + shadeHsl.l * 0.14 + avgLightShift * 0.05, 0.02, 0.9);
 
     const tinted = hslToRgb(targetHue, targetSat, targetLight);
 
     const blendOpacity = clamp(
-      baseBlendOpacity + (look === "nude-rose" && lightness0 < 120 ? -0.12 : 0),
-      0.5,
-      0.88,
+      baseBlendOpacity + (look === "nude-rose" && lightness0 < 120 ? -0.06 : 0),
+      0.68,
+      0.92,
     );
 
-    outputData.data[i] = Math.round(r0 + (tinted.r - r0) * blendOpacity);
-    outputData.data[i + 1] = Math.round(g0 + (tinted.g - g0) * blendOpacity);
-    outputData.data[i + 2] = Math.round(b0 + (tinted.b - b0) * blendOpacity);
+    const finalR = Math.round(r0 + (tinted.r - r0) * blendOpacity);
+    const finalG = Math.round(g0 + (tinted.g - g0) * blendOpacity);
+    const finalB = Math.round(b0 + (tinted.b - b0) * blendOpacity);
+
+    outputData.data[i] = finalR;
+    outputData.data[i + 1] = finalG;
+    outputData.data[i + 2] = finalB;
     outputData.data[i + 3] = originalData.data[i + 3];
+
+    const delta = Math.abs(finalR - r0) + Math.abs(finalG - g0) + Math.abs(finalB - b0);
+    deltaTotal += delta;
+    if (delta >= 10) changedPixels++;
+  }
+
+  const minimumChangedPixels = Math.max(30, Math.floor(finalMaskArea * 0.08));
+  const averageDelta = finalMaskArea > 0 ? deltaTotal / finalMaskArea : 0;
+
+  if (changedPixels < minimumChangedPixels || averageDelta < 9) {
+    return originalSrc;
   }
 
   outputCtx.putImageData(outputData, 0, 0);
