@@ -1,0 +1,1 @@
+ALTER TABLE public.cart_click_events ADD COLUMN image_id uuid DEFAULT gen_random_uuid();
