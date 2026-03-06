@@ -14,7 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cart_click_events: {
+        Row: {
+          created_at: string
+          id: string
+          shade_id: string
+          shade_label: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          shade_id: string
+          shade_label: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          shade_id?: string
+          shade_label?: string
+          variant_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
