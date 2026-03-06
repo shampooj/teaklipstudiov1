@@ -528,9 +528,15 @@ const Index = () => {
                     <SelectContent>
                       {LIPSTICK_LOOKS.map((look) => (
                         <SelectItem key={look.id} value={look.id}>
-                          <div className="flex flex-col">
-                            <span className="font-display text-sm">{look.label}</span>
-                            <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                          <div className="flex items-start gap-2.5">
+                            <span
+                              className="mt-1 h-3 w-3 rounded-full shrink-0"
+                              style={{ backgroundColor: look.color }}
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-display text-sm">{look.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                            </div>
                           </div>
                         </SelectItem>
                       ))}
