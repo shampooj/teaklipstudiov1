@@ -68,6 +68,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   // Pass 1: build a strict lip-candidate mask from strong, lipstick-like color deltas only.
   const candidateMask = new Uint8Array(pixelCount);
+  const originalLipPriorMask = new Uint8Array(pixelCount);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -88,20 +89,43 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const min0 = Math.min(r0, g0, b0);
       const saturation0 = max0 === 0 ? 0 : (max0 - min0) / max0;
       const lightness0 = (max0 + min0) / 2;
+      const chroma0 = max0 - min0;
+
+      const max1 = Math.max(r1, g1, b1);
+      const min1 = Math.min(r1, g1, b1);
+      const saturation1 = max1 === 0 ? 0 : (max1 - min1) / max1;
+      const lightness1 = (max1 + min1) / 2;
 
       const rednessGain = (r1 - Math.max(g1, b1)) - (r0 - Math.max(g0, b0));
       const warmTintGain = (r1 - b1) - (r0 - b0);
       const darkeningAmount = (r0 + g0 + b0) - (r1 + g1 + b1);
+      const hueShiftStrength = Math.abs((r1 - g1) - (r0 - g0)) + Math.abs((r1 - b1) - (r0 - b0));
 
-      const isTeethLike = lightness0 > 170 && saturation0 < 0.20;
-      const strongLipShift =
-        diff > 25 &&
-        (rednessGain > 8 || warmTintGain > 10 || darkeningAmount > 25 || diff > 50);
+      const neutrality0 = Math.abs(r0 - g0) + Math.abs(g0 - b0) + Math.abs(r0 - b0);
+      const isTeethLikeOriginal = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 65;
+      const isTeethLikeEdited = lightness1 > 150 && saturation1 < 0.30;
 
-      // Keep mask restricted to likely mouth region to avoid face-wide drift.
+      // Keep mask restricted to likely mouth region to avoid any face-wide drift.
       const inMouthBand = y > height * 0.30 && y < height * 0.88 && x > width * 0.10 && x < width * 0.90;
 
-      if (!isTeethLike && strongLipShift && inMouthBand) {
+      const isLipToneLikeOriginal =
+        inMouthBand &&
+        !isTeethLikeOriginal &&
+        (
+          ((r0 >= g0 - 24 && r0 >= b0 - 26) && chroma0 > 10) ||
+          (lightness0 < 125 && saturation0 > 0.07)
+        ) &&
+        lightness0 < 210;
+
+      if (isLipToneLikeOriginal) {
+        originalLipPriorMask[pixelIndex] = 1;
+      }
+
+      const strongLipShift =
+        diff > 22 &&
+        (hueShiftStrength > 16 || rednessGain > 7 || warmTintGain > 8 || darkeningAmount > 20 || diff > 48);
+
+      if (isLipToneLikeOriginal && !isTeethLikeEdited && strongLipShift) {
         candidateMask[pixelIndex] = 1;
       }
     }
