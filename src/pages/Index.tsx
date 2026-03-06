@@ -29,54 +29,6 @@ const loadImage = (src: string) =>
     image.src = src;
   });
 
-/** Crop an image data URL to just the face region. */
-async function cropToFace(dataUrl: string): Promise<string> {
-  const img = await loadImage(dataUrl);
-  const { width, height } = img;
-
-  // 1) Try native face detection when available
-  if ("FaceDetector" in window) {
-    try {
-      // @ts-ignore - FaceDetector isn't in all TS DOM libs yet
-      const detector = new window.FaceDetector({ maxDetectedFaces: 1 });
-      const faces = await detector.detect(img);
-
-      if (faces.length > 0) {
-        const box = faces[0].boundingBox;
-        const padX = box.width * 0.55;
-        const padTop = box.height * 0.65;
-        const padBottom = box.height * 0.55;
-
-        const cropX = Math.max(0, box.x - padX);
-        const cropY = Math.max(0, box.y - padTop);
-        const cropW = Math.min(width - cropX, box.width + padX * 2);
-        const cropH = Math.min(height - cropY, box.height + padTop + padBottom);
-
-        const faceCanvas = document.createElement("canvas");
-        faceCanvas.width = Math.floor(cropW);
-        faceCanvas.height = Math.floor(cropH);
-        const faceCtx = faceCanvas.getContext("2d")!;
-        faceCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, faceCanvas.width, faceCanvas.height);
-        return faceCanvas.toDataURL("image/jpeg", 0.92);
-      }
-    } catch {
-      // Fall through to deterministic selfie crop
-    }
-  }
-
-  // 2) Reliable fallback: deterministic selfie crop (always removes background)
-  const cropW = width * 0.68;
-  const cropH = height * 0.82;
-  const cropX = (width - cropW) / 2;
-  const cropY = height * 0.04;
-
-  const fallbackCanvas = document.createElement("canvas");
-  fallbackCanvas.width = Math.floor(cropW);
-  fallbackCanvas.height = Math.floor(cropH);
-  const fallbackCtx = fallbackCanvas.getContext("2d")!;
-  fallbackCtx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, fallbackCanvas.width, fallbackCanvas.height);
-  return fallbackCanvas.toDataURL("image/jpeg", 0.92);
-}
 
 const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: string, look: LookId) => {
   const [original, edited] = await Promise.all([loadImage(originalSrc), loadImage(editedSrc)]);
@@ -401,14 +353,8 @@ const Index = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = async (e) => {
-      const rawDataUrl = e.target?.result as string;
-      try {
-        const croppedDataUrl = await cropToFace(rawDataUrl);
-        setOriginalImage(croppedDataUrl);
-      } catch {
-        setOriginalImage(rawDataUrl);
-      }
+    reader.onload = (e) => {
+      setOriginalImage(e.target?.result as string);
       setState("uploaded");
     };
     reader.readAsDataURL(file);
