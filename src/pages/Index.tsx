@@ -627,7 +627,7 @@ const Index = () => {
                 <label
                   onDrop={handleDrop}
                   onDragOver={(e) => e.preventDefault()}
-                  className="group relative block cursor-pointer border border-border bg-background p-16 text-center transition-all duration-300 hover:border-foreground/40"
+                  className="group relative block cursor-pointer border border-border bg-background p-12 sm:p-16 text-center transition-all duration-300 hover:border-foreground/40"
                 >
                   <input
                     type="file"
@@ -650,6 +650,16 @@ const Index = () => {
                     </div>
                   </div>
                 </label>
+                <div className="mt-6 flex justify-center">
+                  <Button
+                    onClick={() => setState("lip-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                  >
+                    Go Back
+                  </Button>
+                </div>
               </motion.div>
             )}
 
