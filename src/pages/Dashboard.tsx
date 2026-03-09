@@ -193,18 +193,21 @@ const Dashboard = () => {
     );
   }, [data, search]);
 
+  const labeledSubmissions = useMemo(() => data.filter((r) => r.is_labeled), [data]);
+
   const filteredLabels = useMemo(() => {
-    if (!labelSearch.trim()) return adminLabels;
+    if (!labelSearch.trim()) return labeledSubmissions;
     const q = labelSearch.toLowerCase();
-    return adminLabels.filter(
+    return labeledSubmissions.filter(
       (row) =>
-        row.image_id.toLowerCase().includes(q) ||
+        row.id.toLowerCase().includes(q) ||
+        row.shade_label.toLowerCase().includes(q) ||
+        row.shade_id.toLowerCase().includes(q) ||
         (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
         (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
-        (row.labeled_at && row.labeled_at.toLowerCase().includes(q)) ||
-        row.id.toLowerCase().includes(q)
+        (row.labeled_at && row.labeled_at.toLowerCase().includes(q))
     );
-  }, [adminLabels, labelSearch]);
+  }, [labeledSubmissions, labelSearch]);
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
@@ -310,21 +313,24 @@ const Dashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Image ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Shade</TableHead>
+                  <TableHead>Shade ID</TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
-                  <TableHead>Created At</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLabels.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-mono text-xs">{row.id}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {new Date(row.created_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{row.shade_label}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.shade_id}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
@@ -337,11 +343,8 @@ const Dashboard = () => {
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs">
-                      {row.created_at ? new Date(row.created_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.image_id)}>
+                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.id)}>
                         Relabel
                       </Button>
                     </TableCell>
@@ -353,7 +356,7 @@ const Dashboard = () => {
         )}
 
         <p className="text-xs text-muted-foreground">
-          {filteredLabels.length} of {adminLabels.length} labels
+          {filteredLabels.length} of {labeledSubmissions.length} labeled submissions
         </p>
 
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
