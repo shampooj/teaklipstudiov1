@@ -12,6 +12,7 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
+import lipBeige from "@/assets/lip-beige.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
