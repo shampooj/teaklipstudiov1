@@ -357,6 +357,7 @@ const Index = () => {
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [progress, setProgress] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [cartError, setCartError] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
@@ -653,9 +654,11 @@ const Index = () => {
                     className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
                       addedToCart
                         ? "bg-green-700 text-white hover:bg-green-700 border-green-700"
+                        : cartError
+                        ? "bg-red-700 text-white hover:bg-red-700 border-red-700"
                         : "bg-foreground text-background hover:bg-foreground/85"
                     }`}
-                    disabled={addedToCart}
+                    disabled={addedToCart || cartError}
                     onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
@@ -714,11 +717,14 @@ const Index = () => {
                             items: [{ id: parseInt(look.variantId), quantity: 1 }],
                           }),
                         });
-                        setAddedToCart(true);
-                        window.top?.postMessage({ type: "cart-updated" }, "*");
+                        if (res.ok) {
+                          setAddedToCart(true);
+                          window.top?.postMessage({ type: "cart-updated" }, "*");
+                        } else {
+                          setCartError(true);
+                        }
                       } catch {
-                        // Silent fail — still show added state
-                        setAddedToCart(true);
+                        setCartError(true);
                       }
                     }}
                   >
@@ -727,6 +733,8 @@ const Index = () => {
                         <Check className="w-3 h-3" />
                         Added to Cart
                       </>
+                    ) : cartError ? (
+                      <>Failed to add to cart</>
                     ) : (
                       <>Add to Cart — {currentLookLabel}</>
                     )}
@@ -736,6 +744,7 @@ const Index = () => {
                     if (!v) return;
                     setSelectedLook(v as LookId);
                     setAddedToCart(false);
+                    setCartError(false);
                     setResultImage(null);
                     setState("uploaded");
                   }}>
