@@ -63,7 +63,6 @@ const Dashboard = () => {
         <h1 className="text-2xl font-semibold tracking-tight">
           Teak Lip Studio Admin
         </h1>
-        <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
         <Card className="max-w-xs">
           <CardHeader className="pb-2">
@@ -77,6 +76,8 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+
+        <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
