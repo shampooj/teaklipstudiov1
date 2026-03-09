@@ -733,6 +733,8 @@ const Index = () => {
                         <Check className="w-3 h-3" />
                         Added to Cart
                       </>
+                    ) : cartError ? (
+                      <>Failed to add to cart</>
                     ) : (
                       <>Add to Cart — {currentLookLabel}</>
                     )}
