@@ -721,14 +721,10 @@ const Index = () => {
                           setAddedToCart(true);
                           window.top?.postMessage({ type: "cart-updated" }, "*");
                         } else {
-                          // Not embedded — redirect to cart
-                          const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
-                          if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                          setCartError(true);
                         }
                       } catch {
-                        // CORS error (not embedded on teakbeauty.com) — redirect to cart
-                        const url = `https://teakbeauty.com/cart/${look.variantId}:1?utm_source=virtual_lip_studio&utm_medium=app&utm_campaign=${look.id}`;
-                        if (window.top) window.top.location.href = url; else window.open(url, "_top");
+                        setCartError(true);
                       }
                     }}
                   >
