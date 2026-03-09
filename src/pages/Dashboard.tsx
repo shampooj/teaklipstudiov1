@@ -42,6 +42,8 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
+  skin_tone: string | null;
+  lip_tone: string | null;
   // joined from admin_labels
   admin_lip_tone_category: string | null;
   labeled_by_user_id: string | null;
