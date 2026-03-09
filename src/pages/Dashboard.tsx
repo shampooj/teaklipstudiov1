@@ -30,6 +30,10 @@ interface Submission {
   image_id: string | null;
   image_url: string | null;
   is_labeled: boolean;
+  admin_lip_tone_category: string | null;
+  labeled_by_user_id: string | null;
+  labeled_at: string | null;
+  labeled_by_email?: string;
 }
 
 const Dashboard = () => {
