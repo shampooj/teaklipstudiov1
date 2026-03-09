@@ -1,0 +1,1 @@
+ALTER TABLE public.cart_click_events RENAME TO user_input_data;

@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      cart_click_events: {
+      user_input_data: {
         Row: {
           created_at: string
           id: string
