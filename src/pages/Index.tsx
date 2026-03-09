@@ -858,7 +858,7 @@ const Index = () => {
                         const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
 
                         // Call AI to detect lip region
-                        let cropTop = 0.55, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
+                        let cropTop = 0.0, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
                         try {
                           const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
                             body: { imageBase64: detectBase64 },
