@@ -300,7 +300,7 @@ const Dashboard = () => {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Image</TableHead>
-                  <TableHead>Lip Tone</TableHead>
+                  <TableHead>Lip Tone Label</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
                   <TableHead></TableHead>
