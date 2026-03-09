@@ -417,7 +417,7 @@ const Dashboard = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         )}
 
