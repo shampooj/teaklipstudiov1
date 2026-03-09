@@ -255,6 +255,51 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground">All images have been labeled ✓</p>
         )}
 
+        <h2 className="text-lg text-muted-foreground">Admin Labels</h2>
+
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by image ID, lip tone, email…"
+            value={labelSearch}
+            onChange={(e) => setLabelSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {filteredLabels.length === 0 ? (
+          <p className="text-muted-foreground">No admin labels found.</p>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Image ID</TableHead>
+                  <TableHead>Lip Tone</TableHead>
+                  <TableHead>Labeled By</TableHead>
+                  <TableHead>Labeled At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredLabels.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-xs">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground">
+          {filteredLabels.length} of {adminLabels.length} labels
+        </p>
+
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
         <div className="relative max-w-sm">
