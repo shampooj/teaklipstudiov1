@@ -9,12 +9,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
+import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
   { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
-  { id: "medium-brown", label: "Medium Brown", color: "#8D5524" },
+  { id: "medium-brown", label: "Medium Brown", color: "#8D5524", image: skinMediumBrown },
   { id: "deep-brown", label: "Deep Brown", color: "#5C3317" },
   { id: "rich-brown", label: "Rich Brown", color: "#3B1E08" },
 ] as const;
