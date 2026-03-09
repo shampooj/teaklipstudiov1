@@ -36,21 +36,50 @@ const Dashboard = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const fetchData = async () => {
+    const { data: rows, error } = await (supabase.from as any)("customer_submissions")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Failed to fetch submissions:", error);
+    } else {
+      setData(rows || []);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: rows, error } = await (supabase.from as any)("customer_submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Failed to fetch submissions:", error);
-      } else {
-        setData(rows || []);
-      }
-      setLoading(false);
-    };
     fetchData();
   }, []);
+
+  const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
+  const currentImage = unlabeled.length > 0 ? unlabeled[0] : null;
+
+  const handleSaveLabel = async () => {
+    if (!currentImage || !selectedCategory) return;
+    setSaving(true);
+    const { error } = await (supabase.from as any)("customer_submissions")
+      .update({ is_labeled: true, admin_lip_tone_category: selectedCategory })
+      .eq("id", currentImage.id);
+    if (error) {
+      toast.error("Failed to save label");
+      console.error(error);
+    } else {
+      toast.success("Label saved");
+      setSelectedCategory("");
+      setData((prev) =>
+        prev.map((r) =>
+          r.id === currentImage.id
+            ? { ...r, is_labeled: true, admin_lip_tone_category: selectedCategory }
+            : r
+        )
+      );
+    }
+    setSaving(false);
+  };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
