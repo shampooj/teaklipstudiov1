@@ -797,6 +797,7 @@ const Index = () => {
                     setSelectedLook(v as LookId);
                     setAddedToCart(false);
                     setCartError(false);
+                    setAddingToCart(false);
                     setResultImage(null);
                     setState("uploaded");
                   }}>
