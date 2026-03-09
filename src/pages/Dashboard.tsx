@@ -297,10 +297,10 @@ const Dashboard = () => {
               </span>
             </div>
             {currentImage.image_url ? (
-              <img
-                src={currentImage.image_url}
-                alt="Submission"
-                className="w-64 max-h-64 object-contain rounded-md border border-border"
+               <img
+                 src={currentImage.image_url}
+                 alt="Submission"
+                 className="w-full max-w-[16rem] max-h-64 object-contain rounded-md border border-border"
               />
             ) : (
               <p className="text-muted-foreground text-[9px]">No image available</p>
