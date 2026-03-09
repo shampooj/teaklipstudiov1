@@ -731,15 +731,20 @@ const Index = () => {
                         console.error("Failed to crop/upload image:", e);
                       }
 
-                      supabase.from("customer_submissions" as any).insert({
+                      const { error: insertError } = await supabase.from("customer_submissions" as any).insert({
                         shade_id: look.id,
                         shade_label: look.label,
                         variant_id: look.variantId,
                         image_url: imageUrl,
                         image_id: imageId,
-                      } as any).then(({ error }) => {
-                        if (error) console.error("Failed to track cart click:", error);
-                      });
+                      } as any);
+                      if (insertError) {
+                        console.error("Failed to track cart click:", insertError);
+                        setCartError(true);
+                      } else {
+                        setAddedToCart(true);
+                      }
+                      // Best-effort Shopify cart add (will fail on non-Shopify origins due to CORS)
                       try {
                         const res = await fetch("https://teakbeauty.com/cart/add.js", {
                           method: "POST",
@@ -749,13 +754,10 @@ const Index = () => {
                           }),
                         });
                         if (res.ok) {
-                          setAddedToCart(true);
                           window.top?.postMessage({ type: "cart-updated" }, "*");
-                        } else {
-                          setCartError(true);
                         }
                       } catch {
-                        setCartError(true);
+                        // CORS expected when not embedded on Shopify
                       }
                     }}
                   >
