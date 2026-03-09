@@ -199,6 +199,9 @@ const Dashboard = () => {
                   <TableHead>Shade ID</TableHead>
                   <TableHead>Variant ID</TableHead>
                   <TableHead>Image</TableHead>
+                  <TableHead>Lip Tone</TableHead>
+                  <TableHead>Labeled By</TableHead>
+                  <TableHead>Labeled At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -227,6 +230,15 @@ const Dashboard = () => {
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>
                       )}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                   </TableRow>
                 ))}
