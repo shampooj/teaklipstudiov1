@@ -29,6 +29,7 @@ interface AdminLabel {
   labeled_at: string | null;
   created_at?: string;
   labeled_by_email?: string;
+  image_url?: string | null;
 }
 
 interface Submission {
