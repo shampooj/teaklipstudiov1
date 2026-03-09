@@ -21,6 +21,14 @@ import {
 import { Search } from "lucide-react";
 import { toast } from "sonner";
 
+interface AdminLabel {
+  id: string;
+  image_id: string;
+  admin_lip_tone_category: string | null;
+  labeled_by_user_id: string | null;
+  labeled_at: string | null;
+}
+
 interface Submission {
   id: string;
   created_at: string;
@@ -29,11 +37,13 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
-  is_labeled: boolean;
+  // joined from admin_labels
   admin_lip_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
   labeled_by_email?: string;
+  is_labeled: boolean;
+  admin_label_id?: string;
 }
 
 const Dashboard = () => {
@@ -44,10 +54,11 @@ const Dashboard = () => {
   const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
-    const [{ data: rows, error }, { data: profiles }] = await Promise.all([
+    const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
       (supabase.from as any)("customer_submissions")
         .select("*")
         .order("created_at", { ascending: false }),
+      (supabase.from as any)("admin_labels").select("*"),
       (supabase.from as any)("profiles").select("id, email"),
     ]);
     if (error) {
@@ -55,10 +66,22 @@ const Dashboard = () => {
     } else {
       const emailMap = new Map<string, string>();
       (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
-      const enriched = (rows || []).map((r: Submission) => ({
-        ...r,
-        labeled_by_email: r.labeled_by_user_id ? emailMap.get(r.labeled_by_user_id) ?? null : null,
-      }));
+
+      const labelMap = new Map<string, AdminLabel>();
+      (labels || []).forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
+
+      const enriched = (rows || []).map((r: any) => {
+        const label = labelMap.get(r.id);
+        return {
+          ...r,
+          is_labeled: !!label,
+          admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
+          labeled_by_user_id: label?.labeled_by_user_id ?? null,
+          labeled_at: label?.labeled_at ?? null,
+          admin_label_id: label?.id,
+          labeled_by_email: label?.labeled_by_user_id ? emailMap.get(label.labeled_by_user_id) ?? null : null,
+        };
+      });
       setData(enriched);
     }
     setLoading(false);
@@ -76,14 +99,13 @@ const Dashboard = () => {
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const now = new Date().toISOString();
-    const { error } = await (supabase.from as any)("customer_submissions")
-      .update({
-        is_labeled: true,
+    const { error } = await (supabase.from as any)("admin_labels")
+      .insert({
+        image_id: currentImage.id,
         admin_lip_tone_category: selectedCategory,
         labeled_by_user_id: user?.id,
         labeled_at: now,
-      })
-      .eq("id", currentImage.id);
+      });
     if (error) {
       toast.error("Failed to save label");
       console.error(error);
@@ -109,9 +131,11 @@ const Dashboard = () => {
   };
 
   const handleRelabel = async (id: string) => {
-    const { error } = await (supabase.from as any)("customer_submissions")
-      .update({ is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null })
-      .eq("id", id);
+    const row = data.find((r) => r.id === id);
+    if (!row?.admin_label_id) return;
+    const { error } = await (supabase.from as any)("admin_labels")
+      .delete()
+      .eq("id", row.admin_label_id);
     if (error) {
       toast.error("Failed to reset label");
     } else {
@@ -119,7 +143,7 @@ const Dashboard = () => {
       setData((prev) =>
         prev.map((r) =>
           r.id === id
-            ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined }
+            ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
             : r
         )
       );

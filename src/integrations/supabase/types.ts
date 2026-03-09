@@ -14,42 +14,65 @@ export type Database = {
   }
   public: {
     Tables: {
-      customer_submissions: {
+      admin_labels: {
         Row: {
           admin_lip_tone_category: string | null
           created_at: string
           id: string
           image_id: string | null
-          image_url: string | null
-          is_labeled: boolean
           labeled_at: string | null
           labeled_by_user_id: string | null
-          shade_id: string
-          shade_label: string
-          variant_id: string
         }
         Insert: {
           admin_lip_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null
-          image_url?: string | null
-          is_labeled?: boolean
           labeled_at?: string | null
           labeled_by_user_id?: string | null
-          shade_id: string
-          shade_label: string
-          variant_id: string
         }
         Update: {
           admin_lip_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null
-          image_url?: string | null
-          is_labeled?: boolean
           labeled_at?: string | null
           labeled_by_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_labels_image_id_fkey"
+            columns: ["image_id"]
+            isOneToOne: false
+            referencedRelation: "customer_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          image_id: string | null
+          image_url: string | null
+          shade_id: string
+          shade_label: string
+          variant_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_id?: string | null
+          image_url?: string | null
+          shade_id: string
+          shade_label: string
+          variant_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_id?: string | null
+          image_url?: string | null
           shade_id?: string
           shade_label?: string
           variant_id?: string
