@@ -133,6 +133,7 @@ const Dashboard = () => {
     } else {
       toast.success("Label saved");
       setSelectedCategory("");
+      setLabelIndex((prev) => Math.min(prev, unlabeled.length - 2));
       setData((prev) =>
         prev.map((r) =>
           r.id === currentImage.id
