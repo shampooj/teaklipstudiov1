@@ -37,7 +37,7 @@ const LIP_TONES = [
   { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E" },
   { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A" },
   { id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", color: "#4A2228" },
+  { id: "deep-brown", label: "Deep Brown", color: "#4A2228", image: lipDeepBrown },
   { id: "grey-brown", label: "Grey Brown", color: "#7D6B65" },
 ] as const;
 
