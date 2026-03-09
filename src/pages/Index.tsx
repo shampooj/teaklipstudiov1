@@ -369,7 +369,9 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 };
 
 const Index = () => {
-  const [state, setState] = useState<AppState>("idle");
+  const [state, setState] = useState<AppState>("skin-tone");
+  const [skinTone, setSkinTone] = useState<string>("");
+  const [lipTone, setLipTone] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
