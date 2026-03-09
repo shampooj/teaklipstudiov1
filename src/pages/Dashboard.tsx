@@ -196,8 +196,8 @@ const Dashboard = () => {
   }, [labeledSubmissions, labelSearch]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
           Teak Lip Studio Admin
         </h1>
