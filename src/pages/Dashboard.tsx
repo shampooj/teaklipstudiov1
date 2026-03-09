@@ -52,8 +52,9 @@ const Dashboard = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [labelSearch, setLabelSearch] = useState("");
+  const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
