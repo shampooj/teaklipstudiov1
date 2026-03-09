@@ -383,9 +383,10 @@ const Dashboard = () => {
               <TableBody>
                 {filteredLabels.map((row) => (
                   <TableRow key={row.id} className="border-border">
-                    <TableCell className="whitespace-nowrap text-[9px]">
-                      {new Date(row.created_at).toLocaleString()}
-                    </TableCell>
+                     <TableCell className="whitespace-nowrap text-[9px]">
+                       {new Date(row.created_at).toLocaleString()}
+                     </TableCell>
+                     <TableCell className="font-mono text-[9px]">{row.image_id}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-[9px]">View</a>
