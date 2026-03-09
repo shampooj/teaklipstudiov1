@@ -148,24 +148,26 @@ const Dashboard = () => {
     setSaving(false);
   };
 
-  const handleRelabel = async (id: string) => {
-    const row = data.find((r) => r.id === id);
-    if (!row?.admin_label_id) return;
+  const handleRelabel = async (submissionId: string) => {
+    // Find the admin label for this submission
+    const label = adminLabels.find((l) => l.image_id === submissionId);
+    if (!label) return;
     const { error } = await (supabase.from as any)("admin_labels")
       .delete()
-      .eq("id", row.admin_label_id);
+      .eq("id", label.id);
     if (!error) {
       await (supabase.from as any)("customer_submissions")
         .update({ is_labeled: false })
-        .eq("id", id);
+        .eq("id", submissionId);
     }
     if (error) {
       toast.error("Failed to reset label");
     } else {
       toast.success("Moved back to labeling queue");
+      setAdminLabels((prev) => prev.filter((l) => l.id !== label.id));
       setData((prev) =>
         prev.map((r) =>
-          r.id === id
+          r.id === submissionId
             ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
             : r
         )
