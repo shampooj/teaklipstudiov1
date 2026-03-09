@@ -1,0 +1,1 @@
+CREATE POLICY "Allow authenticated deletes" ON public.customer_submissions FOR DELETE TO authenticated USING (true);

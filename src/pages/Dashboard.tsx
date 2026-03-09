@@ -265,9 +265,26 @@ const Dashboard = () => {
                   <SelectItem value="brown">Brown</SelectItem>
                 </SelectContent>
               </Select>
-              <Button onClick={handleSaveLabel} disabled={!selectedCategory || saving}>
-                {saving ? "Saving…" : "Save Label"}
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={handleSaveLabel} disabled={!selectedCategory || saving}>
+                  {saving ? "Saving…" : "Save Label"}
+                </Button>
+                <Button variant="destructive" size="default" onClick={async () => {
+                  if (!currentImage) return;
+                  const { error } = await (supabase.from as any)("customer_submissions")
+                    .delete()
+                    .eq("id", currentImage.id);
+                  if (error) {
+                    toast.error("Failed to discard submission");
+                  } else {
+                    toast.success("Submission discarded");
+                    setData((prev) => prev.filter((r) => r.id !== currentImage.id));
+                    setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
+                  }
+                }}>
+                  Discard Customer Submission
+                </Button>
+              </div>
             </CardContent>
           </Card>
         ) : (
