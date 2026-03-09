@@ -20,6 +20,7 @@ export type Database = {
           id: string
           image_id: string | null
           image_url: string | null
+          is_labeled: boolean
           shade_id: string
           shade_label: string
           variant_id: string
@@ -29,6 +30,7 @@ export type Database = {
           id?: string
           image_id?: string | null
           image_url?: string | null
+          is_labeled?: boolean
           shade_id: string
           shade_label: string
           variant_id: string
@@ -38,6 +40,7 @@ export type Database = {
           id?: string
           image_id?: string | null
           image_url?: string | null
+          is_labeled?: boolean
           shade_id?: string
           shade_label?: string
           variant_id?: string
