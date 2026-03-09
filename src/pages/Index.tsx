@@ -715,11 +715,14 @@ const Index = () => {
                             items: [{ id: parseInt(look.variantId), quantity: 1 }],
                           }),
                         });
-                        setAddedToCart(true);
-                        window.top?.postMessage({ type: "cart-updated" }, "*");
+                        if (res.ok) {
+                          setAddedToCart(true);
+                          window.top?.postMessage({ type: "cart-updated" }, "*");
+                        } else {
+                          setCartError(true);
+                        }
                       } catch {
-                        // Silent fail — still show added state
-                        setAddedToCart(true);
+                        setCartError(true);
                       }
                     }}
                   >
