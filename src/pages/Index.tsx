@@ -666,7 +666,7 @@ const Index = () => {
                       // Generate a unique image ID
                       const imageId = crypto.randomUUID();
 
-                      // Crop bottom half of the result image
+                      // AI-powered crop of lip/lower face region
                       let imageUrl: string | null = null;
                       try {
                         const img = new Image();
@@ -676,13 +676,44 @@ const Index = () => {
                           img.onerror = reject;
                           img.src = originalImage!;
                         });
+
+                        // Get a small base64 version for detection
+                        const detectCanvas = document.createElement("canvas");
+                        const maxDetectSize = 512;
+                        const scale = Math.min(maxDetectSize / img.width, maxDetectSize / img.height, 1);
+                        detectCanvas.width = Math.round(img.width * scale);
+                        detectCanvas.height = Math.round(img.height * scale);
+                        const detectCtx = detectCanvas.getContext("2d")!;
+                        detectCtx.drawImage(img, 0, 0, detectCanvas.width, detectCanvas.height);
+                        const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
+
+                        // Call AI to detect lip region
+                        let cropTop = 0.55, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
+                        try {
+                          const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
+                            body: { imageBase64: detectBase64 },
+                          });
+                          if (!regionError && regionData && regionData.top !== undefined) {
+                            cropTop = regionData.top;
+                            cropBottom = regionData.bottom;
+                            cropLeft = regionData.left;
+                            cropRight = regionData.right;
+                          } else {
+                            console.warn("Lip detection failed, using fallback crop:", regionError);
+                          }
+                        } catch (detectErr) {
+                          console.warn("Lip detection error, using fallback crop:", detectErr);
+                        }
+
                         const canvas = document.createElement("canvas");
-                        const cropStartY = Math.floor(img.height * 0.55);
-                        const cropHeight = img.height - cropStartY;
-                        canvas.width = img.width;
+                        const startX = Math.floor(img.width * cropLeft);
+                        const startY = Math.floor(img.height * cropTop);
+                        const cropWidth = Math.floor(img.width * (cropRight - cropLeft));
+                        const cropHeight = Math.floor(img.height * (cropBottom - cropTop));
+                        canvas.width = cropWidth;
                         canvas.height = cropHeight;
                         const ctx = canvas.getContext("2d")!;
-                        ctx.drawImage(img, 0, cropStartY, img.width, cropHeight, 0, 0, canvas.width, canvas.height);
+                        ctx.drawImage(img, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
                         const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
                         const fileName = `${imageId}.jpg`;
                         const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
