@@ -13,6 +13,7 @@ import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.jpg";
+import lipBrightPink from "@/assets/lip-bright-pink.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
@@ -24,7 +25,7 @@ const SKIN_TONES = [
 ] as const;
 
 const LIP_TONES = [
-  { id: "bright-pink", label: "Bright Pink", color: "#E8577E" },
+  { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
   { id: "brown-pink", label: "Brown Pink", color: "#C4787A" },
   { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D" },
   { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
