@@ -16,6 +16,7 @@ import lipBeige from "@/assets/lip-beige.jpg";
 import lipBrightPink from "@/assets/lip-bright-pink.jpg";
 import lipMediumBrown from "@/assets/lip-medium-brown.png";
 import lipDeepBrown from "@/assets/lip-deep-brown.jpg";
+import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
