@@ -52,7 +52,7 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "return_lip_region",
-              description: "Return the bounding box of the lower face / lip region as normalized coordinates (0 to 1).",
+              description: "Return the bounding box of the face region as normalized coordinates (0 to 1).",
               parameters: {
                 type: "object",
                 properties: {
