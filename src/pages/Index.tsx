@@ -8,11 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import teakLogo from "@/assets/teak-logo.png";
+import skinLightBrown from "@/assets/skin-light-brown.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
-  { id: "light-brown", label: "Light Brown", color: "#C68642" },
+  { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
   { id: "medium-brown", label: "Medium Brown", color: "#8D5524" },
   { id: "deep-brown", label: "Deep Brown", color: "#5C3317" },
   { id: "rich-brown", label: "Rich Brown", color: "#3B1E08" },
@@ -548,10 +549,18 @@ const Index = () => {
                             : "border-border"
                         }`}
                       >
-                        <div
-                          className="w-full aspect-square rounded-sm"
-                          style={{ backgroundColor: tone.color }}
-                        />
+                        {'image' in tone && tone.image ? (
+                          <img
+                            src={tone.image}
+                            alt={tone.label}
+                            className="w-full aspect-square rounded-sm object-cover"
+                          />
+                        ) : (
+                          <div
+                            className="w-full aspect-square rounded-sm"
+                            style={{ backgroundColor: tone.color }}
+                          />
+                        )}
                         <span className="font-display text-xs text-foreground">{tone.label}</span>
                       </button>
                     ))}
