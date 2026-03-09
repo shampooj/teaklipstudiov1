@@ -612,10 +612,14 @@ const Index = () => {
                             : "border-border"
                         }`}
                       >
-                        <div
-                          className="w-full aspect-square rounded-sm"
-                          style={{ backgroundColor: tone.color }}
-                        />
+                        {'image' in tone && tone.image ? (
+                          <img src={tone.image} alt={tone.label} className="w-full aspect-square rounded-sm object-cover" />
+                        ) : (
+                          <div
+                            className="w-full aspect-square rounded-sm"
+                            style={{ backgroundColor: tone.color }}
+                          />
+                        )}
                         <span className="font-display text-[10px] text-foreground leading-tight">{tone.label}</span>
                       </button>
                     ))}
