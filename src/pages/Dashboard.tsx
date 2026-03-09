@@ -281,10 +281,12 @@ const Dashboard = () => {
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Image ID</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
                   <TableHead>Created At</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -292,6 +294,13 @@ const Dashboard = () => {
                   <TableRow key={row.id}>
                     <TableCell className="font-mono text-xs">{row.id}</TableCell>
                     <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell>
+                      {row.image_url ? (
+                        <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-xs">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
@@ -299,6 +308,11 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.created_at ? new Date(row.created_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.image_id)}>
+                        Relabel
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
