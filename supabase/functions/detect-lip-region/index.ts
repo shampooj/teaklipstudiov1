@@ -58,7 +58,7 @@ serve(async (req) => {
                 properties: {
                   top: {
                     type: "number",
-                    description: "Top edge of the crop region as a fraction of image height (0 = top of image, 1 = bottom). Should be roughly at the nose tip level."
+                    description: "Top edge of the crop region as a fraction of image height (0 = top of image, 1 = bottom)."
                   },
                   bottom: {
                     type: "number",
