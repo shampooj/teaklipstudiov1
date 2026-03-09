@@ -299,8 +299,7 @@ const Dashboard = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Date</TableHead>
-                  <TableHead>Shade</TableHead>
-                  <TableHead>Shade ID</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
