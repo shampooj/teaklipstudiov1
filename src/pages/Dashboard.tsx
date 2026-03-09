@@ -44,13 +44,22 @@ const Dashboard = () => {
   const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
-    const { data: rows, error } = await (supabase.from as any)("customer_submissions")
-      .select("*")
-      .order("created_at", { ascending: false });
+    const [{ data: rows, error }, { data: profiles }] = await Promise.all([
+      (supabase.from as any)("customer_submissions")
+        .select("*")
+        .order("created_at", { ascending: false }),
+      (supabase.from as any)("profiles").select("id, email"),
+    ]);
     if (error) {
       console.error("Failed to fetch submissions:", error);
     } else {
-      setData(rows || []);
+      const emailMap = new Map<string, string>();
+      (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
+      const enriched = (rows || []).map((r: Submission) => ({
+        ...r,
+        labeled_by_email: r.labeled_by_user_id ? emailMap.get(r.labeled_by_user_id) ?? null : null,
+      }));
+      setData(enriched);
     }
     setLoading(false);
   };
