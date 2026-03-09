@@ -775,7 +775,12 @@ const Index = () => {
                       }
                     }}
                   >
-                    {addedToCart ? (
+                    {addingToCart ? (
+                      <>
+                        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+                        Adding to Cart…
+                      </>
+                    ) : addedToCart ? (
                       <>
                         <Check className="w-3 h-3" />
                         Added to Cart
