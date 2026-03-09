@@ -38,7 +38,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: "Analyze this face photo. First, locate the EYES. Then return a bounding box that starts WELL BELOW the eyes — the top edge must be at or below the nose bridge (approximately mid-nose level). The crop must NEVER include any part of the eyes, eyebrows, or forehead. Include the nose tip, lips, chin, and jawline. The result should show roughly the bottom third of the face only. Be aggressive about cutting high — it is much better to cut too low (missing some nose) than to include any eye area."
+                text: "Analyze this face photo. Return a bounding box that captures the full face including forehead, eyes, nose, lips, chin, and jawline. Include the complete face with some margin around it."
               },
               {
                 type: "image_url",
