@@ -13,7 +13,7 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
-  { id: "light-brown", label: "Light Brown", color: "#C68642" },
+  { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
   { id: "medium-brown", label: "Medium Brown", color: "#8D5524" },
   { id: "deep-brown", label: "Deep Brown", color: "#5C3317" },
   { id: "rich-brown", label: "Rich Brown", color: "#3B1E08" },
