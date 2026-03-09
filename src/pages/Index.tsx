@@ -654,9 +654,11 @@ const Index = () => {
                     className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
                       addedToCart
                         ? "bg-green-700 text-white hover:bg-green-700 border-green-700"
+                        : cartError
+                        ? "bg-red-700 text-white hover:bg-red-700 border-red-700"
                         : "bg-foreground text-background hover:bg-foreground/85"
                     }`}
-                    disabled={addedToCart}
+                    disabled={addedToCart || cartError}
                     onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
