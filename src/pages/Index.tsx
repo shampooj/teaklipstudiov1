@@ -9,7 +9,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import teakLogo from "@/assets/teak-logo.png";
 
-type AppState = "idle" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
+
+const SKIN_TONES = [
+  { id: "fair", label: "Fair" },
+  { id: "light-medium", label: "Light-Medium" },
+  { id: "medium-tan", label: "Medium-Tan" },
+  { id: "deep-dark", label: "Deep-Dark" },
+] as const;
+
+const LIP_TONES = [
+  { id: "pale-pink", label: "Pale Pink" },
+  { id: "mauve", label: "Mauve" },
+  { id: "rosy", label: "Rosy" },
+  { id: "coral", label: "Coral" },
+  { id: "berry", label: "Berry" },
+  { id: "brown-nude", label: "Brown Nude" },
+  { id: "deep-plum", label: "Deep Plum" },
+  { id: "dark-brown", label: "Dark Brown" },
+] as const;
 
 const LIPSTICK_LOOKS = [
   { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
