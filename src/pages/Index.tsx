@@ -22,6 +22,7 @@ import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.png";
 import lipMauvePink from "@/assets/lip-mauve-pink.png";
 import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
 import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
+import lipBrownPink from "@/assets/lip-brown-pink.png";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
@@ -34,7 +35,7 @@ const SKIN_TONES = [
 
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
-  { id: "brown-pink", label: "Brown Pink", color: "#C4787A" },
+  { id: "brown-pink", label: "Brown Pink", color: "#C4787A", image: lipBrownPink },
   { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
   { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
   { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
