@@ -313,8 +313,6 @@ const Dashboard = () => {
                     <TableCell className="whitespace-nowrap text-xs">
                       {new Date(row.created_at).toLocaleString()}
                     </TableCell>
-                    <TableCell>{row.shade_label}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.shade_id}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
