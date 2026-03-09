@@ -468,7 +468,9 @@ const Index = () => {
   );
 
   const reset = () => {
-    setState("idle");
+    setState("skin-tone");
+    setSkinTone("");
+    setLipTone("");
     setOriginalImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
