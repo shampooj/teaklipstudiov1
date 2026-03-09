@@ -15,6 +15,7 @@ import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.jpg";
 import lipBrightPink from "@/assets/lip-bright-pink.jpg";
 import lipMediumBrown from "@/assets/lip-medium-brown.png";
+import lipDeepBrown from "@/assets/lip-deep-brown.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
@@ -36,7 +37,7 @@ const LIP_TONES = [
   { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E" },
   { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A" },
   { id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", color: "#4A2228" },
+  { id: "deep-brown", label: "Deep Brown", color: "#4A2228", image: lipDeepBrown },
   { id: "grey-brown", label: "Grey Brown", color: "#7D6B65" },
 ] as const;
 
