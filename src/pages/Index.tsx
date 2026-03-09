@@ -659,7 +659,7 @@ const Index = () => {
                         ? "bg-red-700 text-white hover:bg-red-700 border-red-700"
                         : "bg-foreground text-background hover:bg-foreground/85"
                     }`}
-                    disabled={addedToCart || cartError}
+                    disabled={addedToCart || cartError || addingToCart}
                     onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
