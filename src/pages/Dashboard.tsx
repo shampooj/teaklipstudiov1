@@ -108,6 +108,24 @@ const Dashboard = () => {
     setSaving(false);
   };
 
+  const handleRelabel = async (id: string) => {
+    const { error } = await (supabase.from as any)("customer_submissions")
+      .update({ is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null })
+      .eq("id", id);
+    if (error) {
+      toast.error("Failed to reset label");
+    } else {
+      toast.success("Moved back to labeling queue");
+      setData((prev) =>
+        prev.map((r) =>
+          r.id === id
+            ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined }
+            : r
+        )
+      );
+    }
+  };
+
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
     const q = search.toLowerCase();
@@ -211,6 +229,7 @@ const Dashboard = () => {
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -248,6 +267,13 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell>
+                      {row.is_labeled && (
+                        <Button variant="ghost" size="sm" onClick={() => handleRelabel(row.id)}>
+                          Relabel
+                        </Button>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
