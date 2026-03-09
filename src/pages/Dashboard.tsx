@@ -278,7 +278,7 @@ const Dashboard = () => {
                   <TableHead>ID</TableHead>
                   <TableHead>Image ID</TableHead>
                   <TableHead>Lip Tone</TableHead>
-                  <TableHead>Labeled By (User ID)</TableHead>
+                  <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
                   <TableHead>Created At</TableHead>
                 </TableRow>
