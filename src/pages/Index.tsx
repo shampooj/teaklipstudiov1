@@ -33,7 +33,7 @@ const SKIN_TONES = [
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
   { id: "brown-pink", label: "Brown Pink", color: "#C4787A" },
-  { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D" },
+  { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
   { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
   { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
   { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C" },
