@@ -557,6 +557,9 @@ const Index = () => {
                   <p className="font-display text-xl text-foreground">
                     Which image matches your skin tone most closely?
                   </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    If you're in between, go with the deeper shade
+                  </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
                     {SKIN_TONES.map((tone) => (
                       <button
