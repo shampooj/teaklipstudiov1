@@ -268,6 +268,13 @@ const Dashboard = () => {
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
+                    <TableCell>
+                      {row.is_labeled && (
+                        <Button variant="ghost" size="sm" onClick={() => handleRelabel(row.id)}>
+                          Relabel
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
