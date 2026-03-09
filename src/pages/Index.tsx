@@ -615,26 +615,26 @@ const Index = () => {
                   <p className="font-display text-xl text-foreground">
                     Which matches your lip tone most closely?
                   </p>
-                  <div className="mt-8 grid grid-cols-4 gap-3 w-full max-w-md mx-auto">
+                  <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
                     {LIP_TONES.map((tone) => (
                       <button
                         key={tone.id}
                         onClick={() => setLipTone(tone.id)}
-                        className={`group flex flex-col items-center gap-2 p-3 border transition-all duration-200 hover:border-foreground/40 ${
+                        className={`group flex flex-col items-center gap-1.5 border transition-all duration-200 hover:border-foreground/40 overflow-hidden ${
                           lipTone === tone.id
                             ? "border-foreground ring-1 ring-foreground"
                             : "border-border"
                         }`}
                       >
                         {'image' in tone && tone.image ? (
-                          <img src={tone.image} alt={tone.label} className="w-full aspect-square rounded-sm object-cover" />
+                          <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" />
                         ) : (
                           <div
-                            className="w-full aspect-square rounded-sm"
+                            className="w-full aspect-square"
                             style={{ backgroundColor: tone.color }}
                           />
                         )}
-                        <span className="font-display text-[10px] text-foreground leading-tight">{tone.label}</span>
+                        <span className="font-display text-[10px] text-foreground leading-tight pb-2">{tone.label}</span>
                       </button>
                     ))}
                   </div>
