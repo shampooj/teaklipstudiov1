@@ -73,9 +73,12 @@ const Dashboard = () => {
       (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
 
       const labelMap = new Map<string, AdminLabel>();
+      const submissionUrlMap = new Map<string, string | null>();
+      (rows || []).forEach((r: any) => submissionUrlMap.set(r.id, r.image_url));
       const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
         ...l,
         labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
+        image_url: submissionUrlMap.get(l.image_id) ?? null,
       }));
       enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
       setAdminLabels(enrichedLabels);
