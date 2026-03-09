@@ -229,6 +229,7 @@ const Dashboard = () => {
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
