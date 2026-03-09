@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       customer_submissions: {
         Row: {
+          admin_lip_tone_category: string | null
           created_at: string
           id: string
           image_id: string | null
@@ -26,6 +27,7 @@ export type Database = {
           variant_id: string
         }
         Insert: {
+          admin_lip_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null
@@ -36,6 +38,7 @@ export type Database = {
           variant_id: string
         }
         Update: {
+          admin_lip_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null

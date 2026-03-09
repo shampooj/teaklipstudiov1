@@ -1,7 +1,15 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -11,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
+import { toast } from "sonner";
 
 interface Submission {
   id: string;
@@ -27,21 +36,50 @@ const Dashboard = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const fetchData = async () => {
+    const { data: rows, error } = await (supabase.from as any)("customer_submissions")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) {
+      console.error("Failed to fetch submissions:", error);
+    } else {
+      setData(rows || []);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data: rows, error } = await (supabase.from as any)("customer_submissions")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) {
-        console.error("Failed to fetch submissions:", error);
-      } else {
-        setData(rows || []);
-      }
-      setLoading(false);
-    };
     fetchData();
   }, []);
+
+  const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
+  const currentImage = unlabeled.length > 0 ? unlabeled[0] : null;
+
+  const handleSaveLabel = async () => {
+    if (!currentImage || !selectedCategory) return;
+    setSaving(true);
+    const { error } = await (supabase.from as any)("customer_submissions")
+      .update({ is_labeled: true, admin_lip_tone_category: selectedCategory })
+      .eq("id", currentImage.id);
+    if (error) {
+      toast.error("Failed to save label");
+      console.error(error);
+    } else {
+      toast.success("Label saved");
+      setSelectedCategory("");
+      setData((prev) =>
+        prev.map((r) =>
+          r.id === currentImage.id
+            ? { ...r, is_labeled: true, admin_lip_tone_category: selectedCategory }
+            : r
+        )
+      );
+    }
+    setSaving(false);
+  };
 
   const filtered = useMemo(() => {
     if (!search.trim()) return data;
@@ -76,6 +114,46 @@ const Dashboard = () => {
             </p>
           </CardContent>
         </Card>
+
+        {currentImage ? (
+          <Card className="max-w-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Label Image ({unlabeled.length} remaining)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {currentImage.image_url ? (
+                <img
+                  src={currentImage.image_url}
+                  alt="Submission"
+                  className="w-full max-h-64 object-contain rounded-md border"
+                />
+              ) : (
+                <p className="text-muted-foreground text-sm">No image available</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+              </p>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select lip tone category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pink">Pink</SelectItem>
+                  <SelectItem value="medium pink">Medium Pink</SelectItem>
+                  <SelectItem value="two-toned">Two-Toned</SelectItem>
+                  <SelectItem value="brown">Brown</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handleSaveLabel} disabled={!selectedCategory || saving}>
+                {saving ? "Saving…" : "Save Label"}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <p className="text-sm text-muted-foreground">All images have been labeled ✓</p>
+        )}
 
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
