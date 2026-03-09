@@ -908,6 +908,8 @@ const Index = () => {
                         variant_id: look.variantId,
                         image_url: imageUrl,
                         image_id: imageId,
+                        skin_tone: skinTone,
+                        lip_tone: lipTone,
                       } as any).then(({ error: insertError }) => {
                         if (insertError) console.error("Failed to track cart click:", insertError);
                       });

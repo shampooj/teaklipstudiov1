@@ -1,0 +1,1 @@
+ALTER TABLE public.customer_submissions ADD COLUMN skin_tone text, ADD COLUMN lip_tone text;

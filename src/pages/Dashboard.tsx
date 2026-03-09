@@ -42,6 +42,8 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
+  skin_tone: string | null;
+  lip_tone: string | null;
   // joined from admin_labels
   admin_lip_tone_category: string | null;
   labeled_by_user_id: string | null;
@@ -441,6 +443,8 @@ const Dashboard = () => {
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
                 </TableRow>
@@ -459,6 +463,8 @@ const Dashboard = () => {
                     <TableCell className="font-mono text-[9px]">
                       {row.variant_id}
                     </TableCell>
+                    <TableCell className="capitalize text-[9px]">{row.skin_tone || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="capitalize text-[9px]">{row.lip_tone || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a

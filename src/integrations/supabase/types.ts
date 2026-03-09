@@ -56,8 +56,10 @@ export type Database = {
           image_id: string | null
           image_url: string | null
           is_labeled: boolean
+          lip_tone: string | null
           shade_id: string
           shade_label: string
+          skin_tone: string | null
           variant_id: string
         }
         Insert: {
@@ -66,8 +68,10 @@ export type Database = {
           image_id?: string | null
           image_url?: string | null
           is_labeled?: boolean
+          lip_tone?: string | null
           shade_id: string
           shade_label: string
+          skin_tone?: string | null
           variant_id: string
         }
         Update: {
@@ -76,8 +80,10 @@ export type Database = {
           image_id?: string | null
           image_url?: string | null
           is_labeled?: boolean
+          lip_tone?: string | null
           shade_id?: string
           shade_label?: string
+          skin_tone?: string | null
           variant_id?: string
         }
         Relationships: []
