@@ -141,6 +141,11 @@ const Dashboard = () => {
     const { error } = await (supabase.from as any)("admin_labels")
       .delete()
       .eq("id", row.admin_label_id);
+    if (!error) {
+      await (supabase.from as any)("customer_submissions")
+        .update({ is_labeled: false })
+        .eq("id", id);
+    }
     if (error) {
       toast.error("Failed to reset label");
     } else {
