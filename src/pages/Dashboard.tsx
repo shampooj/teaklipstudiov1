@@ -182,6 +182,19 @@ const Dashboard = () => {
     );
   }, [data, search]);
 
+  const filteredLabels = useMemo(() => {
+    if (!labelSearch.trim()) return adminLabels;
+    const q = labelSearch.toLowerCase();
+    return adminLabels.filter(
+      (row) =>
+        row.image_id.toLowerCase().includes(q) ||
+        (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
+        (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
+        (row.labeled_at && row.labeled_at.toLowerCase().includes(q)) ||
+        row.id.toLowerCase().includes(q)
+    );
+  }, [adminLabels, labelSearch]);
+
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-6">
