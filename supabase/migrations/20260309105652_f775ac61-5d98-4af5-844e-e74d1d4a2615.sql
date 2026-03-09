@@ -1,0 +1,1 @@
+ALTER TABLE public.customer_submissions ADD COLUMN is_labeled boolean NOT NULL DEFAULT false;
