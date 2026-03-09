@@ -356,7 +356,7 @@ const Dashboard = () => {
         )}
 
         <p className="text-xs text-muted-foreground">
-          {filteredLabels.length} of {adminLabels.length} labels
+          {filteredLabels.length} of {labeledSubmissions.length} labeled submissions
         </p>
 
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
