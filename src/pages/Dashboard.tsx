@@ -270,7 +270,7 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell>
                       {row.is_labeled && (
-                        <Button variant="ghost" size="sm" onClick={() => handleRelabel(row.id)}>
+                        <Button variant="outline" size="sm" onClick={() => handleRelabel(row.id)}>
                           Relabel
                         </Button>
                       )}
