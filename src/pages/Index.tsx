@@ -731,33 +731,43 @@ const Index = () => {
                         console.error("Failed to crop/upload image:", e);
                       }
 
-                      const { error: insertError } = await supabase.from("customer_submissions" as any).insert({
+                      // Save submission to database
+                      supabase.from("customer_submissions" as any).insert({
                         shade_id: look.id,
                         shade_label: look.label,
                         variant_id: look.variantId,
                         image_url: imageUrl,
                         image_id: imageId,
-                      } as any);
-                      if (insertError) {
-                        console.error("Failed to track cart click:", insertError);
-                        setCartError(true);
-                      } else {
-                        setAddedToCart(true);
-                      }
-                      // Best-effort Shopify cart add (will fail on non-Shopify origins due to CORS)
+                      } as any).then(({ error: insertError }) => {
+                        if (insertError) console.error("Failed to track cart click:", insertError);
+                      });
+
+                      // Ask the Shopify parent page to add to cart via postMessage bridge
                       try {
-                        const res = await fetch("https://teakbeauty.com/cart/add.js", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({
-                            items: [{ id: parseInt(look.variantId), quantity: 1 }],
-                          }),
+                        const cartPromise = new Promise<boolean>((resolve) => {
+                          const timeout = setTimeout(() => resolve(false), 5000);
+                          const handler = (event: MessageEvent) => {
+                            if (event.data?.type === "cart-add-response") {
+                              clearTimeout(timeout);
+                              window.removeEventListener("message", handler);
+                              resolve(!!event.data.success);
+                            }
+                          };
+                          window.addEventListener("message", handler);
                         });
-                        if (res.ok) {
-                          window.top?.postMessage({ type: "cart-updated" }, "*");
+                        window.top?.postMessage({
+                          type: "cart-add",
+                          variantId: parseInt(look.variantId),
+                          quantity: 1,
+                        }, "*");
+                        const success = await cartPromise;
+                        if (success) {
+                          setAddedToCart(true);
+                        } else {
+                          setCartError(true);
                         }
                       } catch {
-                        // CORS expected when not embedded on Shopify
+                        setCartError(true);
                       }
                     }}
                   >
