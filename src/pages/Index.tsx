@@ -697,7 +697,7 @@ const Index = () => {
                         console.error("Failed to crop/upload image:", e);
                       }
 
-                      supabase.from("cart_click_events").insert({
+                      supabase.from("user_input_data" as any).insert({
                         shade_id: look.id,
                         shade_label: look.label,
                         variant_id: look.variantId,
