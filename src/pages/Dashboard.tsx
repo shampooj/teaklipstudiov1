@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
+  is_labeled: boolean;
 }
 
 const Dashboard = () => {
@@ -62,6 +64,19 @@ const Dashboard = () => {
           Teak Lip Studio Admin
         </h1>
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
+
+        <Card className="max-w-xs">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Images Needing Manual Label
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">
+              {data.filter((r) => !r.is_labeled).length}
+            </p>
+          </CardContent>
+        </Card>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
