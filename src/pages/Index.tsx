@@ -46,7 +46,7 @@ const LIP_TONES = [
   { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A", image: lipNeutralBrown },
   { id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
   { id: "deep-brown", label: "Deep Brown", color: "#4A2228", image: lipDeepBrown },
-  { id: "grey-brown", label: "Grey Brown", color: "#7D6B65" },
+  { id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown },
 ] as const;
 
 const LIPSTICK_LOOKS = [
