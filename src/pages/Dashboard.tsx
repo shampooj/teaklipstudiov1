@@ -106,6 +106,11 @@ const Dashboard = () => {
         labeled_by_user_id: user?.id,
         labeled_at: now,
       });
+    if (!error) {
+      await (supabase.from as any)("customer_submissions")
+        .update({ is_labeled: true })
+        .eq("id", currentImage.id);
+    }
     if (error) {
       toast.error("Failed to save label");
       console.error(error);
