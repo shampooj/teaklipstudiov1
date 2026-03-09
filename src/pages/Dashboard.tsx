@@ -436,12 +436,13 @@ const Dashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow className="border-border">
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
-                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
