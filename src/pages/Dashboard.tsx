@@ -20,6 +20,7 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
+  is_labeled: boolean;
 }
 
 const Dashboard = () => {
