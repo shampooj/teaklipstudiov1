@@ -55,6 +55,7 @@ const Dashboard = () => {
   const [labelSearch, setLabelSearch] = useState("");
   const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
