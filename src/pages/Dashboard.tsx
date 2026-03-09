@@ -442,7 +442,7 @@ const Dashboard = () => {
         ) : filtered.length === 0 ? (
           <p className="text-muted-foreground text-[9px]">No submissions found.</p>
         ) : (
-          <div className="rounded-2xl border border-border overflow-x-auto">
+          <div className="rounded-2xl border border-border overflow-x-auto max-h-[340px] overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border">
