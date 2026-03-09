@@ -23,14 +23,18 @@ const SKIN_TONES = [
 ] as const;
 
 const LIP_TONES = [
-  { id: "pale-pink", label: "Pale Pink", color: "#E8B4B8" },
-  { id: "mauve", label: "Mauve", color: "#B5838D" },
-  { id: "rosy", label: "Rosy", color: "#D4727E" },
-  { id: "coral", label: "Coral", color: "#E08D6A" },
-  { id: "berry", label: "Berry", color: "#8E3A59" },
-  { id: "brown-nude", label: "Brown Nude", color: "#A0705A" },
-  { id: "deep-plum", label: "Deep Plum", color: "#5C2340" },
-  { id: "dark-brown", label: "Dark Brown", color: "#4A2228" },
+  { id: "bright-pink", label: "Bright Pink", color: "#E8577E" },
+  { id: "brown-pink", label: "Brown Pink", color: "#C4787A" },
+  { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D" },
+  { id: "beige", label: "Beige", color: "#D4A98C" },
+  { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E" },
+  { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C" },
+  { id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B" },
+  { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E" },
+  { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A" },
+  { id: "medium-brown", label: "Medium Brown", color: "#7A5240" },
+  { id: "deep-brown", label: "Deep Brown", color: "#4A2228" },
+  { id: "grey-brown", label: "Grey Brown", color: "#7D6B65" },
 ] as const;
 
 const LIPSTICK_LOOKS = [
