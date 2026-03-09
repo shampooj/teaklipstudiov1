@@ -115,6 +115,46 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
+        {currentImage ? (
+          <Card className="max-w-md">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Label Image ({unlabeled.length} remaining)
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {currentImage.image_url ? (
+                <img
+                  src={currentImage.image_url}
+                  alt="Submission"
+                  className="w-full max-h-64 object-contain rounded-md border"
+                />
+              ) : (
+                <p className="text-muted-foreground text-sm">No image available</p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+              </p>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select lip tone category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pink">Pink</SelectItem>
+                  <SelectItem value="medium pink">Medium Pink</SelectItem>
+                  <SelectItem value="two-toned">Two-Toned</SelectItem>
+                  <SelectItem value="brown">Brown</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button onClick={handleSaveLabel} disabled={!selectedCategory || saving}>
+                {saving ? "Saving…" : "Save Label"}
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <p className="text-sm text-muted-foreground">All images have been labeled ✓</p>
+        )}
+
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
         <div className="relative max-w-sm">
