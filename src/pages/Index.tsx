@@ -12,10 +12,10 @@ import teakLogo from "@/assets/teak-logo.png";
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
-  { id: "fair", label: "Fair" },
-  { id: "light-medium", label: "Light-Medium" },
-  { id: "medium-tan", label: "Medium-Tan" },
-  { id: "deep-dark", label: "Deep-Dark" },
+  { id: "light-brown", label: "Light Brown", color: "#C68642" },
+  { id: "medium-brown", label: "Medium Brown", color: "#8D5524" },
+  { id: "deep-brown", label: "Deep Brown", color: "#5C3317" },
+  { id: "rich-brown", label: "Rich Brown", color: "#3B1E08" },
 ] as const;
 
 const LIP_TONES = [
