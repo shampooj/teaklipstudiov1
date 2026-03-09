@@ -195,69 +195,69 @@ const Dashboard = () => {
   }, [labeledSubmissions, labelSearch]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <h1 className="text-2xl font-semibold tracking-tight">
+    <div className="min-h-screen bg-background text-foreground p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
+      <div className="max-w-6xl mx-auto space-y-8">
+        <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
           Teak Lip Studio Admin
         </h1>
 
-        <Card className="max-w-xs">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Images Needing Manual Label
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">
-              {data.filter((r) => !r.is_labeled).length}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="border border-border rounded-2xl p-5 max-w-xs">
+          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Label</p>
+          <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
+            {data.filter((r) => !r.is_labeled).length}
+          </p>
+        </div>
 
         {currentImage ? (
-          <Card className="max-w-md">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
-                <span>Label Image ({clampedIndex + 1} of {unlabeled.length})</span>
-                <span className="flex gap-1">
-                  <Button variant="outline" size="icon" className="h-6 w-6" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
-                    <ChevronLeft className="h-3 w-3" />
-                  </Button>
-                  <Button variant="outline" size="icon" className="h-6 w-6" disabled={clampedIndex >= unlabeled.length - 1} onClick={() => setLabelIndex(clampedIndex + 1)}>
-                    <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {currentImage.image_url ? (
-                <img
-                  src={currentImage.image_url}
-                  alt="Submission"
-                  className="w-full max-h-64 object-contain rounded-md border"
-                />
-              ) : (
-                <p className="text-muted-foreground text-sm">No image available</p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+          <div className="border border-border rounded-2xl p-5 max-w-md space-y-4">
+            <div className="flex items-center justify-between">
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                Label Image ({clampedIndex + 1} of {unlabeled.length})
               </p>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select lip tone category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pink">Pink</SelectItem>
-                  <SelectItem value="medium pink">Medium Pink</SelectItem>
-                  <SelectItem value="two-toned">Two-Toned</SelectItem>
-                  <SelectItem value="brown">Brown</SelectItem>
-                </SelectContent>
-              </Select>
-              <div className="flex gap-2">
-                <Button onClick={handleSaveLabel} disabled={!selectedCategory || saving}>
-                  {saving ? "Saving…" : "Save Label"}
+              <span className="flex gap-1">
+                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
+                  <ChevronLeft className="h-3 w-3" />
                 </Button>
-                <Button variant="destructive" size="default" onClick={async () => {
+                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex >= unlabeled.length - 1} onClick={() => setLabelIndex(clampedIndex + 1)}>
+                  <ChevronRight className="h-3 w-3" />
+                </Button>
+              </span>
+            </div>
+            {currentImage.image_url ? (
+              <img
+                src={currentImage.image_url}
+                alt="Submission"
+                className="w-64 max-h-64 object-contain rounded-md border border-border"
+              />
+            ) : (
+              <p className="text-muted-foreground text-[9px]">No image available</p>
+            )}
+            <p className="text-[9px] text-muted-foreground">
+              Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+            </p>
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
+                <SelectValue placeholder="Select lip tone category" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="pink">Pink</SelectItem>
+                <SelectItem value="medium pink">Medium Pink</SelectItem>
+                <SelectItem value="two-toned">Two-Toned</SelectItem>
+                <SelectItem value="brown">Brown</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex gap-2">
+              <Button
+                className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
+                onClick={handleSaveLabel}
+                disabled={!selectedCategory || saving}
+              >
+                {saving ? "Saving…" : "Save Label"}
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[9px] px-4 h-8"
+                onClick={async () => {
                   if (!currentImage) return;
                   const { error } = await (supabase.from as any)("customer_submissions")
                     .delete()
@@ -269,17 +269,17 @@ const Dashboard = () => {
                     setData((prev) => prev.filter((r) => r.id !== currentImage.id));
                     setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
                   }
-                }}>
-                  Discard Customer Submission
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+                }}
+              >
+                Discard
+              </Button>
+            </div>
+          </div>
         ) : (
-          <p className="text-sm text-muted-foreground">All images have been labeled ✓</p>
+          <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
         )}
 
-        <h2 className="text-lg text-muted-foreground">Admin Labels</h2>
+        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Labels</h2>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -287,45 +287,45 @@ const Dashboard = () => {
             placeholder="Search by image ID, lip tone, email…"
             value={labelSearch}
             onChange={(e) => setLabelSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 rounded-full border-foreground/20 text-[9px]"
           />
         </div>
 
         {filteredLabels.length === 0 ? (
-          <p className="text-muted-foreground">No admin labels found.</p>
+          <p className="text-muted-foreground text-[9px]">No admin labels found.</p>
         ) : (
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-2xl border border-border overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Lip Tone Label</TableHead>
-                  <TableHead>Labeled By</TableHead>
-                  <TableHead>Labeled At</TableHead>
+                <TableRow className="border-border">
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled At</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLabels.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="whitespace-nowrap text-xs">
+                  <TableRow key={row.id} className="border-border">
+                    <TableCell className="whitespace-nowrap text-[9px]">
                       {new Date(row.created_at).toLocaleString()}
                     </TableCell>
                     <TableCell>
                       {row.image_url ? (
-                        <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
+                        <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-[9px]">View</a>
                       ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
+                        <span className="text-muted-foreground text-[9px]">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="text-xs">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="whitespace-nowrap text-xs">
+                    <TableCell className="capitalize text-[9px]">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-[9px]">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap text-[9px]">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.id)}>
+                      <Button variant="outline" className="rounded-full border-foreground/20 text-[9px] h-7 px-3" onClick={() => handleRelabel(row.id)}>
                         Relabel
                       </Button>
                     </TableCell>
@@ -336,11 +336,11 @@ const Dashboard = () => {
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[9px] text-muted-foreground">
           {filteredLabels.length} of {labeledSubmissions.length} labeled submissions
         </p>
 
-        <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
+        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Customer Submissions</h2>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -348,38 +348,38 @@ const Dashboard = () => {
             placeholder="Search by shade, variant, date…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
+            className="pl-9 rounded-full border-foreground/20 text-[9px]"
           />
         </div>
 
         {loading ? (
-          <p className="text-muted-foreground">Loading…</p>
+          <p className="text-muted-foreground text-[9px]">Loading…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-muted-foreground">No submissions found.</p>
+          <p className="text-muted-foreground text-[9px]">No submissions found.</p>
         ) : (
-          <div className="rounded-md border overflow-x-auto">
+          <div className="rounded-2xl border border-border overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Shade</TableHead>
-                  <TableHead>Shade ID</TableHead>
-                  <TableHead>Variant ID</TableHead>
-                  <TableHead>Image</TableHead>
-                  <TableHead>Is Labeled</TableHead>
+                <TableRow className="border-border">
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                  <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="whitespace-nowrap">
+                  <TableRow key={row.id} className="border-border">
+                    <TableCell className="whitespace-nowrap text-[9px]">
                       {new Date(row.created_at).toLocaleString()}
                     </TableCell>
-                    <TableCell>{row.shade_label}</TableCell>
-                    <TableCell className="font-mono text-xs">
+                    <TableCell className="text-[9px]">{row.shade_label}</TableCell>
+                    <TableCell className="font-mono text-[9px]">
                       {row.shade_id}
                     </TableCell>
-                    <TableCell className="font-mono text-xs">
+                    <TableCell className="font-mono text-[9px]">
                       {row.variant_id}
                     </TableCell>
                     <TableCell>
@@ -388,15 +388,15 @@ const Dashboard = () => {
                           href={row.image_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary underline text-sm"
+                          className="text-primary underline text-[9px]"
                         >
                           View
                         </a>
                       ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
+                        <span className="text-muted-foreground text-[9px]">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-[9px]">
                       {row.is_labeled ? "Yes" : "No"}
                     </TableCell>
                   </TableRow>
@@ -406,7 +406,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[9px] text-muted-foreground">
           {filtered.length} of {data.length} submissions
         </p>
       </div>
