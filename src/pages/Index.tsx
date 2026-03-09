@@ -694,7 +694,7 @@ const Index = () => {
                             body: { imageBase64: detectBase64 },
                           });
                           if (!regionError && regionData && regionData.top !== undefined) {
-                            cropTop = regionData.top;
+                            cropTop = Math.max(regionData.top, 0.5); // Never go above 50% to ensure eyes are excluded
                             cropBottom = regionData.bottom;
                             cropLeft = regionData.left;
                             cropRight = regionData.right;
