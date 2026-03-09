@@ -278,7 +278,7 @@ const Dashboard = () => {
                   <TableHead>ID</TableHead>
                   <TableHead>Image ID</TableHead>
                   <TableHead>Lip Tone</TableHead>
-                  <TableHead>Labeled By</TableHead>
+                  <TableHead>Labeled Byd>
                   <TableHead>Labeled At</TableHead>
                   <TableHead>Created At</TableHead>
                 </TableRow>
@@ -289,7 +289,7 @@ const Dashboard = () => {
                     <TableCell className="font-mono text-xs">{row.id}</TableCell>
                     <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
                     <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.labeled_by_email || d_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
