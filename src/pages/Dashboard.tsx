@@ -27,6 +27,8 @@ interface AdminLabel {
   admin_lip_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
+  created_at?: string;
+  labeled_by_email?: string;
 }
 
 interface Submission {
@@ -50,6 +52,8 @@ const Dashboard = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [labelSearch, setLabelSearch] = useState("");
+  const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -68,7 +72,12 @@ const Dashboard = () => {
       (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
 
       const labelMap = new Map<string, AdminLabel>();
-      (labels || []).forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
+      const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
+        ...l,
+        labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
+      }));
+      enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
+      setAdminLabels(enrichedLabels);
 
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
@@ -174,6 +183,19 @@ const Dashboard = () => {
     );
   }, [data, search]);
 
+  const filteredLabels = useMemo(() => {
+    if (!labelSearch.trim()) return adminLabels;
+    const q = labelSearch.toLowerCase();
+    return adminLabels.filter(
+      (row) =>
+        row.image_id.toLowerCase().includes(q) ||
+        (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
+        (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
+        (row.labeled_at && row.labeled_at.toLowerCase().includes(q)) ||
+        row.id.toLowerCase().includes(q)
+    );
+  }, [adminLabels, labelSearch]);
+
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-6">
@@ -233,6 +255,51 @@ const Dashboard = () => {
         ) : (
           <p className="text-sm text-muted-foreground">All images have been labeled ✓</p>
         )}
+
+        <h2 className="text-lg text-muted-foreground">Admin Labels</h2>
+
+        <div className="relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by image ID, lip tone, email…"
+            value={labelSearch}
+            onChange={(e) => setLabelSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+
+        {filteredLabels.length === 0 ? (
+          <p className="text-muted-foreground">No admin labels found.</p>
+        ) : (
+          <div className="rounded-md border overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Image ID</TableHead>
+                  <TableHead>Lip Tone</TableHead>
+                  <TableHead>Labeled By</TableHead>
+                  <TableHead>Labeled At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredLabels.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="text-xs">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+
+        <p className="text-xs text-muted-foreground">
+          {filteredLabels.length} of {adminLabels.length} labels
+        </p>
 
         <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
