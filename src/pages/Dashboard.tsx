@@ -122,32 +122,17 @@ const Dashboard = () => {
         labeled_by_user_id: user?.id,
         labeled_at: now,
       });
-    if (!error) {
-      await (supabase.from as any)("customer_submissions")
-        .update({ is_labeled: true })
-        .eq("id", currentImage.id);
-    }
     if (error) {
       toast.error("Failed to save label");
       console.error(error);
     } else {
+      await (supabase.from as any)("customer_submissions")
+        .update({ is_labeled: true })
+        .eq("id", currentImage.id);
       toast.success("Label saved");
       setSelectedCategory("");
-      setLabelIndex((prev) => Math.min(prev, unlabeled.length - 2));
-      setData((prev) =>
-        prev.map((r) =>
-          r.id === currentImage.id
-            ? {
-                ...r,
-                is_labeled: true,
-                admin_lip_tone_category: selectedCategory,
-                labeled_by_user_id: user?.id ?? null,
-                labeled_at: now,
-                labeled_by_email: user?.email ?? undefined,
-              }
-            : r
-        )
-      );
+      setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
+      await fetchData();
     }
     setSaving(false);
   };
