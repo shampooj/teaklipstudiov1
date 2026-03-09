@@ -1,0 +1,1 @@
+ALTER TABLE public.user_input_data RENAME TO customer_submissions;

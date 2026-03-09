@@ -14,7 +14,7 @@ export type Database = {
   }
   public: {
     Tables: {
-      user_input_data: {
+      customer_submissions: {
         Row: {
           created_at: string
           id: string
