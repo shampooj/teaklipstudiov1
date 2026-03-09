@@ -539,7 +539,7 @@ const Index = () => {
               >
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    What is your skin tone?
+                    Which image matches your skin tone most closely?
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
                     {SKIN_TONES.map((tone) => (
