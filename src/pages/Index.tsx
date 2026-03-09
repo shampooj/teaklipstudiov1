@@ -356,8 +356,9 @@ const Index = () => {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [progress, setProgress] = useState(0);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [cartError, setCartError] = useState(false);
+   const [addedToCart, setAddedToCart] = useState(false);
+   const [cartError, setCartError] = useState(false);
+   const [addingToCart, setAddingToCart] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
@@ -658,7 +659,7 @@ const Index = () => {
                         ? "bg-red-700 text-white hover:bg-red-700 border-red-700"
                         : "bg-foreground text-background hover:bg-foreground/85"
                     }`}
-                    disabled={addedToCart || cartError}
+                    disabled={addedToCart || cartError || addingToCart}
                     onClick={async () => {
                       const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
                       if (!look || !resultImage) return;
@@ -743,6 +744,7 @@ const Index = () => {
                       });
 
                       // Ask the Shopify parent page to add to cart via postMessage bridge
+                      setAddingToCart(true);
                       try {
                         const cartPromise = new Promise<boolean>((resolve) => {
                           const timeout = setTimeout(() => resolve(false), 5000);
@@ -768,10 +770,17 @@ const Index = () => {
                         }
                       } catch {
                         setCartError(true);
+                      } finally {
+                        setAddingToCart(false);
                       }
                     }}
                   >
-                    {addedToCart ? (
+                    {addingToCart ? (
+                      <>
+                        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+                        Adding to Cart…
+                      </>
+                    ) : addedToCart ? (
                       <>
                         <Check className="w-3 h-3" />
                         Added to Cart
@@ -788,6 +797,7 @@ const Index = () => {
                     setSelectedLook(v as LookId);
                     setAddedToCart(false);
                     setCartError(false);
+                    setAddingToCart(false);
                     setResultImage(null);
                     setState("uploaded");
                   }}>
