@@ -106,7 +106,9 @@ const Dashboard = () => {
   }, []);
 
   const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
-  const currentImage = unlabeled.length > 0 ? unlabeled[0] : null;
+  const [labelIndex, setLabelIndex] = useState(0);
+  const clampedIndex = Math.min(labelIndex, Math.max(0, unlabeled.length - 1));
+  const currentImage = unlabeled.length > 0 ? unlabeled[clampedIndex] : null;
 
   const handleSaveLabel = async () => {
     if (!currentImage || !selectedCategory) return;
