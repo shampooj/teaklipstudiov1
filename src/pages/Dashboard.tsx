@@ -65,8 +65,15 @@ const Dashboard = () => {
   const handleSaveLabel = async () => {
     if (!currentImage || !selectedCategory) return;
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const now = new Date().toISOString();
     const { error } = await (supabase.from as any)("customer_submissions")
-      .update({ is_labeled: true, admin_lip_tone_category: selectedCategory })
+      .update({
+        is_labeled: true,
+        admin_lip_tone_category: selectedCategory,
+        labeled_by_user_id: user?.id,
+        labeled_at: now,
+      })
       .eq("id", currentImage.id);
     if (error) {
       toast.error("Failed to save label");
@@ -77,7 +84,14 @@ const Dashboard = () => {
       setData((prev) =>
         prev.map((r) =>
           r.id === currentImage.id
-            ? { ...r, is_labeled: true, admin_lip_tone_category: selectedCategory }
+            ? {
+                ...r,
+                is_labeled: true,
+                admin_lip_tone_category: selectedCategory,
+                labeled_by_user_id: user?.id ?? null,
+                labeled_at: now,
+                labeled_by_email: user?.email ?? undefined,
+              }
             : r
         )
       );
