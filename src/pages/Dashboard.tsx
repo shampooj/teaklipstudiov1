@@ -444,7 +444,7 @@ const Dashboard = () => {
         ) : (
           <div className="rounded-2xl border border-border overflow-x-auto max-h-[340px] overflow-y-auto">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow className="border-border">
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
