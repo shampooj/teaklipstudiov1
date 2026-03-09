@@ -59,8 +59,9 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-6">
         <h1 className="text-2xl font-semibold tracking-tight">
-          Customer Submissions
+          Teak Lip Studio Admin
         </h1>
+        <h2 className="text-lg text-muted-foreground">Customer Submissions</h2>
 
         <div className="relative max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
