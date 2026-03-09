@@ -22,6 +22,8 @@ export type Database = {
           image_id: string | null
           image_url: string | null
           is_labeled: boolean
+          labeled_at: string | null
+          labeled_by_user_id: string | null
           shade_id: string
           shade_label: string
           variant_id: string
@@ -33,6 +35,8 @@ export type Database = {
           image_id?: string | null
           image_url?: string | null
           is_labeled?: boolean
+          labeled_at?: string | null
+          labeled_by_user_id?: string | null
           shade_id: string
           shade_label: string
           variant_id: string
@@ -44,6 +48,8 @@ export type Database = {
           image_id?: string | null
           image_url?: string | null
           is_labeled?: boolean
+          labeled_at?: string | null
+          labeled_by_user_id?: string | null
           shade_id?: string
           shade_label?: string
           variant_id?: string

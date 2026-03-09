@@ -30,6 +30,10 @@ interface Submission {
   image_id: string | null;
   image_url: string | null;
   is_labeled: boolean;
+  admin_lip_tone_category: string | null;
+  labeled_by_user_id: string | null;
+  labeled_at: string | null;
+  labeled_by_email?: string;
 }
 
 const Dashboard = () => {
@@ -61,8 +65,15 @@ const Dashboard = () => {
   const handleSaveLabel = async () => {
     if (!currentImage || !selectedCategory) return;
     setSaving(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    const now = new Date().toISOString();
     const { error } = await (supabase.from as any)("customer_submissions")
-      .update({ is_labeled: true, admin_lip_tone_category: selectedCategory })
+      .update({
+        is_labeled: true,
+        admin_lip_tone_category: selectedCategory,
+        labeled_by_user_id: user?.id,
+        labeled_at: now,
+      })
       .eq("id", currentImage.id);
     if (error) {
       toast.error("Failed to save label");
@@ -73,7 +84,14 @@ const Dashboard = () => {
       setData((prev) =>
         prev.map((r) =>
           r.id === currentImage.id
-            ? { ...r, is_labeled: true, admin_lip_tone_category: selectedCategory }
+            ? {
+                ...r,
+                is_labeled: true,
+                admin_lip_tone_category: selectedCategory,
+                labeled_by_user_id: user?.id ?? null,
+                labeled_at: now,
+                labeled_by_email: user?.email ?? undefined,
+              }
             : r
         )
       );
@@ -181,6 +199,9 @@ const Dashboard = () => {
                   <TableHead>Shade ID</TableHead>
                   <TableHead>Variant ID</TableHead>
                   <TableHead>Image</TableHead>
+                  <TableHead>Lip Tone</TableHead>
+                  <TableHead>Labeled By</TableHead>
+                  <TableHead>Labeled At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -209,6 +230,15 @@ const Dashboard = () => {
                       ) : (
                         <span className="text-muted-foreground text-sm">—</span>
                       )}
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                   </TableRow>
                 ))}
