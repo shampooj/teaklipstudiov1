@@ -36,7 +36,7 @@ const LIP_TONES = [
   { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
   { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
   { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C" },
-  { id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B" },
+  { id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
   { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E" },
   { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A", image: lipNeutralBrown },
   { id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
