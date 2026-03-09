@@ -18,6 +18,7 @@ import lipMediumBrown from "@/assets/lip-medium-brown.png";
 import lipDeepBrown from "@/assets/lip-deep-brown.jpg";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.jpg";
 import lipNeutralBrown from "@/assets/lip-neutral-brown.png";
+import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.png";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
