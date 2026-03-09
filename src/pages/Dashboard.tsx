@@ -228,8 +228,16 @@ const Dashboard = () => {
         {currentImage ? (
           <Card className="max-w-md">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                Label Image ({unlabeled.length} remaining)
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center justify-between">
+                <span>Label Image ({clampedIndex + 1} of {unlabeled.length})</span>
+                <span className="flex gap-1">
+                  <Button variant="outline" size="icon" className="h-6 w-6" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
+                    <ChevronLeft className="h-3 w-3" />
+                  </Button>
+                  <Button variant="outline" size="icon" className="h-6 w-6" disabled={clampedIndex >= unlabeled.length - 1} onClick={() => setLabelIndex(clampedIndex + 1)}>
+                    <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
