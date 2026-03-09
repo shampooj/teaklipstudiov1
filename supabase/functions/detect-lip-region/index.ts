@@ -38,7 +38,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: "Analyze this photo and identify the lower face / lip area. Return the bounding box as normalized coordinates (0 to 1) that would crop the image to show the lower face including the lips, chin, and a small margin above the upper lip (roughly from the nose tip down). The crop should be tight but include some context around the lips."
+                text: "Analyze this photo and identify the lower face / lip area. First locate the eyes, then return a bounding box as normalized coordinates (0 to 1) that crops the image to show ONLY the area BELOW the eyes. The top of the crop must be below the lower eyelids (roughly at the cheekbone level). Include the nose, lips, chin, and jawline. The crop must completely exclude the eyes and everything above them (forehead, eyebrows, eyes). Make the crop tight horizontally around the face."
               },
               {
                 type: "image_url",
