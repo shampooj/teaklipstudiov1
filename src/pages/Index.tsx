@@ -671,7 +671,7 @@ const Index = () => {
                         await new Promise<void>((resolve, reject) => {
                           img.onload = () => resolve();
                           img.onerror = reject;
-                          img.src = resultImage;
+                          img.src = originalImage!;
                         });
                         const canvas = document.createElement("canvas");
                         const cropStartY = Math.floor(img.height * 0.55);
