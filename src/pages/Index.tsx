@@ -592,25 +592,30 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center gap-8"
               >
-                <div className="border border-border bg-background p-12 sm:p-16 text-center w-full">
+                <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
                     What is your lip tone?
                   </p>
-                  <div className="mt-6 w-full max-w-xs mx-auto">
-                    <Select value={lipTone} onValueChange={setLipTone}>
-                      <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20">
-                        <SelectValue placeholder="Select your lip tone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {LIP_TONES.map((tone) => (
-                          <SelectItem key={tone.id} value={tone.id}>
-                            <span className="font-display text-sm">{tone.label}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="mt-8 grid grid-cols-4 gap-3 w-full max-w-md mx-auto">
+                    {LIP_TONES.map((tone) => (
+                      <button
+                        key={tone.id}
+                        onClick={() => setLipTone(tone.id)}
+                        className={`group flex flex-col items-center gap-2 p-3 border transition-all duration-200 hover:border-foreground/40 ${
+                          lipTone === tone.id
+                            ? "border-foreground ring-1 ring-foreground"
+                            : "border-border"
+                        }`}
+                      >
+                        <div
+                          className="w-full aspect-square rounded-sm"
+                          style={{ backgroundColor: tone.color }}
+                        />
+                        <span className="font-display text-[10px] text-foreground leading-tight">{tone.label}</span>
+                      </button>
+                    ))}
                   </div>
-                  <div className="mt-6 flex gap-3 justify-center">
+                  <div className="mt-8 flex gap-3 justify-center">
                     <Button
                       onClick={() => setState("idle")}
                       disabled={!lipTone}
