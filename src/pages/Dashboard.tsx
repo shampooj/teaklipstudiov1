@@ -377,8 +377,8 @@ const Dashboard = () => {
         {filteredLabels.length === 0 ? (
           <p className="text-muted-foreground text-[9px]">No admin labels found.</p>
         ) : (
-          <div className="rounded-2xl border border-border overflow-x-auto max-h-[340px] overflow-y-auto">
-            <Table>
+          <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
+            <table className="w-full caption-bottom text-sm">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow className="border-border">
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
@@ -417,7 +417,7 @@ const Dashboard = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         )}
 
@@ -442,8 +442,8 @@ const Dashboard = () => {
         ) : filtered.length === 0 ? (
           <p className="text-muted-foreground text-[9px]">No submissions found.</p>
         ) : (
-          <div className="rounded-2xl border border-border overflow-x-auto max-h-[340px] overflow-y-auto">
-            <Table>
+          <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
+            <table className="w-full caption-bottom text-sm">
               <TableHeader className="sticky top-0 z-10 bg-background">
                 <TableRow className="border-border">
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
@@ -493,7 +493,7 @@ const Dashboard = () => {
                   </TableRow>
                 ))}
               </TableBody>
-            </Table>
+            </table>
           </div>
         )}
 
