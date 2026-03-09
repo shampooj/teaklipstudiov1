@@ -12,6 +12,7 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
+import lipBeige from "@/assets/lip-beige.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
@@ -26,7 +27,7 @@ const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", color: "#E8577E" },
   { id: "brown-pink", label: "Brown Pink", color: "#C4787A" },
   { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D" },
-  { id: "beige", label: "Beige", color: "#D4A98C" },
+  { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
   { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E" },
   { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C" },
   { id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B" },
@@ -611,10 +612,14 @@ const Index = () => {
                             : "border-border"
                         }`}
                       >
-                        <div
-                          className="w-full aspect-square rounded-sm"
-                          style={{ backgroundColor: tone.color }}
-                        />
+                        {'image' in tone && tone.image ? (
+                          <img src={tone.image} alt={tone.label} className="w-full aspect-square rounded-sm object-cover" />
+                        ) : (
+                          <div
+                            className="w-full aspect-square rounded-sm"
+                            style={{ backgroundColor: tone.color }}
+                          />
+                        )}
                         <span className="font-display text-[10px] text-foreground leading-tight">{tone.label}</span>
                       </button>
                     ))}
