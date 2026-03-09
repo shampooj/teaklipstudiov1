@@ -533,25 +533,30 @@ const Index = () => {
                 transition={{ duration: 0.3 }}
                 className="flex flex-col items-center gap-8"
               >
-                <div className="border border-border bg-background p-12 sm:p-16 text-center w-full">
+                <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
                     What is your skin tone?
                   </p>
-                  <div className="mt-6 w-full max-w-xs mx-auto">
-                    <Select value={skinTone} onValueChange={setSkinTone}>
-                      <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20">
-                        <SelectValue placeholder="Select your skin tone" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {SKIN_TONES.map((tone) => (
-                          <SelectItem key={tone.id} value={tone.id}>
-                            <span className="font-display text-sm">{tone.label}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
+                    {SKIN_TONES.map((tone) => (
+                      <button
+                        key={tone.id}
+                        onClick={() => setSkinTone(tone.id)}
+                        className={`group flex flex-col items-center gap-3 p-4 border transition-all duration-200 hover:border-foreground/40 ${
+                          skinTone === tone.id
+                            ? "border-foreground ring-1 ring-foreground"
+                            : "border-border"
+                        }`}
+                      >
+                        <div
+                          className="w-full aspect-square rounded-sm"
+                          style={{ backgroundColor: tone.color }}
+                        />
+                        <span className="font-display text-xs text-foreground">{tone.label}</span>
+                      </button>
+                    ))}
                   </div>
-                  <div className="mt-6">
+                  <div className="mt-8">
                     <Button
                       onClick={() => setState("lip-tone")}
                       disabled={!skinTone}
