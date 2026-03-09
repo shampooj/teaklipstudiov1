@@ -9,7 +9,25 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import teakLogo from "@/assets/teak-logo.png";
 
-type AppState = "idle" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
+
+const SKIN_TONES = [
+  { id: "fair", label: "Fair" },
+  { id: "light-medium", label: "Light-Medium" },
+  { id: "medium-tan", label: "Medium-Tan" },
+  { id: "deep-dark", label: "Deep-Dark" },
+] as const;
+
+const LIP_TONES = [
+  { id: "pale-pink", label: "Pale Pink" },
+  { id: "mauve", label: "Mauve" },
+  { id: "rosy", label: "Rosy" },
+  { id: "coral", label: "Coral" },
+  { id: "berry", label: "Berry" },
+  { id: "brown-nude", label: "Brown Nude" },
+  { id: "deep-plum", label: "Deep Plum" },
+  { id: "dark-brown", label: "Dark Brown" },
+] as const;
 
 const LIPSTICK_LOOKS = [
   { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
@@ -351,7 +369,9 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 };
 
 const Index = () => {
-  const [state, setState] = useState<AppState>("idle");
+  const [state, setState] = useState<AppState>("skin-tone");
+  const [skinTone, setSkinTone] = useState<string>("");
+  const [lipTone, setLipTone] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
@@ -448,7 +468,9 @@ const Index = () => {
   );
 
   const reset = () => {
-    setState("idle");
+    setState("skin-tone");
+    setSkinTone("");
+    setLipTone("");
     setOriginalImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
@@ -501,7 +523,99 @@ const Index = () => {
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait">
-            {/* Step 1: Upload */}
+            {/* Step 1: Skin Tone */}
+            {state === "skin-tone" && (
+              <motion.div
+                key="skin-tone"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-8"
+              >
+                <div className="border border-border bg-background p-12 sm:p-16 text-center w-full">
+                  <p className="font-display text-xl text-foreground">
+                    What is your skin tone?
+                  </p>
+                  <div className="mt-6 w-full max-w-xs mx-auto">
+                    <Select value={skinTone} onValueChange={setSkinTone}>
+                      <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20">
+                        <SelectValue placeholder="Select your skin tone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SKIN_TONES.map((tone) => (
+                          <SelectItem key={tone.id} value={tone.id}>
+                            <span className="font-display text-sm">{tone.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="mt-6">
+                    <Button
+                      onClick={() => setState("lip-tone")}
+                      disabled={!skinTone}
+                      size="lg"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
+                    >
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 2: Lip Tone */}
+            {state === "lip-tone" && (
+              <motion.div
+                key="lip-tone"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-8"
+              >
+                <div className="border border-border bg-background p-12 sm:p-16 text-center w-full">
+                  <p className="font-display text-xl text-foreground">
+                    What is your lip tone?
+                  </p>
+                  <div className="mt-6 w-full max-w-xs mx-auto">
+                    <Select value={lipTone} onValueChange={setLipTone}>
+                      <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20">
+                        <SelectValue placeholder="Select your lip tone" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LIP_TONES.map((tone) => (
+                          <SelectItem key={tone.id} value={tone.id}>
+                            <span className="font-display text-sm">{tone.label}</span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="mt-6 flex gap-3 justify-center">
+                    <Button
+                      onClick={() => setState("idle")}
+                      disabled={!lipTone}
+                      size="lg"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
+                    >
+                      Next
+                    </Button>
+                    <Button
+                      onClick={() => setState("skin-tone")}
+                      size="lg"
+                      variant="outline"
+                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                    >
+                      Back
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Upload */}
             {state === "idle" && (
               <motion.div
                 key="upload"
