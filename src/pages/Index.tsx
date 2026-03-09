@@ -565,7 +565,7 @@ const Index = () => {
                       <button
                         key={tone.id}
                         onClick={() => setSkinTone(tone.id)}
-                        className={`group flex flex-col items-center gap-3 p-4 border transition-all duration-200 hover:border-foreground/40 ${
+                        className={`group flex flex-col items-center gap-1.5 border transition-all duration-200 hover:border-foreground/40 overflow-hidden ${
                           skinTone === tone.id
                             ? "border-foreground ring-1 ring-foreground"
                             : "border-border"
@@ -575,15 +575,15 @@ const Index = () => {
                           <img
                             src={tone.image}
                             alt={tone.label}
-                            className="w-full aspect-square rounded-sm object-cover"
+                            className="w-full aspect-square object-cover"
                           />
                         ) : (
                           <div
-                            className="w-full aspect-square rounded-sm"
+                            className="w-full aspect-square"
                             style={{ backgroundColor: tone.color }}
                           />
                         )}
-                        <span className="font-display text-xs text-foreground">{tone.label}</span>
+                        <span className="font-display text-xs text-foreground pb-2">{tone.label}</span>
                       </button>
                     ))}
                   </div>
