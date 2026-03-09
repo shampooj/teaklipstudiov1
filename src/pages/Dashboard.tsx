@@ -193,18 +193,21 @@ const Dashboard = () => {
     );
   }, [data, search]);
 
+  const labeledSubmissions = useMemo(() => data.filter((r) => r.is_labeled), [data]);
+
   const filteredLabels = useMemo(() => {
-    if (!labelSearch.trim()) return adminLabels;
+    if (!labelSearch.trim()) return labeledSubmissions;
     const q = labelSearch.toLowerCase();
-    return adminLabels.filter(
+    return labeledSubmissions.filter(
       (row) =>
-        row.image_id.toLowerCase().includes(q) ||
+        row.id.toLowerCase().includes(q) ||
+        row.shade_label.toLowerCase().includes(q) ||
+        row.shade_id.toLowerCase().includes(q) ||
         (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
         (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
-        (row.labeled_at && row.labeled_at.toLowerCase().includes(q)) ||
-        row.id.toLowerCase().includes(q)
+        (row.labeled_at && row.labeled_at.toLowerCase().includes(q))
     );
-  }, [adminLabels, labelSearch]);
+  }, [labeledSubmissions, labelSearch]);
 
   return (
     <div className="min-h-screen bg-background text-foreground p-6 md:p-10">
