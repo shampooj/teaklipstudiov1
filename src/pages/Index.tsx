@@ -23,14 +23,14 @@ const SKIN_TONES = [
 ] as const;
 
 const LIP_TONES = [
-  { id: "pale-pink", label: "Pale Pink" },
-  { id: "mauve", label: "Mauve" },
-  { id: "rosy", label: "Rosy" },
-  { id: "coral", label: "Coral" },
-  { id: "berry", label: "Berry" },
-  { id: "brown-nude", label: "Brown Nude" },
-  { id: "deep-plum", label: "Deep Plum" },
-  { id: "dark-brown", label: "Dark Brown" },
+  { id: "pale-pink", label: "Pale Pink", color: "#E8B4B8" },
+  { id: "mauve", label: "Mauve", color: "#B5838D" },
+  { id: "rosy", label: "Rosy", color: "#D4727E" },
+  { id: "coral", label: "Coral", color: "#E08D6A" },
+  { id: "berry", label: "Berry", color: "#8E3A59" },
+  { id: "brown-nude", label: "Brown Nude", color: "#A0705A" },
+  { id: "deep-plum", label: "Deep Plum", color: "#5C2340" },
+  { id: "dark-brown", label: "Dark Brown", color: "#4A2228" },
 ] as const;
 
 const LIPSTICK_LOOKS = [
