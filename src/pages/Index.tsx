@@ -744,6 +744,7 @@ const Index = () => {
                       });
 
                       // Ask the Shopify parent page to add to cart via postMessage bridge
+                      setAddingToCart(true);
                       try {
                         const cartPromise = new Promise<boolean>((resolve) => {
                           const timeout = setTimeout(() => resolve(false), 5000);
@@ -769,6 +770,8 @@ const Index = () => {
                         }
                       } catch {
                         setCartError(true);
+                      } finally {
+                        setAddingToCart(false);
                       }
                     }}
                   >
