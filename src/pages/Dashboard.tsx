@@ -313,21 +313,24 @@ const Dashboard = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Image ID</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Shade</TableHead>
+                  <TableHead>Shade ID</TableHead>
                   <TableHead>Image</TableHead>
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
-                  <TableHead>Created At</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLabels.map((row) => (
                   <TableRow key={row.id}>
-                    <TableCell className="font-mono text-xs">{row.id}</TableCell>
-                    <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell className="whitespace-nowrap text-xs">
+                      {new Date(row.created_at).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{row.shade_label}</TableCell>
+                    <TableCell className="font-mono text-xs">{row.shade_id}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
@@ -340,11 +343,8 @@ const Dashboard = () => {
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-xs">
-                      {row.created_at ? new Date(row.created_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
                     <TableCell>
-                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.image_id)}>
+                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.id)}>
                         Relabel
                       </Button>
                     </TableCell>
