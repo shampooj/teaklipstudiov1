@@ -29,6 +29,7 @@ interface AdminLabel {
   labeled_at: string | null;
   created_at?: string;
   labeled_by_email?: string;
+  image_url?: string | null;
 }
 
 interface Submission {
@@ -72,9 +73,12 @@ const Dashboard = () => {
       (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
 
       const labelMap = new Map<string, AdminLabel>();
+      const submissionUrlMap = new Map<string, string | null>();
+      (rows || []).forEach((r: any) => submissionUrlMap.set(r.id, r.image_url));
       const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
         ...l,
         labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
+        image_url: submissionUrlMap.get(l.image_id) ?? null,
       }));
       enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
       setAdminLabels(enrichedLabels);
@@ -144,24 +148,26 @@ const Dashboard = () => {
     setSaving(false);
   };
 
-  const handleRelabel = async (id: string) => {
-    const row = data.find((r) => r.id === id);
-    if (!row?.admin_label_id) return;
+  const handleRelabel = async (submissionId: string) => {
+    // Find the admin label for this submission
+    const label = adminLabels.find((l) => l.image_id === submissionId);
+    if (!label) return;
     const { error } = await (supabase.from as any)("admin_labels")
       .delete()
-      .eq("id", row.admin_label_id);
+      .eq("id", label.id);
     if (!error) {
       await (supabase.from as any)("customer_submissions")
         .update({ is_labeled: false })
-        .eq("id", id);
+        .eq("id", submissionId);
     }
     if (error) {
       toast.error("Failed to reset label");
     } else {
       toast.success("Moved back to labeling queue");
+      setAdminLabels((prev) => prev.filter((l) => l.id !== label.id));
       setData((prev) =>
         prev.map((r) =>
-          r.id === id
+          r.id === submissionId
             ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
             : r
         )
@@ -277,10 +283,12 @@ const Dashboard = () => {
                 <TableRow>
                   <TableHead>ID</TableHead>
                   <TableHead>Image ID</TableHead>
+                  <TableHead>Image</TableHead>
                   <TableHead>Lip Tone</TableHead>
                   <TableHead>Labeled By</TableHead>
                   <TableHead>Labeled At</TableHead>
                   <TableHead>Created At</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -288,6 +296,13 @@ const Dashboard = () => {
                   <TableRow key={row.id}>
                     <TableCell className="font-mono text-xs">{row.id}</TableCell>
                     <TableCell className="font-mono text-xs">{row.image_id}</TableCell>
+                    <TableCell>
+                      {row.image_url ? (
+                        <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-sm">View</a>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="capitalize">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-xs">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
@@ -295,6 +310,11 @@ const Dashboard = () => {
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-xs">
                       {row.created_at ? new Date(row.created_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="outline" size="sm" onClick={() => handleRelabel(row.image_id)}>
+                        Relabel
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
