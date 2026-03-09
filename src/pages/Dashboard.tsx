@@ -282,7 +282,7 @@ const Dashboard = () => {
         </div>
 
         {currentImage ? (
-          <div className="border border-border rounded-2xl p-5 max-w-md space-y-4">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
                 Label Image ({clampedIndex + 1} of {unlabeled.length})
