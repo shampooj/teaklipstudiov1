@@ -196,21 +196,21 @@ const Dashboard = () => {
   }, [labeledSubmissions, labelSearch]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
           Teak Lip Studio Admin
         </h1>
 
         {/* Stats row */}
-        <div className="flex flex-wrap gap-6 items-start">
-          <div className="border border-border rounded-2xl p-5 max-w-xs">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Submissions</p>
             <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
               {data.length}
             </p>
           </div>
-          <div className="border border-border rounded-2xl p-5 max-w-xs">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Label</p>
             <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
               {data.filter((r) => !r.is_labeled).length}
@@ -282,7 +282,7 @@ const Dashboard = () => {
         </div>
 
         {currentImage ? (
-          <div className="border border-border rounded-2xl p-5 max-w-md space-y-4">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4">
             <div className="flex items-center justify-between">
               <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
                 Label Image ({clampedIndex + 1} of {unlabeled.length})
@@ -297,10 +297,10 @@ const Dashboard = () => {
               </span>
             </div>
             {currentImage.image_url ? (
-              <img
-                src={currentImage.image_url}
-                alt="Submission"
-                className="w-64 max-h-64 object-contain rounded-md border border-border"
+               <img
+                 src={currentImage.image_url}
+                 alt="Submission"
+                 className="w-full max-w-[16rem] max-h-64 object-contain rounded-md border border-border"
               />
             ) : (
               <p className="text-muted-foreground text-[9px]">No image available</p>
@@ -354,7 +354,7 @@ const Dashboard = () => {
 
         <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Labels</h2>
 
-        <div className="relative max-w-sm">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by image ID, lip tone, email…"
@@ -417,7 +417,7 @@ const Dashboard = () => {
 
         <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Customer Submissions</h2>
 
-        <div className="relative max-w-sm">
+        <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by shade, variant, date…"
