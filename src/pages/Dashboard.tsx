@@ -203,8 +203,8 @@ const Dashboard = () => {
         </h1>
 
         {/* Stats row */}
-        <div className="flex flex-wrap gap-6 items-start">
-          <div className="border border-border rounded-2xl p-5 max-w-xs">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
             <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Submissions</p>
             <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
               {data.length}
