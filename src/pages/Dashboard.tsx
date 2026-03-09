@@ -463,6 +463,8 @@ const Dashboard = () => {
                     <TableCell className="font-mono text-[9px]">
                       {row.variant_id}
                     </TableCell>
+                    <TableCell className="capitalize text-[9px]">{row.skin_tone || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="capitalize text-[9px]">{row.lip_tone || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell>
                       {row.image_url ? (
                         <a
