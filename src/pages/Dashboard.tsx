@@ -27,6 +27,7 @@ interface AdminLabel {
   id: string;
   image_id: string;
   admin_lip_tone_category: string | null;
+  admin_skin_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
   created_at?: string;
