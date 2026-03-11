@@ -638,6 +638,34 @@ const Dashboard = () => {
             ) : (
               <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
             )}
+
+            {/* Quiz Reference: Skin Tones */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-4">
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Screen 1 — Skin Tone Options</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {SKIN_TONES_REF.map((tone) => (
+                  <div key={tone.id} className="space-y-1.5">
+                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <p className="text-[9px] text-muted-foreground text-center">{tone.label}</p>
+                    <p className="text-[8px] text-muted-foreground/60 text-center">{tone.id}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quiz Reference: Lip Tones */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-4">
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Screen 2 — Lip Tone Options</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                {LIP_TONES_REF.map((tone) => (
+                  <div key={tone.id} className="space-y-1.5">
+                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <p className="text-[9px] text-muted-foreground text-center">{tone.label}</p>
+                    <p className="text-[8px] text-muted-foreground/60 text-center">{tone.id}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </>
         )}
 
