@@ -435,7 +435,11 @@ const Dashboard = () => {
                 );
               })()}
             </div>
+          </>
+        )}
 
+        {activeTab === "labeling" && (
+          <>
             {currentImage ? (
               <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
                 <div className="flex items-center justify-between">
