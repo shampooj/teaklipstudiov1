@@ -223,13 +223,14 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <div className="space-y-6">
           <div className="flex items-center justify-between">
+            <img src={teakLogo} alt="Teak" className="h-8 object-contain" />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="text-muted-foreground hover:text-foreground transition-colors">
                   <User className="h-4 w-4" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="rounded-2xl">
+              <DropdownMenuContent align="end" className="rounded-2xl">
                 <DropdownMenuItem className="text-[10px] text-muted-foreground cursor-default focus:bg-transparent">
                   {userEmail}
                 </DropdownMenuItem>
@@ -245,7 +246,6 @@ const Dashboard = () => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <img src={teakLogo} alt="Teak" className="h-8 object-contain" />
           </div>
           <div className="flex items-center gap-6">
             <button
