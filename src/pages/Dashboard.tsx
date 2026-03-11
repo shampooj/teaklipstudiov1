@@ -484,10 +484,10 @@ const Dashboard = () => {
         </div>
 
         {currentImage ? (
-          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4">
+          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
             <div className="flex items-center justify-between">
               <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-                Label Image ({clampedIndex + 1} of {unlabeled.length})
+                Images Needing Admin Label ({clampedIndex + 1} of {unlabeled.length})
               </p>
               <span className="flex gap-1">
                 <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
