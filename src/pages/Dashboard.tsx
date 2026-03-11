@@ -230,7 +230,7 @@ const Dashboard = () => {
         </div>
 
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-          {activeTab === "dashboard" ? "Dashboard" : "Data"}
+          {activeTab === "dashboard" ? "Dashboard" : activeTab === "labeling" ? "Admin Labeling" : "Data"}
         </h1>
 
         {activeTab === "dashboard" && (
