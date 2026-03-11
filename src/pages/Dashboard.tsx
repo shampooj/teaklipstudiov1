@@ -123,6 +123,7 @@ const Dashboard = () => {
       .insert({
         image_id: currentImage.id,
         admin_lip_tone_category: selectedCategory,
+        admin_skin_tone_category: selectedSkinTone,
         labeled_by_user_id: user?.id,
         labeled_at: now,
       });
