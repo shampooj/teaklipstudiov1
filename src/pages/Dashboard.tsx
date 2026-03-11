@@ -136,6 +136,7 @@ const Dashboard = () => {
         .eq("id", currentImage.id);
       toast.success("Label saved");
       setSelectedCategory("");
+      setSelectedSkinTone("");
       setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
       await fetchData();
     }
