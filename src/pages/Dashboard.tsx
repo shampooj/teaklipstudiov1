@@ -244,7 +244,7 @@ const Dashboard = () => {
             ];
             if (pieData.length === 0) return null;
             return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md">
+              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Lip Tone Distribution</p>
                 <div className="h-52">
                   <ResponsiveContainer width="100%" height="100%">
@@ -306,7 +306,7 @@ const Dashboard = () => {
             ];
             if (pieData.length === 0) return null;
             return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md">
+              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Skin Tone Distribution</p>
                 <div className="h-52">
                   <ResponsiveContainer width="100%" height="100%">
