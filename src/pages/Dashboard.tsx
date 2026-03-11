@@ -244,18 +244,28 @@ const Dashboard = () => {
           </div>
           <div className="flex flex-col items-end gap-1">
             <img src={teakLogo} alt="Teak" className="h-8 object-contain" />
-            <div className="flex items-center gap-2 text-[9px] text-muted-foreground">
-              <span>{userEmail}</span>
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  navigate("/login");
-                }}
-                className="hover:text-foreground transition-colors underline"
-              >
-                Log out
-              </button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="text-muted-foreground hover:text-foreground transition-colors">
+                  <User className="h-4 w-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-2xl">
+                <DropdownMenuItem className="text-[10px] text-muted-foreground cursor-default focus:bg-transparent">
+                  {userEmail}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-[10px] cursor-pointer"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    navigate("/login");
+                  }}
+                >
+                  <LogOut className="h-3 w-3 mr-2" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
