@@ -374,7 +374,7 @@ const Dashboard = () => {
             ];
             if (pieData.length === 0) return null;
             return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md">
+              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] w-full sm:w-[calc(50%-0.75rem)] sm:max-w-none max-w-md" style={{ backgroundColor: 'hsl(var(--light-blue))' }}>
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Lip Tone Distribution</p>
                 <div className="h-52">
                   <ResponsiveContainer width="100%" height="100%">
