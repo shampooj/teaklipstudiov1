@@ -17,6 +17,7 @@ export type Database = {
       admin_labels: {
         Row: {
           admin_lip_tone_category: string | null
+          admin_skin_tone_category: string | null
           created_at: string
           id: string
           image_id: string | null
@@ -25,6 +26,7 @@ export type Database = {
         }
         Insert: {
           admin_lip_tone_category?: string | null
+          admin_skin_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null
@@ -33,6 +35,7 @@ export type Database = {
         }
         Update: {
           admin_lip_tone_category?: string | null
+          admin_skin_tone_category?: string | null
           created_at?: string
           id?: string
           image_id?: string | null
