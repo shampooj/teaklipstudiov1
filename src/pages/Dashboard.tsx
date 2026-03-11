@@ -120,6 +120,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserEmail(user?.email ?? null);
+    });
   }, []);
 
   const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
