@@ -3,6 +3,44 @@ import { ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import teakLogo from "@/assets/teak-logo.png";
+import skinLightBrown from "@/assets/skin-light-brown.jpg";
+import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
+import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
+import skinRichBrown from "@/assets/skin-rich-brown.jpg";
+import lipBeige from "@/assets/lip-beige.jpg";
+import lipBrightPink from "@/assets/lip-bright-pink.jpg";
+import lipMediumBrown from "@/assets/lip-medium-brown.png";
+import lipDeepBrown from "@/assets/lip-deep-brown.jpg";
+import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.jpg";
+import lipNeutralBrown from "@/assets/lip-neutral-brown.png";
+import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.png";
+import lipMauvePink from "@/assets/lip-mauve-pink.png";
+import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
+import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
+import lipBrownPink from "@/assets/lip-brown-pink.png";
+import lipGreyBrown from "@/assets/lip-grey-brown.png";
+
+const SKIN_TONES_REF = [
+  { id: "light-brown", label: "Light Brown", image: skinLightBrown },
+  { id: "medium-brown", label: "Medium Brown", image: skinMediumBrown },
+  { id: "deep-brown", label: "Deep Brown", image: skinDeepBrown },
+  { id: "rich-brown", label: "Rich Brown", image: skinRichBrown },
+] as const;
+
+const LIP_TONES_REF = [
+  { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
+  { id: "brown-pink", label: "Brown Pink", image: lipBrownPink },
+  { id: "mauve-pink", label: "Mauve Pink", image: lipMauvePink },
+  { id: "beige", label: "Beige", image: lipBeige },
+  { id: "two-toned-purple", label: "Two-Toned Purple", image: lipTwoTonedPurple },
+  { id: "two-toned-brown", label: "Two-Toned Brown", image: lipTwoTonedBrown },
+  { id: "two-toned-grey", label: "Two-Toned Grey", image: lipTwoTonedGrey },
+  { id: "two-toned-beige", label: "Two-Toned Beige", image: lipTwoTonedBeige },
+  { id: "neutral-brown", label: "Neutral Brown", image: lipNeutralBrown },
+  { id: "medium-brown", label: "Medium Brown", image: lipMediumBrown },
+  { id: "deep-brown", label: "Deep Brown", image: lipDeepBrown },
+  { id: "grey-brown", label: "Grey Brown", image: lipGreyBrown },
+] as const;
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -600,6 +638,34 @@ const Dashboard = () => {
             ) : (
               <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
             )}
+
+            {/* Quiz Reference: Skin Tones */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-4">
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Screen 1 — Skin Tone Options</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {SKIN_TONES_REF.map((tone) => (
+                  <div key={tone.id} className="space-y-1.5">
+                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <p className="text-[9px] text-muted-foreground text-center">{tone.label}</p>
+                    <p className="text-[8px] text-muted-foreground/60 text-center">{tone.id}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quiz Reference: Lip Tones */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-4">
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Screen 2 — Lip Tone Options</p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                {LIP_TONES_REF.map((tone) => (
+                  <div key={tone.id} className="space-y-1.5">
+                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover rounded-lg border border-border" />
+                    <p className="text-[9px] text-muted-foreground text-center">{tone.label}</p>
+                    <p className="text-[8px] text-muted-foreground/60 text-center">{tone.id}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
           </>
         )}
 
