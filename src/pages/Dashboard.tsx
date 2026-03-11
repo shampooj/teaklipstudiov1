@@ -203,7 +203,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "data">("dashboard");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data">("dashboard");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
@@ -216,6 +216,12 @@ const Dashboard = () => {
             Dashboard
           </button>
           <button
+            onClick={() => setActiveTab("labeling")}
+            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "labeling" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Admin Labeling
+          </button>
+          <button
             onClick={() => setActiveTab("data")}
             className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
@@ -224,7 +230,7 @@ const Dashboard = () => {
         </div>
 
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-          {activeTab === "dashboard" ? "Dashboard" : "Data"}
+          {activeTab === "dashboard" ? "Dashboard" : activeTab === "labeling" ? "Admin Labeling" : "Data"}
         </h1>
 
         {activeTab === "dashboard" && (
@@ -429,7 +435,11 @@ const Dashboard = () => {
                 );
               })()}
             </div>
+          </>
+        )}
 
+        {activeTab === "labeling" && (
+          <>
             {currentImage ? (
               <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
                 <div className="flex items-center justify-between">
