@@ -219,7 +219,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Label</p>
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Admin Label</p>
             <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
               {data.filter((r) => !r.is_labeled).length}
             </p>
