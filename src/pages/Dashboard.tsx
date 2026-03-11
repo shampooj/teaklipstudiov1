@@ -210,16 +210,16 @@ const Dashboard = () => {
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <div className="flex items-center gap-6">
           <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            Dashboard
-          </button>
-          <button
             onClick={() => setActiveTab("labeling")}
             className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "labeling" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
           >
             Admin Labeling
+          </button>
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Dashboard
           </button>
           <button
             onClick={() => setActiveTab("data")}
