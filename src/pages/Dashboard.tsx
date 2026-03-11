@@ -221,7 +221,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div className="flex items-center justify-end gap-3">
             <img src={teakLogo} alt="Teak" className="h-8 object-contain" />
             <DropdownMenu>
