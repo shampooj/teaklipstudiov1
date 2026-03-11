@@ -166,7 +166,7 @@ const Dashboard = () => {
       setData((prev) =>
         prev.map((r) =>
           r.id === submissionId
-            ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
+            ? { ...r, is_labeled: false, admin_lip_tone_category: null, admin_skin_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
             : r
         )
       );
