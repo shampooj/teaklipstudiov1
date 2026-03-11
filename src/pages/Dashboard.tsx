@@ -60,6 +60,7 @@ const Dashboard = () => {
   const [labelSearch, setLabelSearch] = useState("");
   const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSkinTone, setSelectedSkinTone] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
