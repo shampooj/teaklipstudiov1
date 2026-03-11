@@ -1,6 +1,14 @@
 import { useState, useEffect, useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import teakLogo from "@/assets/teak-logo.png";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,6 +72,8 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSkinTone, setSelectedSkinTone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
@@ -110,6 +120,9 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchData();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUserEmail(user?.email ?? null);
+    });
   }, []);
 
   const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
@@ -208,25 +221,53 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
-        <div className="flex items-center gap-6">
-          <button
-            onClick={() => setActiveTab("labeling")}
-            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "labeling" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            Admin Labeling
-          </button>
-          <button
-            onClick={() => setActiveTab("dashboard")}
-            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setActiveTab("data")}
-            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-          >
-            Data
-          </button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <button
+              onClick={() => setActiveTab("labeling")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "labeling" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Admin Labeling
+            </button>
+            <button
+              onClick={() => setActiveTab("dashboard")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setActiveTab("data")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Data
+            </button>
+          </div>
+          <div className="flex items-center gap-4">
+            <img src={teakLogo} alt="Teak" className="h-8 object-contain" />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline">{userEmail}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="rounded-2xl">
+                <DropdownMenuItem className="text-[10px] text-muted-foreground cursor-default focus:bg-transparent">
+                  {userEmail}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-[10px] cursor-pointer"
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    navigate("/login");
+                  }}
+                >
+                  <LogOut className="h-3 w-3 mr-2" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
