@@ -464,11 +464,22 @@ const Dashboard = () => {
                 <SelectItem value="grey-brown">Grey Brown</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
+                <SelectValue placeholder="Select skin tone category" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="light-brown">Light Brown</SelectItem>
+                <SelectItem value="medium-brown">Medium Brown</SelectItem>
+                <SelectItem value="deep-brown">Deep Brown</SelectItem>
+                <SelectItem value="rich-brown">Rich Brown</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               <Button
                 className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
                 onClick={handleSaveLabel}
-                disabled={!selectedCategory || saving}
+                disabled={!selectedCategory || !selectedSkinTone || saving}
               >
                 {saving ? "Saving…" : "Save Label"}
               </Button>
