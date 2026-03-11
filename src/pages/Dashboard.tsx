@@ -203,516 +203,469 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
+  const [activeTab, setActiveTab] = useState<"dashboard" | "data">("dashboard");
+
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
       <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => setActiveTab("dashboard")}
+            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setActiveTab("data")}
+            className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+          >
+            Data
+          </button>
+        </div>
+
         <h1 className="text-3xl tracking-tight" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-          Teak Lip Studio Admin
+          {activeTab === "dashboard" ? "Dashboard" : "Data"}
         </h1>
 
-        {/* Stats row */}
-        <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
-          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Submissions</p>
-            <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-              {data.length}
-            </p>
-          </div>
-          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
-            <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Admin Label</p>
-            <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-              {data.filter((r) => !r.is_labeled).length}
-            </p>
-          </div>
-
-          {/* Pie chart: lip tone distribution */}
-          {(() => {
-            const counts: Record<string, number> = {};
-            adminLabels.forEach((l) => {
-              const cat = l.admin_lip_tone_category || "unlabeled";
-              counts[cat] = (counts[cat] || 0) + 1;
-            });
-            const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
-            const COLORS = [
-              "hsl(var(--primary))",
-              "hsl(var(--accent))",
-              "hsl(var(--secondary))",
-              "hsl(var(--muted-foreground))",
-              "hsl(var(--destructive))",
-              "hsl(20, 60%, 55%)",
-              "hsl(340, 50%, 60%)",
-            ];
-            if (pieData.length === 0) return null;
-            return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Lip Tone Distribution</p>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={75}
-                        innerRadius={40}
-                        paddingAngle={2}
-                        stroke="none"
-                      >
-                        {pieData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "0.75rem",
-                          fontSize: "11px",
-                          fontFamily: "'ABC ROM', sans-serif",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {pieData.map((d, i) => (
-                    <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      {d.name} ({d.value})
-                    </span>
-                  ))}
-                </div>
+        {activeTab === "dashboard" && (
+          <>
+            {/* Stats row */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Submissions</p>
+                <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
+                  {data.length}
+                </p>
               </div>
-            );
-          })()}
-
-          {/* Pie chart: admin approved skin tone distribution */}
-          {(() => {
-            const counts: Record<string, number> = {};
-            adminLabels.forEach((l) => {
-              const cat = l.admin_skin_tone_category || "unlabeled";
-              counts[cat] = (counts[cat] || 0) + 1;
-            });
-            const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
-            const COLORS = [
-              "hsl(var(--primary))",
-              "hsl(var(--accent))",
-              "hsl(var(--secondary))",
-              "hsl(var(--muted-foreground))",
-              "hsl(var(--destructive))",
-              "hsl(20, 60%, 55%)",
-            ];
-            if (pieData.length === 0) return null;
-            return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Skin Tone Distribution</p>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={75}
-                        innerRadius={40}
-                        paddingAngle={2}
-                        stroke="none"
-                      >
-                        {pieData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "0.75rem",
-                          fontSize: "11px",
-                          fontFamily: "'ABC ROM', sans-serif",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {pieData.map((d, i) => (
-                    <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      {d.name} ({d.value})
-                    </span>
-                  ))}
-                </div>
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Images Needing Admin Label</p>
+                <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
+                  {data.filter((r) => !r.is_labeled).length}
+                </p>
               </div>
-            );
-          })()}
 
-          {/* Pie chart: customer submission lip tone distribution */}
-          {(() => {
-            const counts: Record<string, number> = {};
-            data.forEach((r) => {
-              const tone = r.lip_tone || "unknown";
-              counts[tone] = (counts[tone] || 0) + 1;
-            });
-            const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
-            const COLORS = [
-              "hsl(var(--primary))",
-              "hsl(var(--accent))",
-              "hsl(var(--secondary))",
-              "hsl(var(--muted-foreground))",
-              "hsl(var(--destructive))",
-              "hsl(20, 60%, 55%)",
-              "hsl(340, 50%, 60%)",
-              "hsl(200, 50%, 50%)",
-              "hsl(160, 40%, 50%)",
-              "hsl(280, 40%, 55%)",
-              "hsl(50, 60%, 50%)",
-              "hsl(10, 70%, 45%)",
-            ];
-            if (pieData.length === 0) return null;
-            return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] w-full sm:w-[calc(50%-0.75rem)] sm:max-w-none max-w-md" style={{ backgroundColor: 'hsl(var(--light-blue))' }}>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Lip Tone Distribution</p>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={75}
-                        innerRadius={40}
-                        paddingAngle={2}
-                        stroke="none"
-                      >
-                        {pieData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "0.75rem",
-                          fontSize: "11px",
-                          fontFamily: "'ABC ROM', sans-serif",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {pieData.map((d, i) => (
-                    <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      {d.name} ({d.value})
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
+              {/* Pie chart: admin approved lip tone distribution */}
+              {(() => {
+                const counts: Record<string, number> = {};
+                adminLabels.forEach((l) => {
+                  const cat = l.admin_lip_tone_category || "unlabeled";
+                  counts[cat] = (counts[cat] || 0) + 1;
+                });
+                const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+                const COLORS = [
+                  "hsl(var(--primary))",
+                  "hsl(var(--accent))",
+                  "hsl(var(--secondary))",
+                  "hsl(var(--muted-foreground))",
+                  "hsl(var(--destructive))",
+                  "hsl(20, 60%, 55%)",
+                  "hsl(340, 50%, 60%)",
+                ];
+                if (pieData.length === 0) return null;
+                return (
+                  <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Lip Tone Distribution</p>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} innerRadius={40} paddingAngle={2} stroke="none">
+                            {pieData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {pieData.map((d, i) => (
+                        <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          {d.name} ({d.value})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
-          {/* Pie chart: customer submission skin tone distribution */}
-          {(() => {
-            const counts: Record<string, number> = {};
-            data.forEach((r) => {
-              const tone = r.skin_tone || "unknown";
-              counts[tone] = (counts[tone] || 0) + 1;
-            });
-            const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
-            const COLORS = [
-              "hsl(var(--primary))",
-              "hsl(var(--accent))",
-              "hsl(var(--secondary))",
-              "hsl(var(--muted-foreground))",
-              "hsl(var(--destructive))",
-              "hsl(20, 60%, 55%)",
-              "hsl(340, 50%, 60%)",
-              "hsl(200, 50%, 50%)",
-            ];
-            if (pieData.length === 0) return null;
-            return (
-              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] w-full sm:w-[calc(50%-0.75rem)] sm:max-w-none max-w-md" style={{ backgroundColor: 'hsl(var(--light-blue))' }}>
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Skin Tone Distribution</p>
-                <div className="h-52">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={75}
-                        innerRadius={40}
-                        paddingAngle={2}
-                        stroke="none"
-                      >
-                        {pieData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--background))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "0.75rem",
-                          fontSize: "11px",
-                          fontFamily: "'ABC ROM', sans-serif",
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="flex flex-wrap gap-3 mt-2">
-                  {pieData.map((d, i) => (
-                    <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                      {d.name} ({d.value})
-                    </span>
-                  ))}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
+              {/* Pie chart: admin approved skin tone distribution */}
+              {(() => {
+                const counts: Record<string, number> = {};
+                adminLabels.forEach((l) => {
+                  const cat = l.admin_skin_tone_category || "unlabeled";
+                  counts[cat] = (counts[cat] || 0) + 1;
+                });
+                const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+                const COLORS = [
+                  "hsl(var(--primary))",
+                  "hsl(var(--accent))",
+                  "hsl(var(--secondary))",
+                  "hsl(var(--muted-foreground))",
+                  "hsl(var(--destructive))",
+                  "hsl(20, 60%, 55%)",
+                ];
+                if (pieData.length === 0) return null;
+                return (
+                  <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md" style={{ backgroundColor: 'hsl(var(--light-peach))' }}>
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Admin Approved Skin Tone Distribution</p>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} innerRadius={40} paddingAngle={2} stroke="none">
+                            {pieData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {pieData.map((d, i) => (
+                        <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          {d.name} ({d.value})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
 
-        {currentImage ? (
-          <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
-            <div className="flex items-center justify-between">
-              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-                Images Needing Admin Label ({clampedIndex + 1} of {unlabeled.length})
-              </p>
-              <span className="flex gap-1">
-                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
-                  <ChevronLeft className="h-3 w-3" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex >= unlabeled.length - 1} onClick={() => setLabelIndex(clampedIndex + 1)}>
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-              </span>
+              {/* Pie chart: customer submission lip tone distribution */}
+              {(() => {
+                const counts: Record<string, number> = {};
+                data.forEach((r) => {
+                  const tone = r.lip_tone || "unknown";
+                  counts[tone] = (counts[tone] || 0) + 1;
+                });
+                const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+                const COLORS = [
+                  "hsl(var(--primary))",
+                  "hsl(var(--accent))",
+                  "hsl(var(--secondary))",
+                  "hsl(var(--muted-foreground))",
+                  "hsl(var(--destructive))",
+                  "hsl(20, 60%, 55%)",
+                  "hsl(340, 50%, 60%)",
+                  "hsl(200, 50%, 50%)",
+                  "hsl(160, 40%, 50%)",
+                  "hsl(280, 40%, 55%)",
+                  "hsl(50, 60%, 50%)",
+                  "hsl(10, 70%, 45%)",
+                ];
+                if (pieData.length === 0) return null;
+                return (
+                  <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] w-full sm:w-[calc(50%-0.75rem)] sm:max-w-none max-w-md" style={{ backgroundColor: 'hsl(var(--light-blue))' }}>
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Lip Tone Distribution</p>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} innerRadius={40} paddingAngle={2} stroke="none">
+                            {pieData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {pieData.map((d, i) => (
+                        <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          {d.name} ({d.value})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Pie chart: customer submission skin tone distribution */}
+              {(() => {
+                const counts: Record<string, number> = {};
+                data.forEach((r) => {
+                  const tone = r.skin_tone || "unknown";
+                  counts[tone] = (counts[tone] || 0) + 1;
+                });
+                const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+                const COLORS = [
+                  "hsl(var(--primary))",
+                  "hsl(var(--accent))",
+                  "hsl(var(--secondary))",
+                  "hsl(var(--muted-foreground))",
+                  "hsl(var(--destructive))",
+                  "hsl(20, 60%, 55%)",
+                  "hsl(340, 50%, 60%)",
+                  "hsl(200, 50%, 50%)",
+                ];
+                if (pieData.length === 0) return null;
+                return (
+                  <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] w-full sm:w-[calc(50%-0.75rem)] sm:max-w-none max-w-md" style={{ backgroundColor: 'hsl(var(--light-blue))' }}>
+                    <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Skin Tone Distribution</p>
+                    <div className="h-52">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={pieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} innerRadius={40} paddingAngle={2} stroke="none">
+                            {pieData.map((_, i) => (
+                              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="flex flex-wrap gap-3 mt-2">
+                      {pieData.map((d, i) => (
+                        <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                          <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                          {d.name} ({d.value})
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
-            {currentImage.image_url ? (
-               <img
-                 src={currentImage.image_url}
-                 alt="Submission"
-                 className="w-full max-w-[16rem] max-h-64 object-contain rounded-md border border-border"
-              />
+
+            {currentImage ? (
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+                    Images Needing Admin Label ({clampedIndex + 1} of {unlabeled.length})
+                  </p>
+                  <span className="flex gap-1">
+                    <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex === 0} onClick={() => setLabelIndex(clampedIndex - 1)}>
+                      <ChevronLeft className="h-3 w-3" />
+                    </Button>
+                    <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-foreground/20" disabled={clampedIndex >= unlabeled.length - 1} onClick={() => setLabelIndex(clampedIndex + 1)}>
+                      <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </span>
+                </div>
+                {currentImage.image_url ? (
+                   <img
+                     src={currentImage.image_url}
+                     alt="Submission"
+                     className="w-full max-w-[16rem] max-h-64 object-contain rounded-md border border-border"
+                  />
+                ) : (
+                  <p className="text-muted-foreground text-[9px]">No image available</p>
+                )}
+                <p className="text-[9px] text-muted-foreground">
+                  Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+                </p>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
+                    <SelectValue placeholder="Select lip tone category" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl">
+                    <SelectItem value="bright-pink">Bright Pink</SelectItem>
+                    <SelectItem value="brown-pink">Brown Pink</SelectItem>
+                    <SelectItem value="mauve-pink">Mauve Pink</SelectItem>
+                    <SelectItem value="beige">Beige</SelectItem>
+                    <SelectItem value="two-toned-purple">Two-Toned Purple</SelectItem>
+                    <SelectItem value="two-toned-brown">Two-Toned Brown</SelectItem>
+                    <SelectItem value="two-toned-grey">Two-Toned Grey</SelectItem>
+                    <SelectItem value="two-toned-beige">Two-Toned Beige</SelectItem>
+                    <SelectItem value="neutral-brown">Neutral Brown</SelectItem>
+                    <SelectItem value="medium-brown">Medium Brown</SelectItem>
+                    <SelectItem value="deep-brown">Deep Brown</SelectItem>
+                    <SelectItem value="grey-brown">Grey Brown</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
+                  <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
+                    <SelectValue placeholder="Select skin tone category" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-2xl">
+                    <SelectItem value="light-brown">Light Brown</SelectItem>
+                    <SelectItem value="medium-brown">Medium Brown</SelectItem>
+                    <SelectItem value="deep-brown">Deep Brown</SelectItem>
+                    <SelectItem value="rich-brown">Rich Brown</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="flex gap-2">
+                  <Button
+                    className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
+                    onClick={handleSaveLabel}
+                    disabled={!selectedCategory || !selectedSkinTone || saving}
+                  >
+                    {saving ? "Saving…" : "Save Label"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[9px] px-4 h-8"
+                    onClick={async () => {
+                      if (!currentImage) return;
+                      const { error } = await (supabase.from as any)("customer_submissions")
+                        .delete()
+                        .eq("id", currentImage.id);
+                      if (error) {
+                        toast.error("Failed to discard submission");
+                      } else {
+                        toast.success("Submission discarded");
+                        setData((prev) => prev.filter((r) => r.id !== currentImage.id));
+                        setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
+                      }
+                    }}
+                  >
+                    Discard
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <p className="text-muted-foreground text-[9px]">No image available</p>
+              <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
             )}
-            <p className="text-[9px] text-muted-foreground">
-              Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
-            </p>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
-                <SelectValue placeholder="Select lip tone category" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl">
-                <SelectItem value="bright-pink">Bright Pink</SelectItem>
-                <SelectItem value="brown-pink">Brown Pink</SelectItem>
-                <SelectItem value="mauve-pink">Mauve Pink</SelectItem>
-                <SelectItem value="beige">Beige</SelectItem>
-                <SelectItem value="two-toned-purple">Two-Toned Purple</SelectItem>
-                <SelectItem value="two-toned-brown">Two-Toned Brown</SelectItem>
-                <SelectItem value="two-toned-grey">Two-Toned Grey</SelectItem>
-                <SelectItem value="two-toned-beige">Two-Toned Beige</SelectItem>
-                <SelectItem value="neutral-brown">Neutral Brown</SelectItem>
-                <SelectItem value="medium-brown">Medium Brown</SelectItem>
-                <SelectItem value="deep-brown">Deep Brown</SelectItem>
-                <SelectItem value="grey-brown">Grey Brown</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
-              <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
-                <SelectValue placeholder="Select skin tone category" />
-              </SelectTrigger>
-              <SelectContent className="rounded-2xl">
-                <SelectItem value="light-brown">Light Brown</SelectItem>
-                <SelectItem value="medium-brown">Medium Brown</SelectItem>
-                <SelectItem value="deep-brown">Deep Brown</SelectItem>
-                <SelectItem value="rich-brown">Rich Brown</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex gap-2">
-              <Button
-                className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
-                onClick={handleSaveLabel}
-                disabled={!selectedCategory || !selectedSkinTone || saving}
-              >
-                {saving ? "Saving…" : "Save Label"}
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[9px] px-4 h-8"
-                onClick={async () => {
-                  if (!currentImage) return;
-                  const { error } = await (supabase.from as any)("customer_submissions")
-                    .delete()
-                    .eq("id", currentImage.id);
-                  if (error) {
-                    toast.error("Failed to discard submission");
-                  } else {
-                    toast.success("Submission discarded");
-                    setData((prev) => prev.filter((r) => r.id !== currentImage.id));
-                    setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
-                  }
-                }}
-              >
-                Discard
-              </Button>
+          </>
+        )}
+
+        {activeTab === "data" && (
+          <>
+            <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Categorization of Customer Submissions</h2>
+
+            <div className="relative w-full sm:max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by image ID, lip tone, email…"
+                value={labelSearch}
+                onChange={(e) => setLabelSearch(e.target.value)}
+                className="pl-9 rounded-full border-foreground/20 text-[9px]"
+              />
             </div>
-          </div>
-        ) : (
-          <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
+
+            {filteredLabels.length === 0 ? (
+              <p className="text-muted-foreground text-[9px]">No admin labels found.</p>
+            ) : (
+              <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow className="border-border">
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone Label</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled At</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredLabels.map((row) => (
+                      <TableRow key={row.id} className="border-border">
+                         <TableCell className="whitespace-nowrap text-[9px]">
+                           {new Date(row.created_at).toLocaleString()}
+                         </TableCell>
+                         <TableCell className="font-mono text-[9px]">{row.image_id}</TableCell>
+                        <TableCell>
+                          {row.image_url ? (
+                            <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-[9px]">View</a>
+                          ) : (
+                            <span className="text-muted-foreground text-[9px]">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="capitalize text-[9px]">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="capitalize text-[9px]">{row.admin_skin_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="text-[9px]">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="whitespace-nowrap text-[9px]">
+                          {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="outline" className="rounded-full border-foreground/20 text-[9px] h-7 px-3" onClick={() => handleRelabel(row.id)}>
+                            Relabel
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+              </div>
+            )}
+
+            <p className="text-[9px] text-muted-foreground">
+              {filteredLabels.length} of {labeledSubmissions.length} labeled submissions
+            </p>
+
+            <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Customer Submissions</h2>
+
+            <div className="relative w-full sm:max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by shade, variant, date…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 rounded-full border-foreground/20 text-[9px]"
+              />
+            </div>
+
+            {loading ? (
+              <p className="text-muted-foreground text-[9px]">Loading…</p>
+            ) : filtered.length === 0 ? (
+              <p className="text-muted-foreground text-[9px]">No submissions found.</p>
+            ) : (
+              <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <TableHeader className="sticky top-0 z-10 bg-background">
+                    <TableRow className="border-border">
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filtered.map((row) => (
+                      <TableRow key={row.id} className="border-border">
+                         <TableCell className="whitespace-nowrap text-[9px]">
+                           {new Date(row.created_at).toLocaleString()}
+                         </TableCell>
+                         <TableCell className="font-mono text-[9px]">{row.image_id || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="text-[9px]">{row.shade_label}</TableCell>
+                        <TableCell className="font-mono text-[9px]">
+                          {row.shade_id}
+                        </TableCell>
+                        <TableCell className="font-mono text-[9px]">
+                          {row.variant_id}
+                        </TableCell>
+                        <TableCell className="capitalize text-[9px]">{row.skin_tone || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell className="capitalize text-[9px]">{row.lip_tone || <span className="text-muted-foreground">—</span>}</TableCell>
+                        <TableCell>
+                          {row.image_url ? (
+                            <a
+                              href={row.image_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary underline text-[9px]"
+                            >
+                              View
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground text-[9px]">—</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-[9px]">
+                          {row.is_labeled ? "Yes" : "No"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </table>
+              </div>
+            )}
+
+            <p className="text-[9px] text-muted-foreground">
+              {filtered.length} of {data.length} submissions
+            </p>
+          </>
         )}
-
-        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Categorization of Customer Submissions</h2>
-
-        <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by image ID, lip tone, email…"
-            value={labelSearch}
-            onChange={(e) => setLabelSearch(e.target.value)}
-            className="pl-9 rounded-full border-foreground/20 text-[9px]"
-          />
-        </div>
-
-        {filteredLabels.length === 0 ? (
-          <p className="text-muted-foreground text-[9px]">No admin labels found.</p>
-        ) : (
-          <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow className="border-border">
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone Label</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled At</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLabels.map((row) => (
-                  <TableRow key={row.id} className="border-border">
-                     <TableCell className="whitespace-nowrap text-[9px]">
-                       {new Date(row.created_at).toLocaleString()}
-                     </TableCell>
-                     <TableCell className="font-mono text-[9px]">{row.image_id}</TableCell>
-                    <TableCell>
-                      {row.image_url ? (
-                        <a href={row.image_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-[9px]">View</a>
-                      ) : (
-                        <span className="text-muted-foreground text-[9px]">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="capitalize text-[9px]">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="capitalize text-[9px]">{row.admin_skin_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="text-[9px]">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="whitespace-nowrap text-[9px]">
-                      {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="outline" className="rounded-full border-foreground/20 text-[9px] h-7 px-3" onClick={() => handleRelabel(row.id)}>
-                        Relabel
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </table>
-          </div>
-        )}
-
-        <p className="text-[9px] text-muted-foreground">
-          {filteredLabels.length} of {labeledSubmissions.length} labeled submissions
-        </p>
-
-        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Customer Submissions</h2>
-
-        <div className="relative w-full sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by shade, variant, date…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 rounded-full border-foreground/20 text-[9px]"
-          />
-        </div>
-
-        {loading ? (
-          <p className="text-muted-foreground text-[9px]">Loading…</p>
-        ) : filtered.length === 0 ? (
-          <p className="text-muted-foreground text-[9px]">No submissions found.</p>
-        ) : (
-          <div className="rounded-2xl border border-border max-h-[340px] overflow-auto">
-            <table className="w-full caption-bottom text-sm">
-              <TableHeader className="sticky top-0 z-10 bg-background">
-                <TableRow className="border-border">
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
-                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Is Labeled</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((row) => (
-                  <TableRow key={row.id} className="border-border">
-                     <TableCell className="whitespace-nowrap text-[9px]">
-                       {new Date(row.created_at).toLocaleString()}
-                     </TableCell>
-                     <TableCell className="font-mono text-[9px]">{row.image_id || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="text-[9px]">{row.shade_label}</TableCell>
-                    <TableCell className="font-mono text-[9px]">
-                      {row.shade_id}
-                    </TableCell>
-                    <TableCell className="font-mono text-[9px]">
-                      {row.variant_id}
-                    </TableCell>
-                    <TableCell className="capitalize text-[9px]">{row.skin_tone || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell className="capitalize text-[9px]">{row.lip_tone || <span className="text-muted-foreground">—</span>}</TableCell>
-                    <TableCell>
-                      {row.image_url ? (
-                        <a
-                          href={row.image_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary underline text-[9px]"
-                        >
-                          View
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground text-[9px]">—</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-[9px]">
-                      {row.is_labeled ? "Yes" : "No"}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </table>
-          </div>
-        )}
-
-        <p className="text-[9px] text-muted-foreground">
-          {filtered.length} of {data.length} submissions
-        </p>
       </div>
     </div>
   );
