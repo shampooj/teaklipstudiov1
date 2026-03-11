@@ -58,6 +58,9 @@
     --input: 52 16% 67%;
     --ring: 24 60% 19%;
 
+    /* Light Blue: brand accent for customer submission cards */
+    --light-blue: 210 40% 92%;
+
     --radius: 0rem;
 
     --sidebar-background: 50 12% 90%;
