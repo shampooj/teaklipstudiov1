@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_labels ADD COLUMN admin_skin_tone_category text;

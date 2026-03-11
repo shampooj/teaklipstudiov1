@@ -60,6 +60,7 @@ const Dashboard = () => {
   const [labelSearch, setLabelSearch] = useState("");
   const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedSkinTone, setSelectedSkinTone] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchData = async () => {
@@ -114,7 +115,7 @@ const Dashboard = () => {
   const currentImage = unlabeled.length > 0 ? unlabeled[clampedIndex] : null;
 
   const handleSaveLabel = async () => {
-    if (!currentImage || !selectedCategory) return;
+    if (!currentImage || !selectedCategory || !selectedSkinTone) return;
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const now = new Date().toISOString();
@@ -122,6 +123,7 @@ const Dashboard = () => {
       .insert({
         image_id: currentImage.id,
         admin_lip_tone_category: selectedCategory,
+        admin_skin_tone_category: selectedSkinTone,
         labeled_by_user_id: user?.id,
         labeled_at: now,
       });
@@ -134,6 +136,7 @@ const Dashboard = () => {
         .eq("id", currentImage.id);
       toast.success("Label saved");
       setSelectedCategory("");
+      setSelectedSkinTone("");
       setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
       await fetchData();
     }
@@ -461,11 +464,22 @@ const Dashboard = () => {
                 <SelectItem value="grey-brown">Grey Brown</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
+                <SelectValue placeholder="Select skin tone category" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                <SelectItem value="light-brown">Light Brown</SelectItem>
+                <SelectItem value="medium-brown">Medium Brown</SelectItem>
+                <SelectItem value="deep-brown">Deep Brown</SelectItem>
+                <SelectItem value="rich-brown">Rich Brown</SelectItem>
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
               <Button
                 className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
                 onClick={handleSaveLabel}
-                disabled={!selectedCategory || saving}
+                disabled={!selectedCategory || !selectedSkinTone || saving}
               >
                 {saving ? "Saving…" : "Save Label"}
               </Button>
