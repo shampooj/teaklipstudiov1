@@ -430,7 +430,7 @@ const Dashboard = () => {
           <p className="text-[9px] text-muted-foreground">All images have been labeled ✓</p>
         )}
 
-        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Labels</h2>
+        <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Categorization of Customer Submissions</h2>
 
         <div className="relative w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
