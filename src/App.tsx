@@ -21,7 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Auth />} />
           <Route
-            path="/dashboard"
+            path="/admin"
             element={
               <ProtectedRoute>
                 <Dashboard />
