@@ -47,6 +47,7 @@ interface Submission {
   lip_tone: string | null;
   // joined from admin_labels
   admin_lip_tone_category: string | null;
+  admin_skin_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
   labeled_by_email?: string;
