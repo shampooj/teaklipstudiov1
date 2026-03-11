@@ -115,7 +115,7 @@ const Dashboard = () => {
   const currentImage = unlabeled.length > 0 ? unlabeled[clampedIndex] : null;
 
   const handleSaveLabel = async () => {
-    if (!currentImage || !selectedCategory) return;
+    if (!currentImage || !selectedCategory || !selectedSkinTone) return;
     setSaving(true);
     const { data: { user } } = await supabase.auth.getUser();
     const now = new Date().toISOString();
