@@ -27,6 +27,7 @@ interface AdminLabel {
   id: string;
   image_id: string;
   admin_lip_tone_category: string | null;
+  admin_skin_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
   created_at?: string;
@@ -46,6 +47,7 @@ interface Submission {
   lip_tone: string | null;
   // joined from admin_labels
   admin_lip_tone_category: string | null;
+  admin_skin_tone_category: string | null;
   labeled_by_user_id: string | null;
   labeled_at: string | null;
   labeled_by_email?: string;
@@ -94,6 +96,7 @@ const Dashboard = () => {
           ...r,
           is_labeled: !!label,
           admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
+          admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
           labeled_by_user_id: label?.labeled_by_user_id ?? null,
           labeled_at: label?.labeled_at ?? null,
           admin_label_id: label?.id,
@@ -163,7 +166,7 @@ const Dashboard = () => {
       setData((prev) =>
         prev.map((r) =>
           r.id === submissionId
-            ? { ...r, is_labeled: false, admin_lip_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
+            ? { ...r, is_labeled: false, admin_lip_tone_category: null, admin_skin_tone_category: null, labeled_by_user_id: null, labeled_at: null, labeled_by_email: undefined, admin_label_id: undefined }
             : r
         )
       );
@@ -531,6 +534,7 @@ const Dashboard = () => {
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
+                   <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone Label</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
                    <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled At</TableHead>
                   <TableHead></TableHead>
@@ -551,6 +555,7 @@ const Dashboard = () => {
                       )}
                     </TableCell>
                     <TableCell className="capitalize text-[9px]">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
+                    <TableCell className="capitalize text-[9px]">{row.admin_skin_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="text-[9px]">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
                     <TableCell className="whitespace-nowrap text-[9px]">
                       {row.labeled_at ? new Date(row.labeled_at).toLocaleString() : <span className="text-muted-foreground">—</span>}
