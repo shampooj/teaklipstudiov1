@@ -349,6 +349,70 @@ const Dashboard = () => {
               </div>
             );
           })()}
+
+          {/* Pie chart: customer submission skin tone distribution */}
+          {(() => {
+            const counts: Record<string, number> = {};
+            data.forEach((r) => {
+              const tone = r.skin_tone || "unknown";
+              counts[tone] = (counts[tone] || 0) + 1;
+            });
+            const pieData = Object.entries(counts).map(([name, value]) => ({ name, value }));
+            const COLORS = [
+              "hsl(var(--primary))",
+              "hsl(var(--accent))",
+              "hsl(var(--secondary))",
+              "hsl(var(--muted-foreground))",
+              "hsl(var(--destructive))",
+              "hsl(20, 60%, 55%)",
+              "hsl(340, 50%, 60%)",
+              "hsl(200, 50%, 50%)",
+            ];
+            if (pieData.length === 0) return null;
+            return (
+              <div className="border border-border rounded-2xl p-5 flex-1 min-w-[280px] max-w-md">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-3">Customer Submission Skin Tone Distribution</p>
+                <div className="h-52">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={75}
+                        innerRadius={40}
+                        paddingAngle={2}
+                        stroke="none"
+                      >
+                        {pieData.map((_, i) => (
+                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          background: "hsl(var(--background))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "0.75rem",
+                          fontSize: "11px",
+                          fontFamily: "'ABC ROM', sans-serif",
+                        }}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="flex flex-wrap gap-3 mt-2">
+                  {pieData.map((d, i) => (
+                    <span key={d.name} className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+                      <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                      {d.name} ({d.value})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {currentImage ? (
