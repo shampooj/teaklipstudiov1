@@ -96,6 +96,7 @@ const Dashboard = () => {
           ...r,
           is_labeled: !!label,
           admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
+          admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
           labeled_by_user_id: label?.labeled_by_user_id ?? null,
           labeled_at: label?.labeled_at ?? null,
           admin_label_id: label?.id,
