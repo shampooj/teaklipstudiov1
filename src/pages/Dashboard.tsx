@@ -556,25 +556,45 @@ const Dashboard = () => {
                   >
                     {saving ? "Saving…" : "Save Label"}
                   </Button>
-                  <Button
-                    variant="outline"
-                    className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[9px] px-4 h-8"
-                    onClick={async () => {
-                      if (!currentImage) return;
-                      const { error } = await (supabase.from as any)("customer_submissions")
-                        .delete()
-                        .eq("id", currentImage.id);
-                      if (error) {
-                        toast.error("Failed to discard submission");
-                      } else {
-                        toast.success("Submission discarded");
-                        setData((prev) => prev.filter((r) => r.id !== currentImage.id));
-                        setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
-                      }
-                    }}
-                  >
-                    Discard
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="rounded-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[9px] px-4 h-8"
+                      >
+                        Discard
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-2xl" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-sm" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Discard this submission?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-[10px]">
+                          This action cannot be undone. The submission will be permanently deleted.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-full text-[9px] h-8">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 text-[9px] h-8"
+                          onClick={async () => {
+                            if (!currentImage) return;
+                            const { error } = await (supabase.from as any)("customer_submissions")
+                              .delete()
+                              .eq("id", currentImage.id);
+                            if (error) {
+                              toast.error("Failed to discard submission");
+                            } else {
+                              toast.success("Submission discarded");
+                              setData((prev) => prev.filter((r) => r.id !== currentImage.id));
+                              setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
+                            }
+                          }}
+                        >
+                          Discard
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               </div>
             ) : (
