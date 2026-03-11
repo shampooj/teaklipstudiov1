@@ -72,6 +72,8 @@ const Dashboard = () => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSkinTone, setSelectedSkinTone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
