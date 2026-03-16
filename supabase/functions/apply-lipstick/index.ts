@@ -17,8 +17,23 @@ const LOOK_SHADES: Record<string, string> = {
 const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
   "light-brown": "light brown skin with warm golden undertones",
   "medium-brown": "medium brown skin with warm undertones",
-  "deep-brown": "deep brown skin with rich undertones — lip-skin contrast may be subtle",
-  "rich-brown": "rich dark brown skin — lip boundaries have very low contrast with surrounding skin, pay extra attention to identifying the vermilion border",
+  "deep-brown": "deep brown skin with rich undertones",
+  "rich-brown": "rich dark brown skin",
+};
+
+const LIP_TONE_DESCRIPTIONS: Record<string, string> = {
+  "bright-pink": "bright pink lips",
+  "brown-pink": "brown-pink lips",
+  "mauve-pink": "mauve-pink lips",
+  "beige": "beige/nude lips",
+  "two-toned-purple": "two-toned purple-brown lips",
+  "two-toned-brown": "two-toned brown lips",
+  "two-toned-grey": "two-toned grey-brown lips",
+  "two-toned-beige": "two-toned beige-brown lips",
+  "neutral-brown": "neutral brown lips",
+  "medium-brown": "medium brown lips",
+  "deep-brown": "deep brown lips that are very close in color to the surrounding skin",
+  "grey-brown": "grey-brown lips",
 };
 
 const SHAPE_LOCK_RULES = `
@@ -37,7 +52,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, look = "classic-red", skinTone = "", model = "google/gemini-3.1-flash-image-preview" } = await req.json();
+    const { imageBase64, look = "classic-red", skinTone = "", lipTone = "", model = "google/gemini-3.1-flash-image-preview" } = await req.json();
 
     const ALLOWED_MODELS = ["google/gemini-3.1-flash-image-preview", "google/gemini-3-pro-image-preview"];
     const selectedModel = ALLOWED_MODELS.includes(model) ? model : ALLOWED_MODELS[0];
@@ -51,9 +66,16 @@ serve(async (req) => {
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
     const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
-    const skinContext = skinDesc ? `This person has ${skinDesc}.` : "";
+    const lipDesc = LIP_TONE_DESCRIPTIONS[lipTone] || "";
 
-    const prompt = `Recolor ONLY the lips in this photo with this shade: ${shade}. ${skinContext}
+    const currentLipContext = lipDesc
+      ? `This person currently has ${lipDesc}. Their lips may blend with their skin tone — look for the subtle texture and contour difference around the mouth to locate them.`
+      : "";
+    const skinContext = skinDesc ? `They have ${skinDesc}.` : "";
+
+    const prompt = `This person's lips currently appear as: ${lipDesc || "natural lip color"}. ${skinContext} Change ONLY their lip color to: ${shade}.
+
+${currentLipContext}
 
 Do NOT alter anything outside the lips — no skin, teeth, face shape, expression, lighting, background, pores, or blemishes. ${SHAPE_LOCK_RULES}
 
