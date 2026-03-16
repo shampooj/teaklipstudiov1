@@ -50,13 +50,11 @@ serve(async (req) => {
     const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
     const skinContext = skinDesc ? `This person has ${skinDesc}.` : "";
 
-    const prompt = `STEP 1 — IDENTIFY THE LIPS: Locate the lips in this photo. The lip area is defined by the vermilion border — the visible color transition where lip tissue meets surrounding face skin. The top boundary is the cupid's bow / upper lip edge. The bottom boundary is the lowest curve of the lower lip. The left and right boundaries are the mouth corners (oral commissures). Do NOT include the nose, nostrils, chin, or skin above the upper lip. ${skinContext}
+    const prompt = `Recolor ONLY the lips in this photo with this shade: ${shade}. ${skinContext}
 
-STEP 2 — APPLY COLOR: Recolor ONLY the identified lip area with this shade: ${shade}.
+Do NOT alter anything outside the lips — no skin, teeth, face shape, expression, lighting, background, pores, or blemishes. ${SHAPE_LOCK_RULES}
 
-STEP 3 — PRESERVE EVERYTHING ELSE: ${SHAPE_LOCK_RULES}
-
-Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, pores, and blemishes. Make the lip color change photorealistic but change NOTHING else.`;
+Make the result photorealistic.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
