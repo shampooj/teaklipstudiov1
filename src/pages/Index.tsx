@@ -442,7 +442,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: originalImage, look: selectedLook },
+        body: { imageBase64: originalImage, look: selectedLook, skinTone },
       });
 
       if (error) throw error;
@@ -468,7 +468,7 @@ const Index = () => {
       toast.error(err.message || "Something went wrong. Please try again.");
       setState("uploaded");
     }
-  }, [originalImage, selectedLook]);
+  }, [originalImage, selectedLook, skinTone]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

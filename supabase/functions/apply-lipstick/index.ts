@@ -14,19 +14,21 @@ const LOOK_SHADES: Record<string, string> = {
   "deep-terracotta": "deep warm terracotta-plum matte lipstick, rich dark earthy brown-red with a distinct purple-plum undertone — more purple than brick, with deep berry and chocolate notes. On darker skin tones the purple should be clearly visible, shifting away from orange-brick toward a cool plum-berry direction",
 };
 
+const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
+  "light-brown": "light brown skin with warm golden undertones",
+  "medium-brown": "medium brown skin with warm undertones",
+  "deep-brown": "deep brown skin with rich undertones — lip-skin contrast may be subtle",
+  "rich-brown": "rich dark brown skin — lip boundaries have very low contrast with surrounding skin, pay extra attention to identifying the vermilion border",
+};
+
 const SHAPE_LOCK_RULES = `
-CRITICAL RULES (MUST FOLLOW WITHOUT EXCEPTION):
-- This is ONLY a lip RECOLOR. Change ONLY the hue and saturation of existing lip pixels. Do NOT regenerate, redraw, or reconstruct any part of the image.
-- ABSOLUTE LIP GEOMETRY LOCK: The lip outline, shape, size, thickness, cupid's bow, corners, and contour must remain PIXEL-PERFECT identical to the original. Do NOT redraw, reshape, enlarge, shrink, smooth edges, or alter lip boundaries in ANY way.
-- TEETH ARE 100% LOCKED: Every single teeth pixel must remain byte-identical to the original photo. NEVER alter, invent, remove, smooth, whiten, blur, resize, reshape, or restyle teeth. If teeth are visible, they must be completely untouched.
-- MOUTH LOCK: do not change mouth openness, expression, tongue, or inner mouth.
-- FACE GEOMETRY IS 100% LOCKED: do NOT change ANY facial feature — no reshaping of nose, jawline, chin, eyes, eyebrows, ears, or face contour. Every non-lip pixel must be identical to the input.
-- NO FACIAL ENHANCEMENTS OF ANY KIND: do NOT smooth skin, remove blemishes, reduce wrinkles, brighten eyes, reshape face, slim nose, enhance eyebrows, add makeup to any area other than lips, adjust skin tone, or improve appearance in any way.
-- NO BEAUTIFICATION: the output must look exactly like the input photo with ONLY the lip color changed.
-- Keep ALL non-lip regions pixel-identical to the original (skin, eyes, nose, hair, jawline, clothing, background, lighting, skin texture, pores, every imperfection).
-- Only recolor lip surface within the exact existing lip boundary. Do NOT extend color beyond the natural lip line.
-- If you cannot recolor lips without altering other facial features, return the image UNCHANGED rather than modifying anything else.
-- The person's face shape, skin texture, and all features must be INDISTINGUISHABLE from the original — only lip color should differ.
+STRICT CONSTRAINTS:
+- ONLY recolor lip pixels. Do NOT regenerate, redraw, or reconstruct any part of the image.
+- LIP GEOMETRY IS LOCKED: lip outline, shape, size, thickness, cupid's bow, and corners must remain pixel-identical to the original. Do NOT reshape, enlarge, shrink, or alter lip boundaries.
+- TEETH ARE LOCKED: if teeth are visible, every teeth pixel must remain completely untouched — no whitening, smoothing, reshaping, or altering.
+- FACE IS LOCKED: do NOT change any facial feature, skin texture, blemish, pore, wrinkle, or expression. No beautification or enhancement of any kind.
+- Only apply color within the natural lip boundary. Do NOT extend color beyond the vermilion border onto surrounding skin.
+- If you cannot recolor lips without altering other features, return the image UNCHANGED.
 `.trim();
 
 serve(async (req) => {
@@ -35,7 +37,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, look = "classic-red" } = await req.json();
+    const { imageBase64, look = "classic-red", skinTone = "" } = await req.json();
 
     if (!imageBase64) {
       return new Response(
@@ -45,7 +47,16 @@ serve(async (req) => {
     }
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
-    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, skin imperfections, pores, and blemishes. Do NOT beautify, enhance, smooth, or improve any aspect of the face. Make the lip color change photorealistic but change NOTHING else.`;
+    const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
+    const skinContext = skinDesc ? `This person has ${skinDesc}.` : "";
+
+    const prompt = `STEP 1 — IDENTIFY THE LIPS: Locate the lips in this photo. The lip area is defined by the vermilion border — the visible color transition where lip tissue meets surrounding face skin. The top boundary is the cupid's bow / upper lip edge. The bottom boundary is the lowest curve of the lower lip. The left and right boundaries are the mouth corners (oral commissures). Do NOT include the nose, nostrils, chin, or skin above the upper lip. ${skinContext}
+
+STEP 2 — APPLY COLOR: Recolor ONLY the identified lip area with this shade: ${shade}.
+
+STEP 3 — PRESERVE EVERYTHING ELSE: ${SHAPE_LOCK_RULES}
+
+Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, pores, and blemishes. Make the lip color change photorealistic but change NOTHING else.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
