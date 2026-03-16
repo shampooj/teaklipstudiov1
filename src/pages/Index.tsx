@@ -753,6 +753,21 @@ const Index = () => {
                     </SelectContent>
                   </Select>
 
+                  {/* Model toggle for A/B testing */}
+                  <Select value={aiModel} onValueChange={setAiModel}>
+                    <SelectTrigger className="w-full border-foreground/20 font-sans text-xs">
+                      <SelectValue placeholder="AI Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google/gemini-3.1-flash-image-preview">
+                        <span className="font-display text-sm">Flash (fast)</span>
+                      </SelectItem>
+                      <SelectItem value="google/gemini-3-pro-image-preview">
+                        <span className="font-display text-sm">Pro (higher quality)</span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+
                   <div className="flex gap-3 justify-center pt-2">
                     <Button
                       onClick={applyLipstick}
