@@ -63,7 +63,7 @@ Make the result photorealistic.`;
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const requestBody = JSON.stringify({
-      model: "google/gemini-3.1-flash-image-preview",
+      model: selectedModel,
       messages: [
         {
           role: "user",
