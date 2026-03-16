@@ -14,37 +14,6 @@ const LOOK_SHADES: Record<string, string> = {
   "deep-terracotta": "deep warm terracotta-plum matte lipstick, rich dark earthy brown-red with a distinct purple-plum undertone — more purple than brick, with deep berry and chocolate notes. On darker skin tones the purple should be clearly visible, shifting away from orange-brick toward a cool plum-berry direction",
 };
 
-const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
-  "light-brown": "light brown skin with warm golden undertones",
-  "medium-brown": "medium brown skin with warm undertones",
-  "deep-brown": "deep brown skin with rich undertones",
-  "rich-brown": "rich dark brown skin",
-};
-
-const LIP_TONE_DESCRIPTIONS: Record<string, string> = {
-  "bright-pink": "bright pink lips",
-  "brown-pink": "brown-pink lips",
-  "mauve-pink": "mauve-pink lips",
-  "beige": "beige/nude lips",
-  "two-toned-purple": "two-toned purple-brown lips",
-  "two-toned-brown": "two-toned brown lips",
-  "two-toned-grey": "two-toned grey-brown lips",
-  "two-toned-beige": "two-toned beige-brown lips",
-  "neutral-brown": "neutral brown lips",
-  "medium-brown": "medium brown lips",
-  "deep-brown": "deep brown lips that are very close in color to the surrounding skin",
-  "grey-brown": "grey-brown lips",
-};
-
-const SHAPE_LOCK_RULES = `
-STRICT CONSTRAINTS:
-- ONLY recolor lip pixels. Do NOT regenerate, redraw, or reconstruct any part of the image.
-- LIP GEOMETRY IS LOCKED: lip outline, shape, size, thickness, cupid's bow, and corners must remain pixel-identical to the original. Do NOT reshape, enlarge, shrink, or alter lip boundaries.
-- TEETH ARE LOCKED: if teeth are visible, every teeth pixel must remain completely untouched — no whitening, smoothing, reshaping, or altering.
-- FACE IS LOCKED: do NOT change any facial feature, skin texture, blemish, pore, wrinkle, or expression. No beautification or enhancement of any kind.
-- Only apply color within the natural lip boundary. Do NOT extend color beyond the vermilion border onto surrounding skin.
-- If you cannot recolor lips without altering other features, return the image UNCHANGED.
-`.trim();
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -65,21 +34,8 @@ serve(async (req) => {
     }
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
-    const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
-    const lipDesc = LIP_TONE_DESCRIPTIONS[lipTone] || "";
 
-    const currentLipContext = lipDesc
-      ? `This person currently has ${lipDesc}. Their lips may blend with their skin tone — look for the subtle texture and contour difference around the mouth to locate them.`
-      : "";
-    const skinContext = skinDesc ? `They have ${skinDesc}.` : "";
-
-    const prompt = `This person's lips currently appear as: ${lipDesc || "natural lip color"}. ${skinContext} Change ONLY their lip color to: ${shade}.
-
-${currentLipContext}
-
-Do NOT alter anything outside the lips — no skin, teeth, face shape, expression, lighting, background, pores, or blemishes. ${SHAPE_LOCK_RULES}
-
-Make the result photorealistic.`;
+    const prompt = `Apply this lipstick shade to the lips in this photo: ${shade}. Keep everything else in the image exactly the same — same face, skin, teeth, expression, lighting, and background. Only change the lip color.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
