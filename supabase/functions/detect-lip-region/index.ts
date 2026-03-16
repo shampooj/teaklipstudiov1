@@ -38,7 +38,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: "Analyze this face photo. Return a bounding box that captures just the lips."
+                text: "Analyze this face photo. First, identify the full face region (forehead to chin, ear to ear). Then, within that face region, locate just the lips. Return a bounding box that tightly captures only the lips area, using coordinates relative to the full image (normalized 0 to 1)."
               },
               {
                 type: "image_url",
