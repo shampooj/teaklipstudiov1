@@ -442,7 +442,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: originalImage, look: selectedLook },
+        body: { imageBase64: originalImage, look: selectedLook, skinTone },
       });
 
       if (error) throw error;
