@@ -443,7 +443,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: originalImage, look: selectedLook, skinTone },
+        body: { imageBase64: originalImage, look: selectedLook, skinTone, model: aiModel },
       });
 
       if (error) throw error;
