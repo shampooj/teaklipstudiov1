@@ -395,6 +395,7 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
   const [progress, setProgress] = useState(0);
    const [addedToCart, setAddedToCart] = useState(false);
    const [cartError, setCartError] = useState(false);
