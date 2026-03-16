@@ -38,7 +38,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: "Analyze this face photo. First, identify the full face region (forehead to chin, ear to ear). Then, within that face region, locate just the lips. Return a bounding box that tightly captures only the lips area, using coordinates relative to the full image (normalized 0 to 1)."
+                text: "Look at this photo of a person's face. I need you to find ONLY THE LIPS (mouth area). Return a bounding box around just the lips — from the top of the upper lip to the bottom of the lower lip, and from the left corner of the mouth to the right corner. Add about 15-20% padding around the lips on all sides. Return normalized coordinates (0 to 1) relative to the full image dimensions."
               },
               {
                 type: "image_url",
@@ -52,25 +52,25 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "return_lip_region",
-              description: "Return the bounding box of the face region as normalized coordinates (0 to 1).",
+              description: "Return the bounding box around the lips/mouth area as normalized coordinates (0 to 1) relative to the full image.",
               parameters: {
                 type: "object",
                 properties: {
                   top: {
                     type: "number",
-                    description: "Top edge of the crop region as a fraction of image height (0 = top of image, 1 = bottom)."
+                    description: "Top edge of the lip bounding box as a fraction of image height (0 = top of image). Should be slightly above the upper lip."
                   },
                   bottom: {
                     type: "number",
-                    description: "Bottom edge of the crop region as a fraction of image height. Should include the chin with some margin."
+                    description: "Bottom edge of the lip bounding box as a fraction of image height. Should be slightly below the lower lip/chin area."
                   },
                   left: {
                     type: "number",
-                    description: "Left edge of the crop region as a fraction of image width."
+                    description: "Left edge of the lip bounding box as a fraction of image width. Should be slightly left of the left mouth corner."
                   },
                   right: {
                     type: "number",
-                    description: "Right edge of the crop region as a fraction of image width."
+                    description: "Right edge of the lip bounding box as a fraction of image width. Should be slightly right of the right mouth corner."
                   }
                 },
                 required: ["top", "bottom", "left", "right"],
