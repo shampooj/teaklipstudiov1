@@ -395,6 +395,7 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
   const [progress, setProgress] = useState(0);
    const [addedToCart, setAddedToCart] = useState(false);
    const [cartError, setCartError] = useState(false);
@@ -442,7 +443,7 @@ const Index = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: originalImage, look: selectedLook, skinTone },
+        body: { imageBase64: originalImage, look: selectedLook, skinTone, model: aiModel },
       });
 
       if (error) throw error;
@@ -468,7 +469,7 @@ const Index = () => {
       toast.error(err.message || "Something went wrong. Please try again.");
       setState("uploaded");
     }
-  }, [originalImage, selectedLook, skinTone]);
+  }, [originalImage, selectedLook, skinTone, aiModel]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -749,6 +750,21 @@ const Index = () => {
                           </div>
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+
+                  {/* Model toggle for A/B testing */}
+                  <Select value={aiModel} onValueChange={setAiModel}>
+                    <SelectTrigger className="w-full border-foreground/20 font-sans text-xs">
+                      <SelectValue placeholder="AI Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="google/gemini-3.1-flash-image-preview">
+                        <span className="font-display text-sm">Flash (fast)</span>
+                      </SelectItem>
+                      <SelectItem value="google/gemini-3-pro-image-preview">
+                        <span className="font-display text-sm">Pro (higher quality)</span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
 

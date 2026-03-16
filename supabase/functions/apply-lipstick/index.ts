@@ -37,7 +37,10 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, look = "classic-red", skinTone = "" } = await req.json();
+    const { imageBase64, look = "classic-red", skinTone = "", model = "google/gemini-3.1-flash-image-preview" } = await req.json();
+
+    const ALLOWED_MODELS = ["google/gemini-3.1-flash-image-preview", "google/gemini-3-pro-image-preview"];
+    const selectedModel = ALLOWED_MODELS.includes(model) ? model : ALLOWED_MODELS[0];
 
     if (!imageBase64) {
       return new Response(
@@ -60,7 +63,7 @@ Make the result photorealistic.`;
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const requestBody = JSON.stringify({
-      model: "google/gemini-3.1-flash-image-preview",
+      model: selectedModel,
       messages: [
         {
           role: "user",
