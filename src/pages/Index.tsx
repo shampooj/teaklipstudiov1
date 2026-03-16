@@ -450,16 +450,8 @@ const Index = () => {
       if (data?.error) throw new Error(data.error);
       if (!data?.resultImage) throw new Error("No edited image returned.");
 
-      const finalImage = await blendLipstickPreservingTeeth(originalImage, data.resultImage as string, selectedLook);
-
-      if (finalImage === originalImage) {
-        toast.error("Couldn't safely isolate lips without changing facial features. Try a clearer front-facing photo.");
-        stopProgress();
-        setState("uploaded");
-        return;
-      }
-
-      setResultImage(finalImage);
+      // Temporarily bypassing blendLipstickPreservingTeeth — using AI output directly
+      setResultImage(data.resultImage as string);
       stopProgress();
       setState("done");
       toast.success("Lipstick applied!");
