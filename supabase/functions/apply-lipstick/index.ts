@@ -14,12 +14,6 @@ const LOOK_SHADES: Record<string, string> = {
   "deep-terracotta": "deep warm terracotta-plum matte lipstick, rich dark earthy brown-red with a distinct purple-plum undertone — more purple than brick, with deep berry and chocolate notes. On darker skin tones the purple should be clearly visible, shifting away from orange-brick toward a cool plum-berry direction",
 };
 
-const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
-  "light-brown": "light brown skin with warm golden undertones",
-  "medium-brown": "medium brown skin with warm undertones",
-  "deep-brown": "deep brown skin with rich undertones",
-  "rich-brown": "rich dark brown skin",
-};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
