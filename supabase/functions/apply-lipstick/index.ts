@@ -37,7 +37,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, look = "classic-red" } = await req.json();
+    const { imageBase64, look = "classic-red", skinTone = "" } = await req.json();
 
     if (!imageBase64) {
       return new Response(
@@ -47,7 +47,16 @@ serve(async (req) => {
     }
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
-    const prompt = `Edit this photo to apply lipstick only. Target shade: ${shade}. ${SHAPE_LOCK_RULES} Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, skin imperfections, pores, and blemishes. Do NOT beautify, enhance, smooth, or improve any aspect of the face. Make the lip color change photorealistic but change NOTHING else.`;
+    const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
+    const skinContext = skinDesc ? `This person has ${skinDesc}.` : "";
+
+    const prompt = `STEP 1 — IDENTIFY THE LIPS: Locate the lips in this photo. The lip area is defined by the vermilion border — the visible color transition where lip tissue meets surrounding face skin. The top boundary is the cupid's bow / upper lip edge. The bottom boundary is the lowest curve of the lower lip. The left and right boundaries are the mouth corners (oral commissures). Do NOT include the nose, nostrils, chin, or skin above the upper lip. ${skinContext}
+
+STEP 2 — APPLY COLOR: Recolor ONLY the identified lip area with this shade: ${shade}.
+
+STEP 3 — PRESERVE EVERYTHING ELSE: ${SHAPE_LOCK_RULES}
+
+Keep everything else EXACTLY the same — same face, expression, lighting, background, skin texture, pores, and blemishes. Make the lip color change photorealistic but change NOTHING else.`;
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
