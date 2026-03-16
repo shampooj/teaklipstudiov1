@@ -14,6 +14,13 @@ const LOOK_SHADES: Record<string, string> = {
   "deep-terracotta": "deep warm terracotta-plum matte lipstick, rich dark earthy brown-red with a distinct purple-plum undertone — more purple than brick, with deep berry and chocolate notes. On darker skin tones the purple should be clearly visible, shifting away from orange-brick toward a cool plum-berry direction",
 };
 
+const SKIN_TONE_DESCRIPTIONS: Record<string, string> = {
+  "light-brown": "light brown skin with warm golden undertones",
+  "medium-brown": "medium brown skin with warm undertones",
+  "deep-brown": "deep brown skin with rich undertones — lip-skin contrast may be subtle",
+  "rich-brown": "rich dark brown skin — lip boundaries have very low contrast with surrounding skin, pay extra attention to identifying the vermilion border",
+};
+
 const SHAPE_LOCK_RULES = `
 CRITICAL RULES (MUST FOLLOW WITHOUT EXCEPTION):
 - This is ONLY a lip RECOLOR. Change ONLY the hue and saturation of existing lip pixels. Do NOT regenerate, redraw, or reconstruct any part of the image.
