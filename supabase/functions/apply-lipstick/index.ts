@@ -52,7 +52,7 @@ serve(async (req) => {
   }
 
   try {
-    const { imageBase64, look = "classic-red", skinTone = "", model = "google/gemini-3.1-flash-image-preview" } = await req.json();
+    const { imageBase64, look = "classic-red", skinTone = "", lipTone = "", model = "google/gemini-3.1-flash-image-preview" } = await req.json();
 
     const ALLOWED_MODELS = ["google/gemini-3.1-flash-image-preview", "google/gemini-3-pro-image-preview"];
     const selectedModel = ALLOWED_MODELS.includes(model) ? model : ALLOWED_MODELS[0];
@@ -66,9 +66,16 @@ serve(async (req) => {
 
     const shade = LOOK_SHADES[look] || LOOK_SHADES["classic-red"];
     const skinDesc = SKIN_TONE_DESCRIPTIONS[skinTone] || "";
-    const skinContext = skinDesc ? `This person has ${skinDesc}.` : "";
+    const lipDesc = LIP_TONE_DESCRIPTIONS[lipTone] || "";
 
-    const prompt = `Recolor ONLY the lips in this photo with this shade: ${shade}. ${skinContext}
+    const currentLipContext = lipDesc
+      ? `This person currently has ${lipDesc}. Their lips may blend with their skin tone — look for the subtle texture and contour difference around the mouth to locate them.`
+      : "";
+    const skinContext = skinDesc ? `They have ${skinDesc}.` : "";
+
+    const prompt = `This person's lips currently appear as: ${lipDesc || "natural lip color"}. ${skinContext} Change ONLY their lip color to: ${shade}.
+
+${currentLipContext}
 
 Do NOT alter anything outside the lips — no skin, teeth, face shape, expression, lighting, background, pores, or blemishes. ${SHAPE_LOCK_RULES}
 
