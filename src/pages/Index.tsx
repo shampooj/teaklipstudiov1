@@ -469,7 +469,7 @@ const Index = () => {
       toast.error(err.message || "Something went wrong. Please try again.");
       setState("uploaded");
     }
-  }, [originalImage, selectedLook, skinTone]);
+  }, [originalImage, selectedLook, skinTone, aiModel]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
