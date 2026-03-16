@@ -38,7 +38,7 @@ serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: "Analyze this face photo. Return a bounding box that captures the full face including forehead, eyes, nose, lips, chin, and jawline. Include the complete face with some margin around it."
+                text: "Analyze this face photo. Return a bounding box that captures just the lips."
               },
               {
                 type: "image_url",
