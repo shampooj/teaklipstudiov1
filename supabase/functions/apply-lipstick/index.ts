@@ -112,6 +112,10 @@ serve(async (req) => {
     const resultImage = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
 
     if (!resultImage) {
+      const textContent = data.choices?.[0]?.message?.content || "no content";
+      const fullStructure = JSON.stringify(data.choices?.[0]?.message || {}).substring(0, 1000);
+      console.error("No image in response. Text:", textContent.substring(0, 300));
+      console.error("Response structure:", fullStructure);
       return new Response(JSON.stringify({ error: "No image was generated. Try again with a clearer photo." }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
