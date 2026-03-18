@@ -110,6 +110,9 @@ interface Submission {
   labeled_by_email?: string;
   is_labeled: boolean;
   admin_label_id?: string;
+  ai_skin_tone: string | null;
+  ai_lip_tone: string | null;
+  ai_model_name: string | null;
 }
 
 const Dashboard = () => {
