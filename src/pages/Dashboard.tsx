@@ -110,6 +110,9 @@ interface Submission {
   labeled_by_email?: string;
   is_labeled: boolean;
   admin_label_id?: string;
+  ai_skin_tone: string | null;
+  ai_lip_tone: string | null;
+  ai_model_name: string | null;
 }
 
 const Dashboard = () => {
@@ -125,12 +128,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const fetchData = async () => {
-    const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
+    const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
       (supabase.from as any)("customer_submissions")
         .select("*")
         .order("created_at", { ascending: false }),
       (supabase.from as any)("admin_labels").select("*"),
       (supabase.from as any)("profiles").select("id, email"),
+      (supabase.from as any)("ai_categorization").select("*"),
     ]);
     if (error) {
       console.error("Failed to fetch submissions:", error);
@@ -149,8 +153,12 @@ const Dashboard = () => {
       enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
       setAdminLabels(enrichedLabels);
 
+      const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
+      (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
+
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
+        const aiCat = aiCatMap.get(r.id);
         return {
           ...r,
           is_labeled: !!label,
@@ -160,6 +168,9 @@ const Dashboard = () => {
           labeled_at: label?.labeled_at ?? null,
           admin_label_id: label?.id,
           labeled_by_email: label?.labeled_by_user_id ? emailMap.get(label.labeled_by_user_id) ?? null : null,
+          ai_skin_tone: aiCat?.ai_skin_tone ?? null,
+          ai_lip_tone: aiCat?.ai_lip_tone ?? null,
+          ai_model_name: aiCat?.model_name ?? null,
         };
       });
       setData(enriched);
@@ -589,6 +600,38 @@ const Dashboard = () => {
                       );
                     })() : (
                       <p className="text-[9px] text-muted-foreground">No lip tone selected</p>
+                    )}
+                  </div>
+                  {/* AI categorization */}
+                  <div className="flex flex-col gap-3">
+                    {currentImage.ai_skin_tone ? (() => {
+                      const match = SKIN_TONES_REF.find(s => s.id === currentImage.ai_skin_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Skin Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_skin_tone}</span>
+                          </div>
+                          {currentImage.ai_model_name && <p className="text-[8px] text-muted-foreground mt-0.5">{currentImage.ai_model_name}</p>}
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No AI skin tone</p>
+                    )}
+                    {currentImage.ai_lip_tone ? (() => {
+                      const match = LIP_TONES_REF.find(l => l.id === currentImage.ai_lip_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Lip Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_lip_tone}</span>
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No AI lip tone</p>
                     )}
                   </div>
                 </div>
