@@ -264,8 +264,6 @@ const Dashboard = () => {
     return labeledSubmissions.filter(
       (row) =>
         row.id.toLowerCase().includes(q) ||
-        row.shade_label.toLowerCase().includes(q) ||
-        row.shade_id.toLowerCase().includes(q) ||
         (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
         (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
         (row.labeled_at && row.labeled_at.toLowerCase().includes(q))
