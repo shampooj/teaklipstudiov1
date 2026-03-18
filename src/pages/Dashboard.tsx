@@ -608,7 +608,7 @@ const Dashboard = () => {
                       const match = SKIN_TONES_REF.find(s => s.id === currentImage.ai_skin_tone);
                       return (
                         <div>
-                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Skin Tone</p>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Skin Tone Categorization</p>
                           <div className="flex items-center gap-2">
                             {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
                             <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_skin_tone}</span>
