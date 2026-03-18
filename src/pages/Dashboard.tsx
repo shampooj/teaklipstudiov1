@@ -249,8 +249,6 @@ const Dashboard = () => {
     const q = search.toLowerCase();
     return data.filter(
       (row) =>
-        row.shade_id.toLowerCase().includes(q) ||
-        row.shade_label.toLowerCase().includes(q) ||
         row.variant_id.toLowerCase().includes(q) ||
         row.id.toLowerCase().includes(q) ||
         (row.image_id && row.image_id.toLowerCase().includes(q)) ||
