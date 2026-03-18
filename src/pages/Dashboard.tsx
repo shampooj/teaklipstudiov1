@@ -150,8 +150,12 @@ const Dashboard = () => {
       enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
       setAdminLabels(enrichedLabels);
 
+      const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
+      (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
+
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
+        const aiCat = aiCatMap.get(r.id);
         return {
           ...r,
           is_labeled: !!label,
@@ -161,6 +165,9 @@ const Dashboard = () => {
           labeled_at: label?.labeled_at ?? null,
           admin_label_id: label?.id,
           labeled_by_email: label?.labeled_by_user_id ? emailMap.get(label.labeled_by_user_id) ?? null : null,
+          ai_skin_tone: aiCat?.ai_skin_tone ?? null,
+          ai_lip_tone: aiCat?.ai_lip_tone ?? null,
+          ai_model_name: aiCat?.model_name ?? null,
         };
       });
       setData(enriched);
