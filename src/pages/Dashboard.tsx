@@ -613,7 +613,7 @@ const Dashboard = () => {
                             {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
                             <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_skin_tone}</span>
                           </div>
-                          {currentImage.ai_model_name && <p className="text-[8px] text-muted-foreground mt-0.5">{currentImage.ai_model_name}</p>}
+                          
                         </div>
                       );
                     })() : (
