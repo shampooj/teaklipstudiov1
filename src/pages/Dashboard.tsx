@@ -125,12 +125,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const fetchData = async () => {
-    const [{ data: rows, error }, { data: labels }, { data: profiles }] = await Promise.all([
+    const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
       (supabase.from as any)("customer_submissions")
         .select("*")
         .order("created_at", { ascending: false }),
       (supabase.from as any)("admin_labels").select("*"),
       (supabase.from as any)("profiles").select("id, email"),
+      (supabase.from as any)("ai_categorization").select("*"),
     ]);
     if (error) {
       console.error("Failed to fetch submissions:", error);
