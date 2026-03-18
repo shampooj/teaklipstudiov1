@@ -530,7 +530,7 @@ const Dashboard = () => {
         {activeTab === "labeling" && (
           <>
             {currentImage ? (
-              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-md space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-2xl space-y-4" style={{ backgroundColor: 'hsl(var(--light-green))' }}>
                 <div className="flex items-center justify-between">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
                     Images Needing Admin Label ({clampedIndex + 1} of {unlabeled.length})
@@ -544,22 +544,53 @@ const Dashboard = () => {
                     </Button>
                   </span>
                 </div>
-                {currentImage.image_url ? (
-                   <img
-                     src={currentImage.image_url}
-                     alt="Submission"
-                     className="w-full max-w-[16rem] max-h-64 object-contain rounded-md border border-border"
-                  />
-                ) : (
-                  <p className="text-muted-foreground text-[9px]">No image available</p>
-                )}
-                <p className="text-[9px] text-muted-foreground">
-                  Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
-                </p>
-                <div className="flex gap-3 text-[9px] text-muted-foreground">
-                  {currentImage.skin_tone && <span>User Skin Tone: <strong className="text-foreground">{currentImage.skin_tone}</strong></span>}
-                  {currentImage.lip_tone && <span>User Lip Tone: <strong className="text-foreground">{currentImage.lip_tone}</strong></span>}
-                  {!currentImage.skin_tone && !currentImage.lip_tone && <span>No user self-labels</span>}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {/* Submission image */}
+                  <div className="flex-shrink-0">
+                    {currentImage.image_url ? (
+                      <img
+                        src={currentImage.image_url}
+                        alt="Submission"
+                        className="w-full sm:w-48 max-h-64 object-contain rounded-md border border-border"
+                      />
+                    ) : (
+                      <p className="text-muted-foreground text-[9px]">No image available</p>
+                    )}
+                    <p className="text-[9px] text-muted-foreground mt-2">
+                      Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  {/* User's quiz selections */}
+                  <div className="flex flex-col gap-3">
+                    {currentImage.skin_tone ? (() => {
+                      const match = SKIN_TONES_REF.find(s => s.id === currentImage.skin_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Skin Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.skin_tone}</span>
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No skin tone selected</p>
+                    )}
+                    {currentImage.lip_tone ? (() => {
+                      const match = LIP_TONES_REF.find(l => l.id === currentImage.lip_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Lip Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.lip_tone}</span>
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No lip tone selected</p>
+                    )}
+                  </div>
                 </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
