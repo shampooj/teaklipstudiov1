@@ -556,6 +556,11 @@ const Dashboard = () => {
                 <p className="text-[9px] text-muted-foreground">
                   Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
                 </p>
+                <div className="flex gap-3 text-[9px] text-muted-foreground">
+                  {currentImage.skin_tone && <span>User Skin Tone: <strong className="text-foreground">{currentImage.skin_tone}</strong></span>}
+                  {currentImage.lip_tone && <span>User Lip Tone: <strong className="text-foreground">{currentImage.lip_tone}</strong></span>}
+                  {!currentImage.skin_tone && !currentImage.lip_tone && <span>No user self-labels</span>}
+                </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
                     <SelectValue placeholder="Select lip tone category" />
