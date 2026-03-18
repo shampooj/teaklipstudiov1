@@ -940,8 +940,6 @@ const Index = () => {
 
                       // Save submission to database
                       supabase.from("customer_submissions" as any).insert({
-                        shade_id: look.id,
-                        shade_label: look.label,
                         variant_id: look.variantId,
                         image_url: imageUrl,
                         image_id: imageId,

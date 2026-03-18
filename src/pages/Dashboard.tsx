@@ -846,10 +846,6 @@ const Dashboard = () => {
                            {new Date(row.created_at).toLocaleString()}
                          </TableCell>
                          <TableCell className="font-mono text-[9px]">{row.image_id || <span className="text-muted-foreground">—</span>}</TableCell>
-                        <TableCell className="text-[9px]">{row.shade_label}</TableCell>
-                        <TableCell className="font-mono text-[9px]">
-                          {row.shade_id}
-                        </TableCell>
                         <TableCell className="font-mono text-[9px]">
                           {row.variant_id}
                         </TableCell>
