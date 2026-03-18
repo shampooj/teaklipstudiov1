@@ -562,7 +562,7 @@ const Dashboard = () => {
                       <p className="text-muted-foreground text-[9px]">No image available</p>
                     )}
                     <p className="text-[9px] text-muted-foreground mt-2">
-                      Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+                      {new Date(currentImage.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   {/* User's quiz selections */}
