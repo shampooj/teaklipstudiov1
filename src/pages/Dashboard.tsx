@@ -599,6 +599,38 @@ const Dashboard = () => {
                       <p className="text-[9px] text-muted-foreground">No lip tone selected</p>
                     )}
                   </div>
+                  {/* AI categorization */}
+                  <div className="flex flex-col gap-3">
+                    {currentImage.ai_skin_tone ? (() => {
+                      const match = SKIN_TONES_REF.find(s => s.id === currentImage.ai_skin_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Skin Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_skin_tone}</span>
+                          </div>
+                          {currentImage.ai_model_name && <p className="text-[8px] text-muted-foreground mt-0.5">{currentImage.ai_model_name}</p>}
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No AI skin tone</p>
+                    )}
+                    {currentImage.ai_lip_tone ? (() => {
+                      const match = LIP_TONES_REF.find(l => l.id === currentImage.ai_lip_tone);
+                      return (
+                        <div>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">AI Lip Tone</p>
+                          <div className="flex items-center gap-2">
+                            {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
+                            <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.ai_lip_tone}</span>
+                          </div>
+                        </div>
+                      );
+                    })() : (
+                      <p className="text-[9px] text-muted-foreground">No AI lip tone</p>
+                    )}
+                  </div>
                 </div>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                   <SelectTrigger className="rounded-full border-foreground/20 text-[9px]">
