@@ -52,6 +52,41 @@ export type Database = {
           },
         ]
       }
+      ai_categorization: {
+        Row: {
+          ai_lip_tone: string | null
+          ai_skin_tone: string | null
+          created_at: string
+          id: string
+          model_name: string
+          submission_id: string | null
+        }
+        Insert: {
+          ai_lip_tone?: string | null
+          ai_skin_tone?: string | null
+          created_at?: string
+          id?: string
+          model_name: string
+          submission_id?: string | null
+        }
+        Update: {
+          ai_lip_tone?: string | null
+          ai_skin_tone?: string | null
+          created_at?: string
+          id?: string
+          model_name?: string
+          submission_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_categorization_submission_id_fkey"
+            columns: ["submission_id"]
+            isOneToOne: false
+            referencedRelation: "customer_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_submissions: {
         Row: {
           created_at: string
