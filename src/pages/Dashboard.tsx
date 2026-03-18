@@ -566,7 +566,7 @@ const Dashboard = () => {
                       const match = SKIN_TONES_REF.find(s => s.id === currentImage.skin_tone);
                       return (
                         <div>
-                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Skin Tone</p>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Skin Tone Submission</p>
                           <div className="flex items-center gap-2">
                             {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
                             <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.skin_tone}</span>
@@ -580,7 +580,7 @@ const Dashboard = () => {
                       const match = LIP_TONES_REF.find(l => l.id === currentImage.lip_tone);
                       return (
                         <div>
-                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Lip Tone</p>
+                          <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">User's Lip Tone Submission</p>
                           <div className="flex items-center gap-2">
                             {match && <img src={match.image} alt={match.label} className="w-14 h-14 rounded-md object-cover border border-border" />}
                             <span className="text-[10px] font-medium text-foreground">{match?.label || currentImage.lip_tone}</span>
