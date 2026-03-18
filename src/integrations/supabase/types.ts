@@ -95,8 +95,6 @@ export type Database = {
           image_url: string | null
           is_labeled: boolean
           lip_tone: string | null
-          shade_id: string
-          shade_label: string
           skin_tone: string | null
           variant_id: string
         }
@@ -107,8 +105,6 @@ export type Database = {
           image_url?: string | null
           is_labeled?: boolean
           lip_tone?: string | null
-          shade_id: string
-          shade_label: string
           skin_tone?: string | null
           variant_id: string
         }
@@ -119,8 +115,6 @@ export type Database = {
           image_url?: string | null
           is_labeled?: boolean
           lip_tone?: string | null
-          shade_id?: string
-          shade_label?: string
           skin_tone?: string | null
           variant_id?: string
         }

@@ -95,8 +95,6 @@ interface AdminLabel {
 interface Submission {
   id: string;
   created_at: string;
-  shade_id: string;
-  shade_label: string;
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
@@ -251,8 +249,6 @@ const Dashboard = () => {
     const q = search.toLowerCase();
     return data.filter(
       (row) =>
-        row.shade_id.toLowerCase().includes(q) ||
-        row.shade_label.toLowerCase().includes(q) ||
         row.variant_id.toLowerCase().includes(q) ||
         row.id.toLowerCase().includes(q) ||
         (row.image_id && row.image_id.toLowerCase().includes(q)) ||
@@ -268,8 +264,6 @@ const Dashboard = () => {
     return labeledSubmissions.filter(
       (row) =>
         row.id.toLowerCase().includes(q) ||
-        row.shade_label.toLowerCase().includes(q) ||
-        row.shade_id.toLowerCase().includes(q) ||
         (row.admin_lip_tone_category && row.admin_lip_tone_category.toLowerCase().includes(q)) ||
         (row.labeled_by_email && row.labeled_by_email.toLowerCase().includes(q)) ||
         (row.labeled_at && row.labeled_at.toLowerCase().includes(q))
@@ -568,7 +562,7 @@ const Dashboard = () => {
                       <p className="text-muted-foreground text-[9px]">No image available</p>
                     )}
                     <p className="text-[9px] text-muted-foreground mt-2">
-                      Shade: {currentImage.shade_label} · {new Date(currentImage.created_at).toLocaleDateString()}
+                      {new Date(currentImage.created_at).toLocaleDateString()}
                     </p>
                   </div>
                   {/* User's quiz selections */}
@@ -838,8 +832,6 @@ const Dashboard = () => {
                     <TableRow className="border-border">
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
-                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
-                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
@@ -854,10 +846,6 @@ const Dashboard = () => {
                            {new Date(row.created_at).toLocaleString()}
                          </TableCell>
                          <TableCell className="font-mono text-[9px]">{row.image_id || <span className="text-muted-foreground">—</span>}</TableCell>
-                        <TableCell className="text-[9px]">{row.shade_label}</TableCell>
-                        <TableCell className="font-mono text-[9px]">
-                          {row.shade_id}
-                        </TableCell>
                         <TableCell className="font-mono text-[9px]">
                           {row.variant_id}
                         </TableCell>
