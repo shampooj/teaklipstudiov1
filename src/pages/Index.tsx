@@ -446,7 +446,11 @@ const Index = () => {
         body: { imageBase64: originalImage, look: selectedLook, skinTone, lipTone, model: aiModel },
       });
 
-      if (error) throw error;
+      // supabase-js puts non-2xx body in `data` and sets a generic `error`
+      if (error) {
+        const msg = data?.error || error.message || "Something went wrong.";
+        throw new Error(msg);
+      }
       if (data?.error) throw new Error(data.error);
       if (!data?.resultImage) throw new Error("No edited image returned.");
 
@@ -458,7 +462,14 @@ const Index = () => {
     } catch (err: any) {
       console.error(err);
       stopProgress();
-      toast.error(err.message || "Something went wrong. Please try again.");
+      const message = err.message || "Something went wrong. Please try again.";
+      if (message.includes("Rate limit")) {
+        toast.error("Rate limit reached — please wait a moment and try again.");
+      } else if (message.includes("Payment") || message.includes("credits")) {
+        toast.error("Usage limit reached — please add credits to continue.");
+      } else {
+        toast.error(message);
+      }
       setState("uploaded");
     }
   }, [originalImage, selectedLook, skinTone, aiModel]);
