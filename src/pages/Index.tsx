@@ -436,14 +436,32 @@ const Index = () => {
     reader.readAsDataURL(file);
   }, []);
 
+  const downscaleImage = (base64: string, maxSize = 1024): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+        if (scale >= 1) { resolve(base64); return; }
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.src = base64;
+    });
+  };
+
   const applyLipstick = useCallback(async () => {
     if (!originalImage) return;
     setState("processing");
     startProgress();
 
     try {
+      const resizedImage = await downscaleImage(originalImage, 1024);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: originalImage, look: selectedLook, skinTone, lipTone, model: aiModel },
+        body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel },
       });
 
       // supabase-js puts non-2xx body in `data` and sets a generic `error`
