@@ -95,8 +95,6 @@ interface AdminLabel {
 interface Submission {
   id: string;
   created_at: string;
-  shade_id: string;
-  shade_label: string;
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
