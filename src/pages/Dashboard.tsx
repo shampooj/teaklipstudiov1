@@ -832,8 +832,6 @@ const Dashboard = () => {
                     <TableRow className="border-border">
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
-                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade</TableHead>
-                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Shade ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
