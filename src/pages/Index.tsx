@@ -947,8 +947,30 @@ const Index = () => {
                         image_id: imageId,
                         skin_tone: skinTone,
                         lip_tone: lipTone,
-                      } as any).then(({ error: insertError }) => {
-                        if (insertError) console.error("Failed to track cart click:", insertError);
+                      } as any).select().then(({ data: insertData, error: insertError }) => {
+                        if (insertError) {
+                          console.error("Failed to track cart click:", insertError);
+                          return;
+                        }
+                        // Fire AI categorization in background
+                        const submissionId = (insertData as any)?.[0]?.id;
+                        if (submissionId && originalImage) {
+                          const img = new Image();
+                          img.onload = () => {
+                            const c = document.createElement("canvas");
+                            c.width = Math.min(img.width, 1024);
+                            c.height = Math.round(img.height * (c.width / img.width));
+                            const cx = c.getContext("2d")!;
+                            cx.drawImage(img, 0, 0, c.width, c.height);
+                            const base64 = c.toDataURL("image/jpeg", 0.7);
+                            supabase.functions.invoke("categorize-skin-lip", {
+                              body: { imageBase64: base64, submissionId },
+                            }).then(({ error }) => {
+                              if (error) console.error("AI categorization failed:", error);
+                            });
+                          };
+                          img.src = originalImage;
+                        }
                       });
 
                       // Ask the Shopify parent page to add to cart via postMessage bridge
