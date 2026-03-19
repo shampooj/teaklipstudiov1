@@ -459,7 +459,7 @@ const Index = () => {
     startProgress();
 
     try {
-      const resizedImage = await downscaleImage(originalImage, 1024);
+      const resizedImage = await downscaleImage(originalImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
         body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel },
       });
