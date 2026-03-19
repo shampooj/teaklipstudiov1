@@ -447,7 +447,7 @@ const Index = () => {
         canvas.height = Math.round(img.height * scale);
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
       };
       img.src = base64;
     });
@@ -459,7 +459,7 @@ const Index = () => {
     startProgress();
 
     try {
-      const resizedImage = await downscaleImage(originalImage, 1024);
+      const resizedImage = await downscaleImage(originalImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
         body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel },
       });
