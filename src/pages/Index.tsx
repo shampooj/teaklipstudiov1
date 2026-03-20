@@ -628,11 +628,7 @@ const Index = () => {
                       <button
                         key={tone.id}
                         onClick={() => setLipTone(tone.id)}
-                        className={`group flex flex-col items-center gap-1.5 border transition-all duration-200 hover:border-foreground/40 overflow-hidden ${
-                          lipTone === tone.id
-                            ? "border-foreground ring-1 ring-foreground"
-                            : "border-border"
-                        }`}
+                        className="group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden"
                       >
                         {'image' in tone && tone.image ? (
                           <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" />
