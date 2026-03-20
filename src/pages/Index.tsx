@@ -586,7 +586,7 @@ const Index = () => {
                     {SKIN_TONES.map((tone) => (
                       <button
                         key={tone.id}
-                        onClick={() => { setSkinTone(tone.id); setState("lip-tone"); }}
+                        onClick={() => setSkinTone(tone.id)}
                         className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                           skinTone === tone.id ? "ring-2 ring-foreground" : ""
                         }`}
@@ -606,6 +606,16 @@ const Index = () => {
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                     ))}
+                   </div>
+                  <div className="mt-8">
+                    <Button
+                      onClick={() => setState("lip-tone")}
+                      disabled={!skinTone}
+                      size="lg"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               </motion.div>
