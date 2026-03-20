@@ -733,6 +733,44 @@ const Index = () => {
               </motion.div>
             )}
 
+            {/* Selfie Preview */}
+            {state === "selfie-preview" && originalImage && (
+              <motion.div
+                key="selfie-preview"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-6"
+              >
+                <div className="w-64 h-64 overflow-hidden">
+                  <img
+                    src={originalImage}
+                    alt="Your selfie"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setState("idle")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                  >
+                    Retake
+                  </Button>
+                  <Button
+                    onClick={() => setState("uploaded")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                  >
+                    Next <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
             {/* Step 2: Pick a look */}
             {state === "uploaded" && originalImage && (
               <motion.div
