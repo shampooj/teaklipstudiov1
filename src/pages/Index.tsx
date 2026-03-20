@@ -433,7 +433,7 @@ const Index = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       setOriginalImage(e.target?.result as string);
-      setState("selfie-preview");
+      setState("idle");
     };
     reader.readAsDataURL(file);
   }, []);
