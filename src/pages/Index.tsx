@@ -765,23 +765,6 @@ const Index = () => {
                   
                     </div>
                 }
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                    id="no-store"
-                    checked={noStoreChecked}
-                    onCheckedChange={(checked) => {
-                      setNoStoreChecked(checked === true);
-                      if (checked) setConsentChecked(false);
-                    }}
-                    className="mt-0.5 shrink-0" />
-                  
-                    <label
-                    htmlFor="no-store"
-                    className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
-                    
-                      Please do not store my image!
-                    </label>
-                  </div>
                 </div>
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
