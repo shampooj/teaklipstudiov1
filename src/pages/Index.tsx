@@ -788,7 +788,7 @@ const Index = () => {
                       onClick={() => setState("uploaded")}
                       size="lg"
                       variant="outline"
-                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background transition-colors"
                     >
                       Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
