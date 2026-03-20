@@ -681,29 +681,59 @@ const Index = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.3 }}
               >
-                <label
-                  onDrop={handleDrop}
-                  onDragOver={(e) => e.preventDefault()}
-                  className="group relative block cursor-pointer border border-border bg-background p-12 sm:p-16 text-center transition-all duration-300 hover:border-foreground/40"
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleInputChange}
-                  />
-                  <div className="flex flex-col items-center gap-6">
-                    <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-                    <div>
-                      <p className="font-display text-xl text-foreground">
-                        Drop your selfie here
-                      </p>
-                      <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                        or click to browse · JPG, PNG up to 15MB
-                      </p>
+                {!originalImage ? (
+                  <label
+                    onDrop={handleDrop}
+                    onDragOver={(e) => e.preventDefault()}
+                    className="group relative block cursor-pointer border border-border bg-background p-12 sm:p-16 text-center transition-all duration-300 hover:border-foreground/40"
+                  >
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleInputChange}
+                    />
+                    <div className="flex flex-col items-center gap-6">
+                      <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <div>
+                        <p className="font-display text-xl text-foreground">
+                          Drop your selfie here
+                        </p>
+                        <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
+                          or click to browse · JPG, PNG up to 15MB
+                        </p>
+                      </div>
+                    </div>
+                  </label>
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="w-full border border-border overflow-hidden">
+                      <img
+                        src={originalImage}
+                        alt="Your selfie"
+                        className="w-full h-auto object-cover"
+                      />
+                    </div>
+                    <div className="mt-4 flex gap-3">
+                      <Button
+                        onClick={() => { setOriginalImage(null); }}
+                        size="lg"
+                        variant="outline"
+                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                      >
+                        Retake
+                      </Button>
+                      <Button
+                        onClick={() => setState("uploaded")}
+                        size="lg"
+                        variant="outline"
+                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                      >
+                        Next <ArrowRight className="h-3 w-3" />
+                      </Button>
                     </div>
                   </div>
-                </label>
+                )}
                 <div className="mt-5 flex items-start gap-3">
                   <Checkbox
                     id="consent"
@@ -728,44 +758,6 @@ const Index = () => {
                     className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
                   >
                     Go Back
-                  </Button>
-                </div>
-              </motion.div>
-            )}
-
-            {/* Selfie Preview */}
-            {state === "selfie-preview" && originalImage && (
-              <motion.div
-                key="selfie-preview"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center gap-6"
-              >
-                <div className="w-64 h-64 overflow-hidden">
-                  <img
-                    src={originalImage}
-                    alt="Your selfie"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="flex gap-3">
-                  <Button
-                    onClick={() => setState("idle")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
-                  >
-                    Retake
-                  </Button>
-                  <Button
-                    onClick={() => setState("uploaded")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
-                  >
-                    Next <ArrowRight className="h-3 w-3" />
                   </Button>
                 </div>
               </motion.div>
