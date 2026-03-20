@@ -701,6 +701,9 @@ const Index = () => {
                         <p className="font-display text-xl text-foreground">
                           Drop your selfie here
                         </p>
+                        <p className="mt-1 text-muted-foreground font-sans text-[11px]">
+                          so we can analyze your skin tone
+                        </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                           or click to browse · JPG, PNG up to 15MB
                         </p>
