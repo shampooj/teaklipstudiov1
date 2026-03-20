@@ -746,7 +746,7 @@ const Index = () => {
                       htmlFor="consent"
                       className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
                     >
-                      We need your help! Brown skin is insanely underrepresented in AI — but we're trying to change that. By checking this box, you consent to adding your image to Teak's Brown Skin Database for AI Research. You can request deletion anytime at{" "}
+                      We need your help! Brown skin is insanely underrepresented in AI — but we're trying to change that. By checking this box, you consent to adding your image to Teak's Brown Skin Database for AI Research. As a thank you, you'll get a 10% off discount code. You can request deletion anytime at{" "}
                       <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>. Learn more at{" "}
                       <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Project</a>
                     </label>
