@@ -14,16 +14,16 @@ import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.jpg";
 import lipBrightPink from "@/assets/lip-bright-pink.jpg";
-import lipMediumBrown from "@/assets/lip-medium-brown.png";
+import lipMediumBrown from "@/assets/lip-medium-brown.jpg";
 import lipDeepBrown from "@/assets/lip-deep-brown.jpg";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.jpg";
-import lipNeutralBrown from "@/assets/lip-neutral-brown.png";
-import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.png";
-import lipMauvePink from "@/assets/lip-mauve-pink.png";
-import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
-import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
-import lipBrownPink from "@/assets/lip-brown-pink.png";
-import lipGreyBrown from "@/assets/lip-grey-brown.png";
+import lipNeutralBrown from "@/assets/lip-neutral-brown.jpg";
+import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.jpg";
+import lipMauvePink from "@/assets/lip-mauve-pink.jpg";
+import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.jpg";
+import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.jpg";
+import lipBrownPink from "@/assets/lip-brown-pink.jpg";
+import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
