@@ -750,7 +750,10 @@ const Index = () => {
                     <Checkbox
                     id="consent"
                     checked={consentChecked}
-                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    onCheckedChange={(checked) => {
+                      setConsentChecked(checked === true);
+                      if (checked) setNoStoreChecked(false);
+                    }}
                     className="mt-0.5 shrink-0" />
                   
                     <label
