@@ -551,7 +551,7 @@ const Index = () => {
           transition={{ delay: 0.2 }}
           className="mt-4 text-foreground font-display text-lg tracking-wide"
         >
-          Virtual Lip Studio: <span className="font-sans text-sm">BETA</span>
+          Virtual Lip Studio <sup className="font-sans text-[10px]">BETA</sup>
         </motion.p>
       </header>
 
