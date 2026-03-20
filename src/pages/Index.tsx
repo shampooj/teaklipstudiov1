@@ -709,9 +709,6 @@ const Index = () => {
                       <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                         or click to browse · JPG, PNG up to 15MB
                       </p>
-                      <p className="mt-3 text-muted-foreground font-sans text-[10px]">
-                        Please make sure you aren't wearing a white t-shirt in the photo, as it confuses the technology.
-                      </p>
                     </div>
                   </div>
                 </label>
