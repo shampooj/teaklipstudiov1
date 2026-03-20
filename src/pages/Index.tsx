@@ -729,19 +729,6 @@ const Index = () => {
                 )}
                 {originalImage && (
                   <div className="mt-5 space-y-4">
-                    <div>
-                      <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
-                        Email address
-                      </label>
-                      <input
-                        id="user-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={userEmail}
-                        onChange={(e) => setUserEmail(e.target.value)}
-                        className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
-                    </div>
                     <div className="flex items-start gap-3">
                       <Checkbox
                         id="consent"
@@ -757,6 +744,19 @@ const Index = () => {
                         <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>. Learn more at{" "}
                         <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Project</a>
                       </label>
+                    </div>
+                    <div>
+                      <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
+                        Email address
+                      </label>
+                      <input
+                        id="user-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={userEmail}
+                        onChange={(e) => setUserEmail(e.target.value)}
+                        className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
                     </div>
                   </div>
                 )}
