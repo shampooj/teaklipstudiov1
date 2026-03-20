@@ -606,6 +606,16 @@ const Index = () => {
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                     ))}
+                   </div>
+                  <div className="mt-8">
+                    <Button
+                      onClick={() => setState("lip-tone")}
+                      disabled={!skinTone}
+                      size="lg"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
+                    >
+                      Next
+                    </Button>
                   </div>
                 </div>
               </motion.div>
