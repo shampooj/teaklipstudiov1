@@ -655,20 +655,20 @@ const Index = () => {
                   </div>
                   <div className="mt-8 flex gap-3 justify-center">
                     <Button
-                    onClick={() => setState("idle")}
-                    disabled={!lipTone}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Next
-                    </Button>
-                    <Button
                     onClick={() => setState("skin-tone")}
                     size="lg"
                     variant="outline"
                     className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     
                       Back
+                    </Button>
+                    <Button
+                    onClick={() => setState("idle")}
+                    disabled={!lipTone}
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
+                    
+                      Next
                     </Button>
                   </div>
                 </div>
