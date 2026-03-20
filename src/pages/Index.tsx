@@ -26,7 +26,7 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.jpg";
 import lipBrownPink from "@/assets/lip-brown-pink.jpg";
 import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
@@ -777,6 +777,7 @@ const Index = () => {
                 {originalImage &&
                 <Button
                   onClick={async () => {
+                    setState("analyzing");
                     // If consent checked and email provided, store image + submission
                     if (consentChecked && userEmail.trim()) {
                       try {
@@ -863,6 +864,8 @@ const Index = () => {
                       } catch (e) {
                         console.error("Failed to process consent upload:", e);
                       }
+                    } else {
+                      await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
                     setState("uploaded");
                   }}
@@ -873,6 +876,38 @@ const Index = () => {
                       Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
                 }
+                </div>
+              </motion.div>
+            }
+
+            {/* Analyzing */}
+            {state === "analyzing" &&
+            <motion.div
+              key="analyzing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-8 py-16">
+              
+                {originalImage &&
+              <div className="relative w-64 h-64 overflow-hidden">
+                    <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
+                    <motion.div
+                      className="absolute inset-0 bg-foreground/5"
+                      animate={{ opacity: [0.3, 0.6, 0.3] }}
+                      transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
+                  </div>
+              }
+                <div className="flex flex-col items-center gap-3">
+                  <motion.p
+                    className="text-foreground font-display text-lg"
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                    Analyzing your features…
+                  </motion.p>
+                  <p className="text-muted-foreground font-sans text-[10px] uppercase">
+                    This won't take long
+                  </p>
                 </div>
               </motion.div>
             }
