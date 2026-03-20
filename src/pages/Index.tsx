@@ -760,8 +760,8 @@ const Index = () => {
                     htmlFor="consent"
                     className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
                     
-                      Please add my image to Teak's Brown Skin Database for Equitable AI Beauty Research and get a <span className="font-bold">Please add my image to Teak's Brown Skin Database and help make AI fairer for brown skin. I'll receive a 10% off code as a thank you. Learn more about Teak's Brown Skin Database and Privacy Policy.</span>. Learn more about{" "}
-                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Please add my image to Teak's Brown Skin Database and help make AI fairer for brown skin. I'll receive a 10% off code as a thank you</a> and{" "}
+                      Please add my image to Teak's Brown Skin Database to help make AI fairer for brown skin. <span className="font-bold">I'll receive a 10% off code as a thank you.</span> Learn more about{" "}
+                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Database</a> and{" "}
                       <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
                     </label>
                   </div>
