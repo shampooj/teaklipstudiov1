@@ -753,7 +753,7 @@ const Index = () => {
                       htmlFor="consent"
                       className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
                     >
-                      Please add my image to Teak's Brown Skin Database for Equitable AI Beauty Research and get a <span className="font-bold">10% off discount code</span>. Learn more about{" "}
+                      Please add my image to Teak's Brown Skin Database to help make AI fairer for brown skin. I'll receive a <span className="font-bold">10% off code</span> as a thank you. Learn more about{" "}
                       <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Database</a> and{" "}
                       <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
                     </label>
