@@ -729,6 +729,9 @@ const Index = () => {
                 )}
                 {originalImage && (
                   <div className="mt-5 space-y-4">
+                    <p className="text-muted-foreground font-sans text-[11px] leading-relaxed">
+                      We need your help! Brown skin is shockingly underrepresented in AI — but we're trying to change that by building our own AI database of just brown skin. If you decide to participate, you'll get a <span className="font-bold">10% off discount code</span> as a thank you.
+                    </p>
                     <div className="flex items-start gap-3">
                       <Checkbox
                         id="consent"
