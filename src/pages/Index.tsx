@@ -727,28 +727,39 @@ const Index = () => {
                     </div>
                   </div>
                 )}
-                {originalImage && (
-                  <div className="mt-5 space-y-4">
-                    <p className="text-muted-foreground font-sans text-[11px] leading-relaxed">
-                      We need your help! Brown skin is shockingly underrepresented in AI — but we're trying to change that by building our own AI database of just brown skin. If you decide to participate, you'll get a <span className="font-bold">10% off discount code</span> as a thank you.
-                    </p>
-                    <div className="flex items-start gap-3">
-                      <Checkbox
-                        id="consent"
-                        checked={consentChecked}
-                        onCheckedChange={(checked) => setConsentChecked(checked === true)}
-                        className="mt-0.5 shrink-0"
-                      />
-                      <label
-                        htmlFor="consent"
-                        className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
-                      >
-                        [OPTIONAL] We need your help! Brown skin is insanely underrepresented in AI — but we're trying to change that. By checking this box, you consent to adding your image to Teak's Brown Skin Database for AI Research. <span className="font-bold">As a thank you, you'll get a 10% off discount code.</span> You can request deletion anytime at{" "}
-                        <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>. Learn more at{" "}
-                        <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Project</a>
-                      </label>
-                    </div>
-                    <div>
+                <div className="mt-5 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="no-store"
+                      checked={!consentChecked}
+                      onCheckedChange={(checked) => setConsentChecked(checked !== true)}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <label
+                      htmlFor="no-store"
+                      className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
+                    >
+                      Please do not store my image!
+                    </label>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="consent"
+                      checked={consentChecked}
+                      onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                      className="mt-0.5 shrink-0"
+                    />
+                    <label
+                      htmlFor="consent"
+                      className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
+                    >
+                      Please add my image to Teak's Brown Skin Database for Equitable AI Beauty Research and get a <span className="font-bold">10% off discount code</span>. Learn more about{" "}
+                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Database</a> and{" "}
+                      <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
+                    </label>
+                  </div>
+                  {consentChecked && (
+                    <div className="pl-7">
                       <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
                         Email address
                       </label>
@@ -761,8 +772,8 @@ const Index = () => {
                         className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
                     onClick={() => setState("lip-tone")}
