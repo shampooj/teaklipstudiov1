@@ -580,7 +580,7 @@ const Index = () => {
                     Which image matches your skin tone most closely?
                   </p>
                   <p className="text-sm text-foreground mt-2 font-display">
-                    If you're in between, go with the deeper shade
+                    If you're in between, go with the deeper shade.
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
                     {SKIN_TONES.map((tone) => (
