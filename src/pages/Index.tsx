@@ -734,7 +734,7 @@ const Index = () => {
                     </div>
                   </div>
                 )}
-                <div className="mt-5 flex items-start gap-3">
+                {originalImage && <div className="mt-5 flex items-start gap-3">
                   <Checkbox
                     id="consent"
                     checked={consentChecked}
