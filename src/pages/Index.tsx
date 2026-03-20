@@ -402,7 +402,6 @@ const Index = () => {
   const [cartError, setCartError] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -732,8 +731,8 @@ const Index = () => {
                   <div className="flex items-start gap-3">
                     <Checkbox
                     id="no-store"
-                    checked={noStoreChecked}
-                    onCheckedChange={(checked) => { setNoStoreChecked(checked === true); if (checked) setConsentChecked(false); }}
+                    checked={!consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked !== true)}
                     className="mt-0.5 shrink-0" />
                   
                     <label
@@ -747,7 +746,7 @@ const Index = () => {
                     <Checkbox
                     id="consent"
                     checked={consentChecked}
-                    onCheckedChange={(checked) => { setConsentChecked(checked === true); if (checked) setNoStoreChecked(false); }}
+                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
                     className="mt-0.5 shrink-0" />
                   
                     <label
@@ -755,7 +754,7 @@ const Index = () => {
                     className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
                     
                       Please add my image to Teak's Brown Skin Database for Equitable AI Beauty Research and get a <span className="font-bold">Please add my image to Teak's Brown Skin Database and help make AI fairer for brown skin. I'll receive a 10% off code as a thank you. Learn more about Teak's Brown Skin Database and Privacy Policy.</span>. Learn more about{" "}
-                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Database</a> and{" "}
+                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Please add my image to Teak's Brown Skin Database and help make AI fairer for brown skin. I'll receive a 10% off code as a thank you</a> and{" "}
                       <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
                     </label>
                   </div>
