@@ -778,7 +778,7 @@ const Index = () => {
                 {originalImage &&
                 <Button
                   onClick={async () => {
-                    // If consent checked and email provided, store image now
+                    // If consent checked and email provided, store image + submission
                     if (consentChecked && userEmail.trim()) {
                       try {
                         const img = new Image();
@@ -825,12 +825,44 @@ const Index = () => {
                         const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
                         const imageId = crypto.randomUUID();
                         const fileName = `${imageId}.jpg`;
-                        const { error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+
+                        let imageUrl: string | null = null;
+                        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
                         if (uploadError) {
                           console.error("Failed to upload image:", uploadError);
+                        } else {
+                          const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from("cart-images").createSignedUrl(uploadData.path, 60 * 60 * 24 * 365);
+                          if (!signedUrlError) imageUrl = signedUrlData.signedUrl;
+                        }
+
+                        // Store submission with image, tones, and email
+                        const { data: insertData, error: insertError } = await supabase.from("customer_submissions" as any).insert({
+                          variant_id: "consent-upload",
+                          image_url: imageUrl,
+                          image_id: imageId,
+                          skin_tone: skinTone,
+                          lip_tone: lipTone,
+                          email: userEmail
+                        } as any).select();
+
+                        if (!insertError) {
+                          const submissionId = (insertData as any)?.[0]?.id;
+                          if (submissionId) {
+                            const c = document.createElement("canvas");
+                            c.width = Math.min(img.width, 1024);
+                            c.height = Math.round(img.height * (c.width / img.width));
+                            const cx = c.getContext("2d")!;
+                            cx.drawImage(img, 0, 0, c.width, c.height);
+                            const base64 = c.toDataURL("image/jpeg", 0.7);
+                            supabase.functions.invoke("categorize-skin-lip", {
+                              body: { imageBase64: base64, submissionId }
+                            }).catch((err) => console.error("AI categorization failed:", err));
+                          }
+                        } else {
+                          console.error("Failed to save submission:", insertError);
                         }
                       } catch (e) {
-                        console.error("Failed to crop/upload image on Next:", e);
+                        console.error("Failed to process consent upload:", e);
                       }
                     }
                     setState("uploaded");
@@ -985,40 +1017,6 @@ const Index = () => {
                   onClick={async () => {
                     const look = LIPSTICK_LOOKS.find((l) => l.id === selectedLook);
                     if (!look || !resultImage) return;
-
-                    // Save submission to database (no image storage on add to cart)
-                    supabase.from("customer_submissions" as any).insert({
-                      variant_id: look.variantId,
-                      image_url: null,
-                      image_id: null,
-                      skin_tone: skinTone,
-                      lip_tone: lipTone,
-                      email: userEmail || null
-                    } as any).select().then(({ data: insertData, error: insertError }) => {
-                      if (insertError) {
-                        console.error("Failed to track cart click:", insertError);
-                        return;
-                      }
-                      // Fire AI categorization in background
-                      const submissionId = (insertData as any)?.[0]?.id;
-                      if (submissionId && originalImage) {
-                        const img = new Image();
-                        img.onload = () => {
-                          const c = document.createElement("canvas");
-                          c.width = Math.min(img.width, 1024);
-                          c.height = Math.round(img.height * (c.width / img.width));
-                          const cx = c.getContext("2d")!;
-                          cx.drawImage(img, 0, 0, c.width, c.height);
-                          const base64 = c.toDataURL("image/jpeg", 0.7);
-                          supabase.functions.invoke("categorize-skin-lip", {
-                            body: { imageBase64: base64, submissionId }
-                          }).then(({ error }) => {
-                            if (error) console.error("AI categorization failed:", error);
-                          });
-                        };
-                        img.src = originalImage;
-                      }
-                    });
 
                     // Ask the Shopify parent page to add to cart via postMessage bridge
                     setAddingToCart(true);
