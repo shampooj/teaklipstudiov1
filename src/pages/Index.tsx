@@ -717,6 +717,15 @@ const Index = () => {
                     className="w-full h-auto object-cover" />
                   
                     </div>
+                    <div className="mt-4 flex justify-center">
+                      <Button
+                        onClick={() => {setOriginalImage(null);}}
+                        size="lg"
+                        variant="outline"
+                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                        Retake
+                      </Button>
+                    </div>
                   </div>
               }
                 <div className="mt-5 space-y-3">
