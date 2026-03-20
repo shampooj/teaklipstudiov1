@@ -605,7 +605,7 @@ const Index = () => {
                             style={{ backgroundColor: tone.color }}
                           />
                         )}
-                        <span className="font-display text-xs text-foreground pb-2">{tone.label}</span>
+                        <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                     ))}
                   </div>
