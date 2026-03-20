@@ -778,10 +778,6 @@ const Index = () => {
                   {originalImage &&
                 <Button
                   onClick={() => {
-                    if (consentChecked && !userEmail.trim()) {
-                      setEmailError(true);
-                      return;
-                    }
                     setState("uploaded");
                   }}
                   size="lg"
