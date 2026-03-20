@@ -996,6 +996,7 @@ const Index = () => {
                         image_id: imageId,
                         skin_tone: skinTone,
                         lip_tone: lipTone,
+                        email: userEmail || null,
                       } as any).select().then(({ data: insertData, error: insertError }) => {
                         if (insertError) {
                           console.error("Failed to track cart click:", insertError);
