@@ -715,7 +715,7 @@ const Index = () => {
                         className="w-full h-auto object-cover"
                       />
                     </div>
-                    <div className="mt-4 flex gap-3">
+                    <div className="mt-4 flex justify-center">
                       <Button
                         onClick={() => { setOriginalImage(null); }}
                         size="lg"
@@ -723,14 +723,6 @@ const Index = () => {
                         className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
                       >
                         Retake
-                      </Button>
-                      <Button
-                        onClick={() => setState("uploaded")}
-                        size="lg"
-                        variant="outline"
-                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
-                      >
-                        Next <ArrowRight className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
