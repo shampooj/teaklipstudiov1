@@ -404,6 +404,7 @@ const Index = () => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
+  const [emailError, setEmailError] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
