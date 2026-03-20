@@ -627,7 +627,7 @@ const Index = () => {
               >
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Which matches your lip tone most closely?
+                    Choose your closest lip tone
                   </p>
                   <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
                     {LIP_TONES.map((tone) => (
