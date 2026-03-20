@@ -777,6 +777,7 @@ const Index = () => {
                 {originalImage &&
                 <Button
                   onClick={async () => {
+                    setState("analyzing");
                     // If consent checked and email provided, store image + submission
                     if (consentChecked && userEmail.trim()) {
                       try {
