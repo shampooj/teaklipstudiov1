@@ -587,7 +587,9 @@ const Index = () => {
                       <button
                         key={tone.id}
                         onClick={() => { setSkinTone(tone.id); setState("lip-tone"); }}
-                        className="group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden"
+                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                          skinTone === tone.id ? "ring-2 ring-foreground" : ""
+                        }`}
                       >
                         {'image' in tone && tone.image ? (
                           <img
