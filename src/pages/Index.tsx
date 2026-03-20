@@ -776,8 +776,9 @@ const Index = () => {
                     type="email"
                     placeholder="you@example.com"
                     value={userEmail}
-                    onChange={(e) => setUserEmail(e.target.value)}
-                    className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring" />
+                    onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
+                    className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring`} />
+                      {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
                   
                     </div>
                 }
