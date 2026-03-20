@@ -794,7 +794,13 @@ const Index = () => {
                   </Button>
                   {originalImage &&
                 <Button
-                  onClick={() => setState("uploaded")}
+                  onClick={() => {
+                    if (consentChecked && !userEmail.trim()) {
+                      setEmailError(true);
+                      return;
+                    }
+                    setState("uploaded");
+                  }}
                   size="lg"
                   variant="outline"
                   className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
