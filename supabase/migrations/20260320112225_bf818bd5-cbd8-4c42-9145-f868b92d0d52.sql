@@ -1,0 +1,1 @@
+ALTER TABLE public.customer_submissions ADD COLUMN email text;
