@@ -709,6 +709,7 @@ const Index = () => {
                       <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                         or click to browse · JPG, PNG up to 15MB
                       </p>
+                    </div>
                   </div>
                 </label>
                 <div className="mt-5 flex items-start gap-3">
