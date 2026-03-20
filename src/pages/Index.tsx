@@ -732,8 +732,8 @@ const Index = () => {
                   <div className="flex items-start gap-3">
                     <Checkbox
                       id="no-store"
-                      checked={!consentChecked}
-                      onCheckedChange={(checked) => setConsentChecked(checked !== true)}
+                      checked={noStoreChecked}
+                      onCheckedChange={(checked) => { setNoStoreChecked(checked === true); if (checked) setConsentChecked(false); }}
                       className="mt-0.5 shrink-0"
                     />
                     <label
