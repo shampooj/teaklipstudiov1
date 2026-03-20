@@ -715,6 +715,21 @@ const Index = () => {
                     </div>
                   </div>
                 </label>
+                <div className="mt-5 flex items-start gap-3">
+                  <Checkbox
+                    id="consent"
+                    checked={consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <label
+                    htmlFor="consent"
+                    className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
+                  >
+                    Brown skin is underrepresented in AI — and we're changing that. By checking this box, you consent to your image being used in our brown skin database for AI training and research. You can request deletion anytime at{" "}
+                    <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>.
+                  </label>
+                </div>
                 <div className="mt-6 flex justify-center">
                   <Button
                     onClick={() => setState("lip-tone")}
