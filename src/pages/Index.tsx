@@ -401,6 +401,7 @@ const Index = () => {
    const [addedToCart, setAddedToCart] = useState(false);
    const [cartError, setCartError] = useState(false);
    const [addingToCart, setAddingToCart] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
