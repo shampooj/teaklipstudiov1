@@ -402,6 +402,7 @@ const Index = () => {
    const [cartError, setCartError] = useState(false);
    const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const startProgress = useCallback(() => {
@@ -735,21 +736,36 @@ const Index = () => {
                   </div>
                 )}
                 {originalImage && (
-                  <div className="mt-5 flex items-start gap-3">
-                    <Checkbox
-                      id="consent"
-                      checked={consentChecked}
-                      onCheckedChange={(checked) => setConsentChecked(checked === true)}
-                      className="mt-0.5 shrink-0"
-                    />
-                    <label
-                      htmlFor="consent"
-                      className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
-                    >
-                      We need your help! Brown skin is insanely underrepresented in AI — but we're trying to change that. By checking this box, you consent to adding your image to Teak's Brown Skin Database for AI Research. <span className="font-bold">As a thank you, you'll get a 10% off discount code.</span> You can request deletion anytime at{" "}
-                      <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>. Learn more at{" "}
-                      <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Project</a>
-                    </label>
+                  <div className="mt-5 space-y-4">
+                    <div>
+                      <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
+                        Email address
+                      </label>
+                      <input
+                        id="user-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={userEmail}
+                        onChange={(e) => setUserEmail(e.target.value)}
+                        className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        id="consent"
+                        checked={consentChecked}
+                        onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                        className="mt-0.5 shrink-0"
+                      />
+                      <label
+                        htmlFor="consent"
+                        className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
+                      >
+                        We need your help! Brown skin is insanely underrepresented in AI — but we're trying to change that. By checking this box, you consent to adding your image to Teak's Brown Skin Database for AI Research. <span className="font-bold">As a thank you, you'll get a 10% off discount code.</span> You can request deletion anytime at{" "}
+                        <a href="mailto:hello@teakbeauty.com" className="underline text-foreground">hello@teakbeauty.com</a>. Learn more at{" "}
+                        <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Project</a>
+                      </label>
+                    </div>
                   </div>
                 )}
                 <div className="mt-6 flex justify-center">
@@ -980,6 +996,7 @@ const Index = () => {
                         image_id: imageId,
                         skin_tone: skinTone,
                         lip_tone: lipTone,
+                        email: userEmail || null,
                       } as any).select().then(({ data: insertData, error: insertError }) => {
                         if (insertError) {
                           console.error("Failed to track cart click:", insertError);
