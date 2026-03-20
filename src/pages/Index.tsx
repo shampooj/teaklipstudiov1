@@ -402,6 +402,7 @@ const Index = () => {
   const [cartError, setCartError] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -731,8 +732,8 @@ const Index = () => {
                   <div className="flex items-start gap-3">
                     <Checkbox
                     id="no-store"
-                    checked={!consentChecked}
-                    onCheckedChange={(checked) => setConsentChecked(checked !== true)}
+                    checked={noStoreChecked}
+                    onCheckedChange={(checked) => { setNoStoreChecked(checked === true); if (checked) setConsentChecked(false); }}
                     className="mt-0.5 shrink-0" />
                   
                     <label
@@ -746,7 +747,7 @@ const Index = () => {
                     <Checkbox
                     id="consent"
                     checked={consentChecked}
-                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    onCheckedChange={(checked) => { setConsentChecked(checked === true); if (checked) setNoStoreChecked(false); }}
                     className="mt-0.5 shrink-0" />
                   
                     <label
