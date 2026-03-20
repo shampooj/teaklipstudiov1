@@ -903,7 +903,7 @@ const Index = () => {
                     className="text-foreground font-display text-lg"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                    Analyzing your features…
+                    Analyzing your complexion…
                   </motion.p>
                   <p className="text-muted-foreground font-sans text-[10px] uppercase">
                     This won't take long
