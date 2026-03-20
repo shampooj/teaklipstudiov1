@@ -775,9 +775,64 @@ const Index = () => {
                   
                     Go Back
                   </Button>
-                  {originalImage &&
+                {originalImage &&
                 <Button
-                  onClick={() => {
+                  onClick={async () => {
+                    // If consent checked and email provided, store image now
+                    if (consentChecked && userEmail.trim()) {
+                      try {
+                        const img = new Image();
+                        img.crossOrigin = "anonymous";
+                        await new Promise<void>((resolve, reject) => {
+                          img.onload = () => resolve();
+                          img.onerror = reject;
+                          img.src = originalImage!;
+                        });
+
+                        const detectCanvas = document.createElement("canvas");
+                        const maxDetectSize = 512;
+                        const scale = Math.min(maxDetectSize / img.width, maxDetectSize / img.height, 1);
+                        detectCanvas.width = Math.round(img.width * scale);
+                        detectCanvas.height = Math.round(img.height * scale);
+                        const detectCtx = detectCanvas.getContext("2d")!;
+                        detectCtx.drawImage(img, 0, 0, detectCanvas.width, detectCanvas.height);
+                        const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
+
+                        let cropTop = 0.0, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
+                        try {
+                          const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
+                            body: { imageBase64: detectBase64 }
+                          });
+                          if (!regionError && regionData && regionData.top !== undefined) {
+                            cropTop = regionData.top;
+                            cropBottom = regionData.bottom;
+                            cropLeft = regionData.left;
+                            cropRight = regionData.right;
+                          }
+                        } catch (detectErr) {
+                          console.warn("Lip detection error, using fallback crop:", detectErr);
+                        }
+
+                        const canvas = document.createElement("canvas");
+                        const startX = Math.floor(img.width * cropLeft);
+                        const startY = Math.floor(img.height * cropTop);
+                        const cropWidth = Math.floor(img.width * (cropRight - cropLeft));
+                        const cropHeight = Math.floor(img.height * (cropBottom - cropTop));
+                        canvas.width = cropWidth;
+                        canvas.height = cropHeight;
+                        const ctx = canvas.getContext("2d")!;
+                        ctx.drawImage(img, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
+                        const imageId = crypto.randomUUID();
+                        const fileName = `${imageId}.jpg`;
+                        const { error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+                        if (uploadError) {
+                          console.error("Failed to upload image:", uploadError);
+                        }
+                      } catch (e) {
+                        console.error("Failed to crop/upload image on Next:", e);
+                      }
+                    }
                     setState("uploaded");
                   }}
                   size="lg"
