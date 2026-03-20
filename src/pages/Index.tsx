@@ -29,44 +29,44 @@ import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
-  { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
-  { id: "medium-brown", label: "Medium Brown", color: "#8D5524", image: skinMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", color: "#5C3317", image: skinDeepBrown },
-  { id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown },
-] as const;
+{ id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
+{ id: "medium-brown", label: "Medium Brown", color: "#8D5524", image: skinMediumBrown },
+{ id: "deep-brown", label: "Deep Brown", color: "#5C3317", image: skinDeepBrown },
+{ id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown }] as
+const;
 
 const LIP_TONES = [
-  { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
-  { id: "brown-pink", label: "Brown Pink", color: "#C4787A", image: lipBrownPink },
-  { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
-  { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
-  { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
-  { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
-  { id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
-  { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E", image: lipTwoTonedBeige },
-  { id: "neutral-brown", label: "Neutral Brown", color: "#A0705A", image: lipNeutralBrown },
-  { id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", color: "#4A2228", image: lipDeepBrown },
-  { id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown },
-] as const;
+{ id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
+{ id: "brown-pink", label: "Brown Pink", color: "#C4787A", image: lipBrownPink },
+{ id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
+{ id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
+{ id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
+{ id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
+{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
+{ id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E", image: lipTwoTonedBeige },
+{ id: "neutral-brown", label: "Neutral Brown", color: "#A0705A", image: lipNeutralBrown },
+{ id: "medium-brown", label: "Medium Brown", color: "#7A5240", image: lipMediumBrown },
+{ id: "deep-brown", label: "Deep Brown", color: "#4A2228", image: lipDeepBrown },
+{ id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown }] as
+const;
 
 const LIPSTICK_LOOKS = [
-  { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
-  { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
-  { id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
-  { id: "coral-sunset", label: "Color Study Demi-Satin in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
-  { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b", variantId: "45733508546713" },
-] as const;
+{ id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
+{ id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
+{ id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
+{ id: "coral-sunset", label: "Color Study Demi-Satin in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
+{ id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b", variantId: "45733508546713" }] as
+const;
 
 type LookId = (typeof LIPSTICK_LOOKS)[number]["id"];
 
 const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Failed to load image"));
-    image.src = src;
-  });
+new Promise<HTMLImageElement>((resolve, reject) => {
+  const image = new Image();
+  image.onload = () => resolve(image);
+  image.onerror = () => reject(new Error("Failed to load image"));
+  image.src = src;
+});
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -76,7 +76,7 @@ const normalizeHue = (hue: number) => {
 };
 
 const shortestHueDelta = (from: number, to: number) => {
-  const delta = ((to - from + 540) % 360) - 180;
+  const delta = (to - from + 540) % 360 - 180;
   return delta;
 };
 
@@ -136,20 +136,20 @@ const hslToRgb = (h: number, s: number, l: number) => {
   return {
     r: Math.round(hueToRgb(hue + 1 / 3) * 255),
     g: Math.round(hueToRgb(hue) * 255),
-    b: Math.round(hueToRgb(hue - 1 / 3) * 255),
+    b: Math.round(hueToRgb(hue - 1 / 3) * 255)
   };
 };
 
 const hexToRgb = (hex: string) => {
   const clean = hex.replace("#", "");
-  const normalized = clean.length === 3
-    ? clean.split("").map((c) => `${c}${c}`).join("")
-    : clean;
+  const normalized = clean.length === 3 ?
+  clean.split("").map((c) => `${c}${c}`).join("") :
+  clean;
 
   return {
     r: parseInt(normalized.slice(0, 2), 16),
     g: parseInt(normalized.slice(2, 4), 16),
-    b: parseInt(normalized.slice(4, 6), 16),
+    b: parseInt(normalized.slice(4, 6), 16)
   };
 };
 
@@ -207,11 +207,11 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
       const isTeethLike = lightness0 > 150 && saturation0 < 0.28 && neutrality0 < 62;
       const inMouthBand = y > height * 0.32 && y < height * 0.90 && x > width * 0.1 && x < width * 0.9;
       const likelyLipTone =
-        lightness0 > 12 &&
-        lightness0 < 215 &&
-        saturation0 > 0.04 &&
-        chroma0 > 6 &&
-        (r0 >= g0 - 30 || b0 >= g0 - 20 || lightness0 < 96);
+      lightness0 > 12 &&
+      lightness0 < 215 &&
+      saturation0 > 0.04 &&
+      chroma0 > 6 && (
+      r0 >= g0 - 30 || b0 >= g0 - 20 || lightness0 < 96);
 
       if (inMouthBand && likelyLipTone && !isTeethLike) {
         lipPriorMask[pixelIndex] = 1;
@@ -221,7 +221,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   // Connected components on original-only lip prior (no edited-image geometry is used).
   const visited = new Uint8Array(pixelCount);
-  const components: Array<{ indices: number[]; area: number; cx: number; cy: number; score: number }> = [];
+  const components: Array<{indices: number[];area: number;cx: number;cy: number;score: number;}> = [];
 
   const tryVisit = (from: number, to: number, queue: number[]) => {
     if (to < 0 || to >= pixelCount) return;
@@ -285,11 +285,11 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
 
   const secondary = components[1];
   if (
-    secondary &&
-    secondary.area > primary.area * 0.12 &&
-    Math.abs(secondary.cx - primary.cx) < width * 0.26 &&
-    Math.abs(secondary.cy - primary.cy) < height * 0.18
-  ) {
+  secondary &&
+  secondary.area > primary.area * 0.12 &&
+  Math.abs(secondary.cx - primary.cx) < width * 0.26 &&
+  Math.abs(secondary.cy - primary.cy) < height * 0.18)
+  {
     for (const idx of secondary.indices) finalMask[idx] = 1;
   }
 
@@ -328,11 +328,11 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   const avgLightShift = trendCount ? lightShiftSum / trendCount : 0;
 
   const baseBlendOpacity =
-    look === "classic-red"
-      ? 0.94
-      : look === "berry-wine"
-        ? 0.9
-        : 0.88;
+  look === "classic-red" ?
+  0.94 :
+  look === "berry-wine" ?
+  0.9 :
+  0.88;
 
   for (let pixelIndex = 0; pixelIndex < pixelCount; pixelIndex++) {
     const i = pixelIndex * 4;
@@ -376,7 +376,7 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
     const blendOpacity = clamp(
       baseBlendOpacity + (look === "nude-rose" && lightness0 < 120 ? -0.06 : 0),
       0.72,
-      0.96,
+      0.96
     );
 
     outputData.data[i] = Math.round(r0 + (tinted.r - r0) * blendOpacity);
@@ -398,11 +398,10 @@ const Index = () => {
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
   const [progress, setProgress] = useState(0);
-   const [addedToCart, setAddedToCart] = useState(false);
-   const [cartError, setCartError] = useState(false);
-   const [addingToCart, setAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
+  const [cartError, setCartError] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
-  const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -445,7 +444,7 @@ const Index = () => {
       const img = new Image();
       img.onload = () => {
         const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-        if (scale >= 1) { resolve(base64); return; }
+        if (scale >= 1) {resolve(base64);return;}
         const canvas = document.createElement("canvas");
         canvas.width = Math.round(img.width * scale);
         canvas.height = Math.round(img.height * scale);
@@ -465,7 +464,7 @@ const Index = () => {
     try {
       const resizedImage = await downscaleImage(originalImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel },
+        body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel }
       });
 
       // supabase-js puts non-2xx body in `data` and sets a generic `error`
@@ -543,16 +542,16 @@ const Index = () => {
       <header className="py-10 text-center">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+          animate={{ opacity: 1, y: 0 }}>
+          
           <img src={teakLogo} alt="TEAK" className="h-10 md:h-12 mx-auto" />
         </motion.div>
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 text-foreground font-display text-lg tracking-wide"
-        >
+          className="mt-4 text-foreground font-display text-lg tracking-wide">
+          
           Virtual Lip Studio <sup className="font-sans text-[10px]">BETA</sup>
         </motion.p>
       </header>
@@ -562,15 +561,15 @@ const Index = () => {
         <div className="w-full max-w-2xl">
           <AnimatePresence mode="wait">
             {/* Step 1: Skin Tone */}
-            {state === "skin-tone" && (
-              <motion.div
-                key="skin-tone"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center gap-8"
-              >
+            {state === "skin-tone" &&
+            <motion.div
+              key="skin-tone"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+              
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
                     Choose your closest skin tone
@@ -579,244 +578,241 @@ const Index = () => {
                     If you're in between, go with the deeper shade.
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
-                    {SKIN_TONES.map((tone) => (
-                      <button
-                        key={tone.id}
-                        onClick={() => setSkinTone(tone.id)}
-                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
-                          skinTone === tone.id ? "ring-2 ring-foreground" : ""
-                        }`}
-                      >
-                        {'image' in tone && tone.image ? (
-                          <img
-                            src={tone.image}
-                            alt={tone.label}
-                            className="w-full aspect-square object-cover"
-                          />
-                        ) : (
-                          <div
-                            className="w-full aspect-square"
-                            style={{ backgroundColor: tone.color }}
-                          />
-                        )}
+                    {SKIN_TONES.map((tone) =>
+                  <button
+                    key={tone.id}
+                    onClick={() => setSkinTone(tone.id)}
+                    className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                    skinTone === tone.id ? "ring-2 ring-foreground" : ""}`
+                    }>
+                    
+                        {'image' in tone && tone.image ?
+                    <img
+                      src={tone.image}
+                      alt={tone.label}
+                      className="w-full aspect-square object-cover" /> :
+
+
+                    <div
+                      className="w-full aspect-square"
+                      style={{ backgroundColor: tone.color }} />
+
+                    }
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
-                    ))}
+                  )}
                    </div>
                   <div className="mt-8">
                     <Button
-                      onClick={() => setState("lip-tone")}
-                      disabled={!skinTone}
-                      size="lg"
-                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
-                    >
+                    onClick={() => setState("lip-tone")}
+                    disabled={!skinTone}
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
+                    
                       Next
                     </Button>
                   </div>
                 </div>
               </motion.div>
-            )}
+            }
 
             {/* Step 2: Lip Tone */}
-            {state === "lip-tone" && (
-              <motion.div
-                key="lip-tone"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center gap-8"
-              >
+            {state === "lip-tone" &&
+            <motion.div
+              key="lip-tone"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+              
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
                     Choose your closest lip tone
                   </p>
                   <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
-                    {LIP_TONES.map((tone) => (
-                      <button
-                        key={tone.id}
-                        onClick={() => setLipTone(tone.id)}
-                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
-                          lipTone === tone.id ? "ring-2 ring-foreground" : ""
-                        }`}
-                      >
-                        {'image' in tone && tone.image ? (
-                          <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" />
-                        ) : (
-                          <div
-                            className="w-full aspect-square"
-                            style={{ backgroundColor: tone.color }}
-                          />
-                        )}
+                    {LIP_TONES.map((tone) =>
+                  <button
+                    key={tone.id}
+                    onClick={() => setLipTone(tone.id)}
+                    className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                    lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
+                    }>
+                    
+                        {'image' in tone && tone.image ?
+                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" /> :
+
+                    <div
+                      className="w-full aspect-square"
+                      style={{ backgroundColor: tone.color }} />
+
+                    }
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
-                    ))}
+                  )}
                   </div>
                   <div className="mt-8 flex gap-3 justify-center">
                     <Button
-                      onClick={() => setState("skin-tone")}
-                      size="lg"
-                      variant="outline"
-                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background transition-colors"
-                    >
-                      Back
+                    onClick={() => setState("idle")}
+                    disabled={!lipTone}
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
+                    
+                      Next
                     </Button>
                     <Button
-                      onClick={() => setState("idle")}
-                      disabled={!lipTone}
-                      size="lg"
-                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
-                    >
-                      Next
+                    onClick={() => setState("skin-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    
+                      Back
                     </Button>
                   </div>
                 </div>
               </motion.div>
-            )}
+            }
 
             {/* Step 3: Upload */}
-            {state === "idle" && (
-              <motion.div
-                key="upload"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.3 }}
-              >
-                {!originalImage ? (
-                  <label
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    className="group relative block cursor-pointer border border-border bg-background p-12 sm:p-16 text-center transition-all duration-300 hover:border-foreground/40"
-                  >
+            {state === "idle" &&
+            <motion.div
+              key="upload"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}>
+              
+                {!originalImage ?
+              <label
+                onDrop={handleDrop}
+                onDragOver={(e) => e.preventDefault()}
+                className="group relative block cursor-pointer border border-border bg-background p-12 sm:p-16 text-center transition-all duration-300 hover:border-foreground/40">
+                
                     <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleInputChange}
-                    />
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleInputChange} />
+                
                     <div className="flex flex-col items-center gap-6">
                       <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                       <div>
                         <p className="font-display text-xl text-foreground">
                           Drop your selfie here
                         </p>
-                        <p className="mt-1 text-muted-foreground font-sans text-[11px]">
-                          so we can analyze your skin tone
-                        </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                           or click to browse · JPG, PNG up to 15MB
                         </p>
                       </div>
                     </div>
-                  </label>
-                ) : (
-                  <div className="flex flex-col items-center">
+                  </label> :
+
+              <div className="flex flex-col items-center">
                     <div className="w-full border border-border overflow-hidden">
                       <img
-                        src={originalImage}
-                        alt="Your selfie"
-                        className="w-full h-auto object-cover"
-                      />
+                    src={originalImage}
+                    alt="Your selfie"
+                    className="w-full h-auto object-cover" />
+                  
                     </div>
                     <div className="mt-4 flex justify-center">
                       <Button
-                        onClick={() => { setOriginalImage(null); }}
-                        size="lg"
-                        variant="outline"
-                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
-                      >
+                    onClick={() => {setOriginalImage(null);}}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    
                         Retake
                       </Button>
                     </div>
                   </div>
-                )}
+              }
                 <div className="mt-5 space-y-3">
                   <div className="flex items-start gap-3">
                     <Checkbox
-                      id="no-store"
-                      checked={noStoreChecked}
-                      onCheckedChange={(checked) => { setNoStoreChecked(checked === true); if (checked) setConsentChecked(false); }}
-                      className="mt-0.5 shrink-0"
-                    />
+                    id="no-store"
+                    checked={!consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked !== true)}
+                    className="mt-0.5 shrink-0" />
+                  
                     <label
-                      htmlFor="no-store"
-                      className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
-                    >
+                    htmlFor="no-store"
+                    className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
+                    
                       Please do not store my image!
                     </label>
                   </div>
                   <div className="flex items-start gap-3">
                     <Checkbox
-                      id="consent"
-                      checked={consentChecked}
-                      onCheckedChange={(checked) => { setConsentChecked(checked === true); if (checked) setNoStoreChecked(false); }}
-                      className="mt-0.5 shrink-0"
-                    />
+                    id="consent"
+                    checked={consentChecked}
+                    onCheckedChange={(checked) => setConsentChecked(checked === true)}
+                    className="mt-0.5 shrink-0" />
+                  
                     <label
-                      htmlFor="consent"
-                      className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none"
-                    >
-                      Please add my image to Teak's Brown Skin Database to help make AI fairer for brown skin. I'll receive a <span className="font-bold">10% off code</span> as a thank you. Learn more about{" "}
+                    htmlFor="consent"
+                    className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
+                    
+                      Please add my image to Teak's Brown Skin Database for Equitable AI Beauty Research and get a <span className="font-bold">Please add my image to Teak's Brown Skin Database and help make AI fairer for brown skin. I'll receive a 10% off code as a thank you. Learn more about Teak's Brown Skin Database and Privacy Policy.</span>. Learn more about{" "}
                       <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Teak's Brown Skin Database</a> and{" "}
                       <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
                     </label>
                   </div>
-                  {consentChecked && (
-                    <div className="pl-7">
+                  {consentChecked &&
+                <div className="pl-7">
                       <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
                         Email address
                       </label>
                       <input
-                        id="user-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={userEmail}
-                        onChange={(e) => setUserEmail(e.target.value)}
-                        className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
+                    id="user-email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={userEmail}
+                    onChange={(e) => setUserEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-border bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring" />
+                  
                     </div>
-                  )}
+                }
                 </div>
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
-                    onClick={() => setState("lip-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background transition-colors"
-                  >
+                  onClick={() => setState("lip-tone")}
+                  size="lg"
+                  variant="outline"
+                  className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                  
                     Go Back
                   </Button>
-                  {originalImage && (
-                    <Button
-                      onClick={() => setState("uploaded")}
-                      size="lg"
-                      variant="outline"
-                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background transition-colors"
-                    >
-                      Get My Results <ArrowRight className="h-3 w-3" />
+                  {originalImage &&
+                <Button
+                  onClick={() => setState("uploaded")}
+                  size="lg"
+                  variant="outline"
+                  className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                  
+                      Next <ArrowRight className="h-3 w-3" />
                     </Button>
-                  )}
+                }
                 </div>
               </motion.div>
-            )}
+            }
 
             {/* Step 2: Pick a look */}
-            {state === "uploaded" && originalImage && (
-              <motion.div
-                key="pick-look"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="flex flex-col items-center gap-8"
-              >
+            {state === "uploaded" && originalImage &&
+            <motion.div
+              key="pick-look"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+              
                 <div className="w-64 h-64 overflow-hidden">
                   <img
-                    src={originalImage}
-                    alt="Your photo"
-                    className="w-full h-full object-cover"
-                  />
+                  src={originalImage}
+                  alt="Your photo"
+                  className="w-full h-full object-cover" />
+                
                 </div>
 
                 <div className="w-full max-w-sm flex flex-col gap-5">
@@ -828,20 +824,20 @@ const Index = () => {
                       <SelectValue placeholder="Select a look" />
                     </SelectTrigger>
                     <SelectContent>
-                      {LIPSTICK_LOOKS.map((look) => (
-                        <SelectItem key={look.id} value={look.id}>
+                      {LIPSTICK_LOOKS.map((look) =>
+                    <SelectItem key={look.id} value={look.id}>
                           <div className="flex items-start gap-2.5">
                             <span
-                              className="mt-1 h-3 w-3 rounded-full shrink-0"
-                              style={{ backgroundColor: look.color }}
-                            />
+                          className="mt-1 h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: look.color }} />
+                        
                             <div className="flex flex-col">
                               <span className="font-display text-sm">{look.label}</span>
                               <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
                             </div>
                           </div>
                         </SelectItem>
-                      ))}
+                    )}
                     </SelectContent>
                   </Select>
 
@@ -862,35 +858,35 @@ const Index = () => {
 
                   <div className="flex gap-3 justify-center pt-2">
                     <Button
-                      onClick={applyLipstick}
-                      size="lg"
-                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8"
-                    >
+                    onClick={applyLipstick}
+                    size="lg"
+                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
+                    
                       Apply Look
                     </Button>
-                    <Button onClick={() => { setOriginalImage(null); setState("idle"); }} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                       Go Back
                     </Button>
                   </div>
                 </div>
               </motion.div>
-            )}
+            }
 
             {/* Processing */}
-            {state === "processing" && (
-              <motion.div
-                key="processing"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-8 py-12"
-              >
-                {originalImage && (
-                  <div className="relative w-64 h-64 overflow-hidden">
+            {state === "processing" &&
+            <motion.div
+              key="processing"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-8 py-12">
+              
+                {originalImage &&
+              <div className="relative w-64 h-64 overflow-hidden">
                     <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
-                )}
+              }
                 <div className="flex flex-col items-center gap-4 w-full max-w-xs">
                   <Progress value={progress} className="h-2 w-full" />
                   <p className="text-muted-foreground font-display text-sm">
@@ -898,17 +894,17 @@ const Index = () => {
                   </p>
                 </div>
               </motion.div>
-            )}
+            }
 
             {/* Result */}
-            {state === "done" && resultImage && (
-              <motion.div
-                key="result"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                className="flex flex-col items-center gap-8"
-              >
+            {state === "done" && resultImage &&
+            <motion.div
+              key="result"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center gap-8">
+              
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                   <div className="flex flex-col items-center gap-3">
                     <span className="font-sans text-[9px] text-foreground uppercase">Before</span>
@@ -928,197 +924,197 @@ const Index = () => {
 
                 <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
                   <Button
-                    size="lg"
-                    className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
-                      addedToCart
-                        ? "bg-green-700 text-white hover:bg-green-700 border-green-700"
-                        : cartError
-                        ? "bg-red-700 text-white hover:bg-red-700 border-red-700"
-                        : "bg-foreground text-background hover:bg-foreground/85"
-                    }`}
-                    disabled={addedToCart || cartError || addingToCart}
-                    onClick={async () => {
-                      const look = LIPSTICK_LOOKS.find(l => l.id === selectedLook);
-                      if (!look || !resultImage) return;
+                  size="lg"
+                  className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
+                  addedToCart ?
+                  "bg-green-700 text-white hover:bg-green-700 border-green-700" :
+                  cartError ?
+                  "bg-red-700 text-white hover:bg-red-700 border-red-700" :
+                  "bg-foreground text-background hover:bg-foreground/85"}`
+                  }
+                  disabled={addedToCart || cartError || addingToCart}
+                  onClick={async () => {
+                    const look = LIPSTICK_LOOKS.find((l) => l.id === selectedLook);
+                    if (!look || !resultImage) return;
 
-                      // Generate a unique image ID
-                      const imageId = crypto.randomUUID();
+                    // Generate a unique image ID
+                    const imageId = crypto.randomUUID();
 
-                      // AI-powered crop of lip/lower face region
-                      let imageUrl: string | null = null;
-                      try {
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        await new Promise<void>((resolve, reject) => {
-                          img.onload = () => resolve();
-                          img.onerror = reject;
-                          img.src = originalImage!;
-                        });
-
-                        // Get a small base64 version for detection
-                        const detectCanvas = document.createElement("canvas");
-                        const maxDetectSize = 512;
-                        const scale = Math.min(maxDetectSize / img.width, maxDetectSize / img.height, 1);
-                        detectCanvas.width = Math.round(img.width * scale);
-                        detectCanvas.height = Math.round(img.height * scale);
-                        const detectCtx = detectCanvas.getContext("2d")!;
-                        detectCtx.drawImage(img, 0, 0, detectCanvas.width, detectCanvas.height);
-                        const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
-
-                        // Call AI to detect lip region
-                        let cropTop = 0.0, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
-                        try {
-                          const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
-                            body: { imageBase64: detectBase64 },
-                          });
-                          if (!regionError && regionData && regionData.top !== undefined) {
-                            cropTop = regionData.top;
-                            cropBottom = regionData.bottom;
-                            cropLeft = regionData.left;
-                            cropRight = regionData.right;
-                          } else {
-                            console.warn("Lip detection failed, using fallback crop:", regionError);
-                          }
-                        } catch (detectErr) {
-                          console.warn("Lip detection error, using fallback crop:", detectErr);
-                        }
-
-                        const canvas = document.createElement("canvas");
-                        const startX = Math.floor(img.width * cropLeft);
-                        const startY = Math.floor(img.height * cropTop);
-                        const cropWidth = Math.floor(img.width * (cropRight - cropLeft));
-                        const cropHeight = Math.floor(img.height * (cropBottom - cropTop));
-                        canvas.width = cropWidth;
-                        canvas.height = cropHeight;
-                        const ctx = canvas.getContext("2d")!;
-                        ctx.drawImage(img, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
-                        const fileName = `${imageId}.jpg`;
-                        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
-                        if (uploadError) {
-                          console.error("Failed to upload image:", uploadError);
-                        } else {
-                          const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from("cart-images").createSignedUrl(uploadData.path, 60 * 60 * 24 * 365);
-                          if (signedUrlError) {
-                            console.error("Failed to create signed URL:", signedUrlError);
-                          } else {
-                            imageUrl = signedUrlData.signedUrl;
-                          }
-                        }
-                      } catch (e) {
-                        console.error("Failed to crop/upload image:", e);
-                      }
-
-                      // Save submission to database
-                      supabase.from("customer_submissions" as any).insert({
-                        variant_id: look.variantId,
-                        image_url: imageUrl,
-                        image_id: imageId,
-                        skin_tone: skinTone,
-                        lip_tone: lipTone,
-                        email: userEmail || null,
-                      } as any).select().then(({ data: insertData, error: insertError }) => {
-                        if (insertError) {
-                          console.error("Failed to track cart click:", insertError);
-                          return;
-                        }
-                        // Fire AI categorization in background
-                        const submissionId = (insertData as any)?.[0]?.id;
-                        if (submissionId && originalImage) {
-                          const img = new Image();
-                          img.onload = () => {
-                            const c = document.createElement("canvas");
-                            c.width = Math.min(img.width, 1024);
-                            c.height = Math.round(img.height * (c.width / img.width));
-                            const cx = c.getContext("2d")!;
-                            cx.drawImage(img, 0, 0, c.width, c.height);
-                            const base64 = c.toDataURL("image/jpeg", 0.7);
-                            supabase.functions.invoke("categorize-skin-lip", {
-                              body: { imageBase64: base64, submissionId },
-                            }).then(({ error }) => {
-                              if (error) console.error("AI categorization failed:", error);
-                            });
-                          };
-                          img.src = originalImage;
-                        }
+                    // AI-powered crop of lip/lower face region
+                    let imageUrl: string | null = null;
+                    try {
+                      const img = new Image();
+                      img.crossOrigin = "anonymous";
+                      await new Promise<void>((resolve, reject) => {
+                        img.onload = () => resolve();
+                        img.onerror = reject;
+                        img.src = originalImage!;
                       });
 
-                      // Ask the Shopify parent page to add to cart via postMessage bridge
-                      setAddingToCart(true);
+                      // Get a small base64 version for detection
+                      const detectCanvas = document.createElement("canvas");
+                      const maxDetectSize = 512;
+                      const scale = Math.min(maxDetectSize / img.width, maxDetectSize / img.height, 1);
+                      detectCanvas.width = Math.round(img.width * scale);
+                      detectCanvas.height = Math.round(img.height * scale);
+                      const detectCtx = detectCanvas.getContext("2d")!;
+                      detectCtx.drawImage(img, 0, 0, detectCanvas.width, detectCanvas.height);
+                      const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
+
+                      // Call AI to detect lip region
+                      let cropTop = 0.0,cropBottom = 1.0,cropLeft = 0.0,cropRight = 1.0;
                       try {
-                        const cartPromise = new Promise<boolean>((resolve) => {
-                          const timeout = setTimeout(() => resolve(false), 5000);
-                          const handler = (event: MessageEvent) => {
-                            if (event.data?.type === "cart-add-response") {
-                              clearTimeout(timeout);
-                              window.removeEventListener("message", handler);
-                              resolve(!!event.data.success);
-                            }
-                          };
-                          window.addEventListener("message", handler);
+                        const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
+                          body: { imageBase64: detectBase64 }
                         });
-                        window.top?.postMessage({
-                          type: "cart-add",
-                          variantId: parseInt(look.variantId),
-                          quantity: 1,
-                        }, "*");
-                        const success = await cartPromise;
-                        if (success) {
-                          setAddedToCart(true);
+                        if (!regionError && regionData && regionData.top !== undefined) {
+                          cropTop = regionData.top;
+                          cropBottom = regionData.bottom;
+                          cropLeft = regionData.left;
+                          cropRight = regionData.right;
                         } else {
-                          setCartError(true);
+                          console.warn("Lip detection failed, using fallback crop:", regionError);
                         }
-                      } catch {
-                        setCartError(true);
-                      } finally {
-                        setAddingToCart(false);
+                      } catch (detectErr) {
+                        console.warn("Lip detection error, using fallback crop:", detectErr);
                       }
-                    }}
-                  >
-                    {addingToCart ? (
-                      <>
+
+                      const canvas = document.createElement("canvas");
+                      const startX = Math.floor(img.width * cropLeft);
+                      const startY = Math.floor(img.height * cropTop);
+                      const cropWidth = Math.floor(img.width * (cropRight - cropLeft));
+                      const cropHeight = Math.floor(img.height * (cropBottom - cropTop));
+                      canvas.width = cropWidth;
+                      canvas.height = cropHeight;
+                      const ctx = canvas.getContext("2d")!;
+                      ctx.drawImage(img, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+                      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
+                      const fileName = `${imageId}.jpg`;
+                      const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+                      if (uploadError) {
+                        console.error("Failed to upload image:", uploadError);
+                      } else {
+                        const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from("cart-images").createSignedUrl(uploadData.path, 60 * 60 * 24 * 365);
+                        if (signedUrlError) {
+                          console.error("Failed to create signed URL:", signedUrlError);
+                        } else {
+                          imageUrl = signedUrlData.signedUrl;
+                        }
+                      }
+                    } catch (e) {
+                      console.error("Failed to crop/upload image:", e);
+                    }
+
+                    // Save submission to database
+                    supabase.from("customer_submissions" as any).insert({
+                      variant_id: look.variantId,
+                      image_url: imageUrl,
+                      image_id: imageId,
+                      skin_tone: skinTone,
+                      lip_tone: lipTone,
+                      email: userEmail || null
+                    } as any).select().then(({ data: insertData, error: insertError }) => {
+                      if (insertError) {
+                        console.error("Failed to track cart click:", insertError);
+                        return;
+                      }
+                      // Fire AI categorization in background
+                      const submissionId = (insertData as any)?.[0]?.id;
+                      if (submissionId && originalImage) {
+                        const img = new Image();
+                        img.onload = () => {
+                          const c = document.createElement("canvas");
+                          c.width = Math.min(img.width, 1024);
+                          c.height = Math.round(img.height * (c.width / img.width));
+                          const cx = c.getContext("2d")!;
+                          cx.drawImage(img, 0, 0, c.width, c.height);
+                          const base64 = c.toDataURL("image/jpeg", 0.7);
+                          supabase.functions.invoke("categorize-skin-lip", {
+                            body: { imageBase64: base64, submissionId }
+                          }).then(({ error }) => {
+                            if (error) console.error("AI categorization failed:", error);
+                          });
+                        };
+                        img.src = originalImage;
+                      }
+                    });
+
+                    // Ask the Shopify parent page to add to cart via postMessage bridge
+                    setAddingToCart(true);
+                    try {
+                      const cartPromise = new Promise<boolean>((resolve) => {
+                        const timeout = setTimeout(() => resolve(false), 5000);
+                        const handler = (event: MessageEvent) => {
+                          if (event.data?.type === "cart-add-response") {
+                            clearTimeout(timeout);
+                            window.removeEventListener("message", handler);
+                            resolve(!!event.data.success);
+                          }
+                        };
+                        window.addEventListener("message", handler);
+                      });
+                      window.top?.postMessage({
+                        type: "cart-add",
+                        variantId: parseInt(look.variantId),
+                        quantity: 1
+                      }, "*");
+                      const success = await cartPromise;
+                      if (success) {
+                        setAddedToCart(true);
+                      } else {
+                        setCartError(true);
+                      }
+                    } catch {
+                      setCartError(true);
+                    } finally {
+                      setAddingToCart(false);
+                    }
+                  }}>
+                  
+                    {addingToCart ?
+                  <>
                         <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
                         Adding to Cart…
-                      </>
-                    ) : addedToCart ? (
-                      <>
+                      </> :
+                  addedToCart ?
+                  <>
                         <Check className="w-3 h-3" />
                         Added to Cart
-                      </>
-                    ) : cartError ? (
-                      <>Failed to add to cart</>
-                    ) : (
-                      <>Add to Cart — {currentLookLabel}</>
-                    )}
+                      </> :
+                  cartError ?
+                  <>Failed to add to cart</> :
+
+                  <>Add to Cart — {currentLookLabel}</>
+                  }
                   </Button>
 
                   <Select value="" onValueChange={(v) => {
-                    if (!v) return;
-                    setSelectedLook(v as LookId);
-                    setAddedToCart(false);
-                    setCartError(false);
-                    setAddingToCart(false);
-                    setResultImage(null);
-                    setState("uploaded");
-                  }}>
+                  if (!v) return;
+                  setSelectedLook(v as LookId);
+                  setAddedToCart(false);
+                  setCartError(false);
+                  setAddingToCart(false);
+                  setResultImage(null);
+                  setState("uploaded");
+                }}>
                     <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
                       <SelectValue placeholder="Try another look" />
                     </SelectTrigger>
                     <SelectContent>
-                      {LIPSTICK_LOOKS.map((look) => (
-                        <SelectItem key={look.id} value={look.id}>
+                      {LIPSTICK_LOOKS.map((look) =>
+                    <SelectItem key={look.id} value={look.id}>
                           <div className="flex items-start gap-2.5">
                             <span
-                              className="mt-1 h-3 w-3 rounded-full shrink-0"
-                              style={{ backgroundColor: look.color }}
-                            />
+                          className="mt-1 h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: look.color }} />
+                        
                             <div className="flex flex-col">
                               <span className="font-display text-sm">{look.label}</span>
                               <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
                             </div>
                           </div>
                         </SelectItem>
-                      ))}
+                    )}
                     </SelectContent>
                   </Select>
 
@@ -1127,12 +1123,12 @@ const Index = () => {
                   </Button>
                 </div>
               </motion.div>
-            )}
+            }
           </AnimatePresence>
         </div>
       </main>
-    </div>
-  );
+    </div>);
+
 };
 
 export default Index;
