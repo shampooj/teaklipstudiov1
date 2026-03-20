@@ -790,7 +790,7 @@ const Index = () => {
                       variant="outline"
                       className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
                     >
-                      Next <ArrowRight className="h-3 w-3" />
+                      Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
                   )}
                 </div>
