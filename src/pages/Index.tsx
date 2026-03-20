@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
-import { Upload, Download, RotateCcw } from "lucide-react";
+import { Upload, Download, RotateCcw, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -26,7 +26,7 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.jpg";
 import lipBrownPink from "@/assets/lip-brown-pink.jpg";
 import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "selfie-preview" | "uploaded" | "processing" | "done";
 
 const SKIN_TONES = [
   { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
@@ -433,7 +433,7 @@ const Index = () => {
     const reader = new FileReader();
     reader.onload = (e) => {
       setOriginalImage(e.target?.result as string);
-      setState("uploaded");
+      setState("selfie-preview");
     };
     reader.readAsDataURL(file);
   }, []);
@@ -728,6 +728,44 @@ const Index = () => {
                     className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
                   >
                     Go Back
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Selfie Preview */}
+            {state === "selfie-preview" && originalImage && (
+              <motion.div
+                key="selfie-preview"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="flex flex-col items-center gap-6"
+              >
+                <div className="w-64 h-64 overflow-hidden">
+                  <img
+                    src={originalImage}
+                    alt="Your selfie"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setState("idle")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                  >
+                    Retake
+                  </Button>
+                  <Button
+                    onClick={() => setState("uploaded")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5"
+                  >
+                    Next <ArrowRight className="h-3 w-3" />
                   </Button>
                 </div>
               </motion.div>
