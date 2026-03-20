@@ -586,7 +586,7 @@ const Index = () => {
                     {SKIN_TONES.map((tone) => (
                       <button
                         key={tone.id}
-                        onClick={() => setSkinTone(tone.id)}
+                        onClick={() => { setSkinTone(tone.id); setState("lip-tone"); }}
                         className={`group flex flex-col items-center gap-1.5 border transition-all duration-200 hover:border-foreground/40 overflow-hidden ${
                           skinTone === tone.id
                             ? "border-foreground ring-1 ring-foreground"
