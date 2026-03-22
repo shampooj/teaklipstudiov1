@@ -741,7 +741,7 @@ const Index = () => {
                   
                     <label
                     htmlFor="consent"
-                    className="text-muted-foreground font-sans text-[10px] leading-relaxed cursor-pointer select-none">
+                    className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
                     
                       Yes, I want to contribute to Teak's Brown Skin Database to help make AI fairer for brown skin! Please add my image to the database, and{" "}
                       <span className="font-bold text-primary">I'll receive a 10% off code as a thank you.</span>{" "}
