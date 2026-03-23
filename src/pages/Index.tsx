@@ -1025,7 +1025,7 @@ const Index = () => {
                     
                       Apply Look
                     </Button>
-                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                       Go Back
                     </Button>
                   </div>
