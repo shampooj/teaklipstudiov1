@@ -394,6 +394,8 @@ const Index = () => {
   const [skinTone, setSkinTone] = useState<string>("medium-brown");
   const [lipTone, setLipTone] = useState<string>("neutral-brown");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
+  const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
+  const [croppingFace, setCroppingFace] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
@@ -434,9 +436,27 @@ const Index = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setOriginalImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string;
+      setOriginalImage(base64);
       setState("idle");
+      
+      // Detect and crop face
+      setCroppingFace(true);
+      try {
+        const resized = await downscaleImage(base64, 512);
+        const { data, error } = await supabase.functions.invoke("detect-face-region", {
+          body: { imageBase64: resized }
+        });
+        if (!error && data && data.top !== undefined) {
+          const cropped = await cropImage(base64, data);
+          setFaceCropImage(cropped);
+        }
+      } catch (err) {
+        console.error("Face crop failed, showing original:", err);
+      } finally {
+        setCroppingFace(false);
+      }
     };
     reader.readAsDataURL(file);
   }, []);
@@ -453,6 +473,25 @@ const Index = () => {
         const ctx = canvas.getContext("2d")!;
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = base64;
+    });
+  };
+
+  const cropImage = (base64: string, region: { top: number; bottom: number; left: number; right: number }): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const sx = Math.round(region.left * img.width);
+        const sy = Math.round(region.top * img.height);
+        const sw = Math.round((region.right - region.left) * img.width);
+        const sh = Math.round((region.bottom - region.top) * img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = sw;
+        canvas.height = sh;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
       };
       img.src = base64;
     });
@@ -519,6 +558,7 @@ const Index = () => {
     setSkinTone("");
     setLipTone("");
     setOriginalImage(null);
+    setFaceCropImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
   };
@@ -710,16 +750,21 @@ const Index = () => {
                   </label> :
 
               <div className="flex flex-col items-center">
-                    <div className="w-80 h-80 mx-auto overflow-hidden">
+                    <div className="w-80 h-80 mx-auto overflow-hidden relative">
+                      {croppingFace && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+                          <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
+                        </div>
+                      )}
                       <img
-                    src={originalImage}
+                    src={faceCropImage || originalImage}
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
                   
                     </div>
                     <div className="mt-4 flex justify-center">
                       <Button
-                        onClick={() => {setOriginalImage(null);}}
+                        onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
                         size="lg"
                         variant="outline"
                         className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
@@ -980,7 +1025,7 @@ const Index = () => {
                     
                       Apply Look
                     </Button>
-                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                       Go Back
                     </Button>
                   </div>
