@@ -436,9 +436,27 @@ const Index = () => {
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      setOriginalImage(e.target?.result as string);
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string;
+      setOriginalImage(base64);
       setState("idle");
+      
+      // Detect and crop face
+      setCroppingFace(true);
+      try {
+        const resized = await downscaleImage(base64, 512);
+        const { data, error } = await supabase.functions.invoke("detect-face-region", {
+          body: { imageBase64: resized }
+        });
+        if (!error && data && data.top !== undefined) {
+          const cropped = await cropImage(base64, data);
+          setFaceCropImage(cropped);
+        }
+      } catch (err) {
+        console.error("Face crop failed, showing original:", err);
+      } finally {
+        setCroppingFace(false);
+      }
     };
     reader.readAsDataURL(file);
   }, []);
