@@ -710,7 +710,7 @@ const Index = () => {
                   </label> :
 
               <div className="flex flex-col items-center">
-                    <div className="w-64 h-64 mx-auto overflow-hidden">
+                    <div className="w-80 h-80 mx-auto overflow-hidden">
                       <img
                     src={originalImage}
                     alt="Your selfie"
