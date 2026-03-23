@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.categorize-skin-lip]
 verify_jwt = false
+
+[functions.generate-discount]
+verify_jwt = false
