@@ -790,7 +790,7 @@ const Index = () => {
                     className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
                     
                       Yes, I want to contribute to Teak's Brown Skin Database to help make AI work better for brown skin! Please add my image to the database, and{" "}
-                      <span className="font-bold text-primary">I'll receive a 10% off code on the next screen as a thank you.</span>{" "}
+                      <span className="font-bold text-primary">I'll receive a 10% off code as a thank you.</span>{" "}
                       <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Learn more</a> and{" "}
                       <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>.
                     </label>
