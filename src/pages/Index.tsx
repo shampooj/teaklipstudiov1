@@ -478,6 +478,25 @@ const Index = () => {
     });
   };
 
+  const cropImage = (base64: string, region: { top: number; bottom: number; left: number; right: number }): Promise<string> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const sx = Math.round(region.left * img.width);
+        const sy = Math.round(region.top * img.height);
+        const sw = Math.round((region.right - region.left) * img.width);
+        const sh = Math.round((region.bottom - region.top) * img.height);
+        const canvas = document.createElement("canvas");
+        canvas.width = sw;
+        canvas.height = sh;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
+        resolve(canvas.toDataURL("image/jpeg", 0.9));
+      };
+      img.src = base64;
+    });
+  };
+
   const applyLipstick = useCallback(async () => {
     if (!originalImage) return;
     setState("processing");
