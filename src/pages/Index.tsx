@@ -498,12 +498,13 @@ const Index = () => {
   };
 
   const applyLipstick = useCallback(async () => {
-    if (!originalImage) return;
+    const sourceImage = faceCropImage || originalImage;
+    if (!sourceImage) return;
     setState("processing");
     startProgress();
 
     try {
-      const resizedImage = await downscaleImage(originalImage, 768);
+      const resizedImage = await downscaleImage(sourceImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
         body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel }
       });
@@ -534,7 +535,7 @@ const Index = () => {
       }
       setState("uploaded");
     }
-  }, [originalImage, selectedLook, skinTone, aiModel]);
+  }, [originalImage, faceCropImage, selectedLook, skinTone, aiModel]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
