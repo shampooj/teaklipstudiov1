@@ -749,16 +749,21 @@ const Index = () => {
                   </label> :
 
               <div className="flex flex-col items-center">
-                    <div className="w-80 h-80 mx-auto overflow-hidden">
+                    <div className="w-80 h-80 mx-auto overflow-hidden relative">
+                      {croppingFace && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+                          <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
+                        </div>
+                      )}
                       <img
-                    src={originalImage}
+                    src={faceCropImage || originalImage}
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
                   
                     </div>
                     <div className="mt-4 flex justify-center">
                       <Button
-                        onClick={() => {setOriginalImage(null);}}
+                        onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
                         size="lg"
                         variant="outline"
                         className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
