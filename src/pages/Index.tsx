@@ -710,11 +710,11 @@ const Index = () => {
                   </label> :
 
               <div className="flex flex-col items-center">
-                    <div className="w-full overflow-hidden">
+                    <div className="w-64 h-64 mx-auto overflow-hidden">
                       <img
                     src={originalImage}
                     alt="Your selfie"
-                    className="w-full h-auto object-cover" />
+                    className="w-full h-full object-cover" />
                   
                     </div>
                     <div className="mt-4 flex justify-center">
