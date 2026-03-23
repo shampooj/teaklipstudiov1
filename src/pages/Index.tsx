@@ -558,6 +558,7 @@ const Index = () => {
     setSkinTone("");
     setLipTone("");
     setOriginalImage(null);
+    setFaceCropImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
   };
