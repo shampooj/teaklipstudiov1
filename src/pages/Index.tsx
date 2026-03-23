@@ -971,7 +971,7 @@ const Index = () => {
               
                 <div className="w-64 h-64 overflow-hidden">
                   <img
-                  src={originalImage}
+                  src={faceCropImage || originalImage}
                   alt="Your photo"
                   className="w-full h-full object-cover" />
                 
