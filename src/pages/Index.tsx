@@ -1045,7 +1045,7 @@ const Index = () => {
               
                 {originalImage &&
               <div className="relative w-64 h-64 overflow-hidden">
-                    <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
+                    <img src={faceCropImage || originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
                   </div>
               }
