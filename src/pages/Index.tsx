@@ -535,7 +535,7 @@ const Index = () => {
       }
       setState("uploaded");
     }
-  }, [originalImage, selectedLook, skinTone, aiModel]);
+  }, [originalImage, faceCropImage, selectedLook, skinTone, aiModel]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
