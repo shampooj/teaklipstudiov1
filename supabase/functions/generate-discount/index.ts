@@ -55,6 +55,7 @@ serve(async (req) => {
           customer_selection: "all",
           usage_limit: 1,
           once_per_customer: true,
+          starts_at: new Date().toISOString(),
         },
       }),
     });
