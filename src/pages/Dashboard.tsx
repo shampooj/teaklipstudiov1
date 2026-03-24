@@ -932,6 +932,7 @@ const Dashboard = () => {
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Email</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone Label</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
