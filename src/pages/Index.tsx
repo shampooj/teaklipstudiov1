@@ -929,7 +929,7 @@ const Index = () => {
                      The Founders' Top Recs for Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
@@ -938,13 +938,14 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg h-full"
+                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg snap-start flex-shrink-0"
+                          style={{ width: '160px' }}
                         >
                           <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                            <div className="w-full aspect-square rounded-md overflow-hidden bg-muted relative">
+                            <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
                               {img?.imageUrl ? (
                                 <>
                                   <img
