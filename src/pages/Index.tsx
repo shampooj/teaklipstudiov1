@@ -975,6 +975,9 @@ const Index = () => {
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline">
                             {rec.variantName}
                           </a>
+                          {img?.price && (
+                            <span className="font-sans text-[10px] text-muted-foreground">${parseFloat(img.price).toFixed(2)}</span>
+                          )}
                           <Button
                             size="sm"
                             className={`w-full font-sans text-[8px] uppercase tracking-wider transition-all duration-300 ${
