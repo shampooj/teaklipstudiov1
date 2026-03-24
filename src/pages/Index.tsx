@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRecommendations, getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
