@@ -988,7 +988,7 @@ const Index = () => {
 
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
-                     Choose your lipstick look
+                     Our Top Recommendations for Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
