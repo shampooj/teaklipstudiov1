@@ -141,7 +141,7 @@ const CATEGORY_LABELS: Record<number, { key: RecommendationCategory; label: stri
   0: { key: "MLBB", label: "Your Best \"My Lips But Better\" Shade" },
   1: { key: "RED", label: "A Statement Red" },
   2: { key: "DAY", label: "An Easy, Everyday" },
-  3: { key: "EVENING", label: "Evening" },
+  3: { key: "EVENING", label: "An Evening Look" },
   4: { key: "LIPSET", label: "Lip Set" },
 };
 
