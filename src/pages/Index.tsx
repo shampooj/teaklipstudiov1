@@ -931,7 +931,7 @@ const Index = () => {
                       <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code · Expires in 7 days</p>
                       <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
                       <p className="font-sans text-[9px] text-muted-foreground mt-1">Apply at checkout</p>
-                      <p className="font-sans text-[9px] text-muted-foreground mt-2">Free U.S. Standard Shipping for 2+ Lipsticks</p>
+                      <p className="font-sans text-xs text-muted-foreground mt-2">Free U.S. Standard Shipping for 2+ Lipsticks</p>
                     </div>
                   )}
                    <label className="font-display text-lg text-foreground text-center">
