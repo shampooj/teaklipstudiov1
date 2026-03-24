@@ -134,13 +134,13 @@ const Dashboard = () => {
   // Funnel tracking state
   const [funnelDateFrom, setFunnelDateFrom] = useState<Date>(subDays(new Date(), 30));
   const [funnelDateTo, setFunnelDateTo] = useState<Date>(new Date());
-  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string }[]>([]);
+  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string; event_data: any }[]>([]);
   const [funnelLoading, setFunnelLoading] = useState(false);
 
   const fetchFunnelData = useCallback(async () => {
     setFunnelLoading(true);
     const { data: events, error } = await (supabase.from as any)("quiz_events")
-      .select("event_name, session_id, created_at")
+      .select("event_name, session_id, created_at, event_data")
       .gte("created_at", startOfDay(funnelDateFrom).toISOString())
       .lte("created_at", endOfDay(funnelDateTo).toISOString());
     if (!error && events) {
@@ -457,6 +457,15 @@ const Dashboard = () => {
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Image Submissions</p>
                 <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
                   {filteredData.length}
+                </p>
+              </div>
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Revenue</p>
+                <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
+                  ${quizEvents
+                    .filter((e) => e.event_name === "checkout_completed" && e.event_data?.total_price)
+                    .reduce((sum, e) => sum + parseFloat(e.event_data.total_price || "0"), 0)
+                    .toFixed(2)}
                 </p>
               </div>
             </div>
