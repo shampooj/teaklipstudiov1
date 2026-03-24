@@ -439,34 +439,7 @@ const Dashboard = () => {
 
             {/* Quiz Funnel Analytics */}
             <div className="border border-border rounded-2xl p-5 w-full space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                  <span className="text-[10px] text-muted-foreground">to</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
 
               {funnelLoading ? (
                 <p className="text-muted-foreground text-sm text-center py-8">Loading funnel data…</p>
