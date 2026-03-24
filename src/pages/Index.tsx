@@ -926,7 +926,7 @@ const Index = () => {
                 </div>
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
-                     The Founders' Top Recs for Your Complexion
+                     The Best Shades For Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
                   <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
