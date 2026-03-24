@@ -35,73 +35,95 @@ serve(async (req) => {
     const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
     const discountCode = `TEAK-${skinSlug}-${lipSlug}-${randomSuffix}`;
 
-    const adminUrl = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}`;
+    const graphqlUrl = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`;
 
-    // Step 1: Create a price rule for 10% off
-    const priceRuleRes = await fetch(`${adminUrl}/price_rules.json`, {
+    // Create discount code via GraphQL Admin API with combinesWith support
+    const mutation = `
+      mutation discountCodeBasicCreate($basicCodeDiscount: DiscountCodeBasicInput!) {
+        discountCodeBasicCreate(basicCodeDiscount: $basicCodeDiscount) {
+          codeDiscountNode {
+            id
+            codeDiscount {
+              ... on DiscountCodeBasic {
+                codes(first: 1) {
+                  edges {
+                    node {
+                      code
+                    }
+                  }
+                }
+              }
+            }
+          }
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      basicCodeDiscount: {
+        title: discountCode,
+        code: discountCode,
+        startsAt: new Date().toISOString(),
+        usageLimit: 1,
+        appliesOncePerCustomer: true,
+        customerSelection: {
+          all: true,
+        },
+        customerGets: {
+          value: {
+            percentage: 0.1,
+          },
+          items: {
+            all: true,
+          },
+        },
+        combinesWith: {
+          shippingDiscounts: true,
+          productDiscounts: false,
+          orderDiscounts: false,
+        },
+      },
+    };
+
+    const graphqlRes = await fetch(graphqlUrl, {
       method: "POST",
       headers: {
         "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        price_rule: {
-          title: discountCode,
-          target_type: "line_item",
-          target_selection: "all",
-          allocation_method: "across",
-          value_type: "percentage",
-          value: "-10.0",
-          customer_selection: "all",
-          usage_limit: 1,
-          once_per_customer: true,
-          starts_at: new Date().toISOString(),
-          prerequisite_to_entitlement_purchase: { prerequisite_amount: null },
-        },
-      }),
+      body: JSON.stringify({ query: mutation, variables }),
     });
 
-    if (!priceRuleRes.ok) {
-      const errorText = await priceRuleRes.text();
-      console.error("Shopify price rule error:", priceRuleRes.status, errorText);
+    if (!graphqlRes.ok) {
+      const errorText = await graphqlRes.text();
+      console.error("Shopify GraphQL error:", graphqlRes.status, errorText);
       return new Response(
-        JSON.stringify({ error: "Failed to create price rule" }),
+        JSON.stringify({ error: "Failed to create discount" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const priceRuleData = await priceRuleRes.json();
-    const priceRuleId = priceRuleData.price_rule.id;
+    const graphqlData = await graphqlRes.json();
+    const userErrors = graphqlData?.data?.discountCodeBasicCreate?.userErrors;
 
-    // Step 2: Create the discount code under that price rule
-    const discountRes = await fetch(`${adminUrl}/price_rules/${priceRuleId}/discount_codes.json`, {
-      method: "POST",
-      headers: {
-        "X-Shopify-Access-Token": SHOPIFY_ACCESS_TOKEN,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        discount_code: {
-          code: discountCode,
-        },
-      }),
-    });
-
-    if (!discountRes.ok) {
-      const errorText = await discountRes.text();
-      console.error("Shopify discount code error:", discountRes.status, errorText);
+    if (userErrors && userErrors.length > 0) {
+      console.error("Shopify discount userErrors:", JSON.stringify(userErrors));
       return new Response(
-        JSON.stringify({ error: "Failed to create discount code" }),
+        JSON.stringify({ error: "Failed to create discount", details: userErrors }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const discountData = await discountRes.json();
+    const createdCode =
+      graphqlData?.data?.discountCodeBasicCreate?.codeDiscountNode?.codeDiscount?.codes?.edges?.[0]?.node?.code;
 
     return new Response(
       JSON.stringify({
-        code: discountData.discount_code.code,
-        priceRuleId,
+        code: createdCode || discountCode,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
