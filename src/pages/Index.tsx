@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getRecommendations, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -50,6 +51,7 @@ const LIP_TONES = [
 { id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown }] as
 const;
 
+// LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
 const LIPSTICK_LOOKS = [
 { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
 { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
@@ -398,6 +400,7 @@ const Index = () => {
   const [croppingFace, setCroppingFace] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
   const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
   const [progress, setProgress] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
@@ -409,6 +412,8 @@ const Index = () => {
   const [emailError, setEmailError] = useState(false);
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
+  const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
+  const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
   const startProgress = useCallback(() => {
     setProgress(0);
     progressInterval.current = setInterval(() => {
@@ -506,7 +511,7 @@ const Index = () => {
     try {
       const resizedImage = await downscaleImage(sourceImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel }
+        body: { imageBase64: resizedImage, look: selectedRec?.variantName || selectedLook, skinTone, lipTone, model: aiModel }
       });
 
       // supabase-js puts non-2xx body in `data` and sets a generic `error`
@@ -562,6 +567,7 @@ const Index = () => {
     setFaceCropImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
+    setSelectedRecIndex(0);
   };
 
   const tryAnotherLook = () => {
@@ -577,7 +583,7 @@ const Index = () => {
     link.click();
   };
 
-  const currentLookLabel = LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
+  const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
 
   return (
     <div className="bg-background flex flex-col">
@@ -981,6 +987,30 @@ const Index = () => {
                    <label className="font-display text-lg text-foreground text-center">
                      Choose your lipstick look
                    </label>
+                  {recommendations.length > 0 ? (
+                  <Select value={String(selectedRecIndex)} onValueChange={(v) => setSelectedRecIndex(Number(v))}>
+                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
+                      <SelectValue placeholder="Select a look" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recommendations.map((rec, i) =>
+                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
+                          <div className="flex items-start gap-2.5">
+                            <span
+                          className="mt-1 h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: rec.color }} />
+                        
+                            <div className="flex flex-col">
+                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
+                              <span className="font-display text-sm">{rec.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                    )}
+                    </SelectContent>
+                  </Select>
+                  ) : (
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
                     <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
                       <SelectValue placeholder="Select a look" />
@@ -1002,6 +1032,7 @@ const Index = () => {
                     )}
                     </SelectContent>
                   </Select>
+                  )}
 
                   {/* Model toggle for A/B testing */}
                   <Select value={aiModel} onValueChange={setAiModel}>
@@ -1096,8 +1127,8 @@ const Index = () => {
                   }
                   disabled={addedToCart || cartError || addingToCart}
                   onClick={async () => {
-                    const look = LIPSTICK_LOOKS.find((l) => l.id === selectedLook);
-                    if (!look || !resultImage) return;
+                    const variantId = selectedRec?.variantId || LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.variantId;
+                    if (!variantId || !resultImage) return;
 
                     // Ask the Shopify parent page to add to cart via postMessage bridge
                     setAddingToCart(true);
@@ -1115,7 +1146,7 @@ const Index = () => {
                       });
                       window.top?.postMessage({
                         type: "cart-add",
-                        variantId: parseInt(look.variantId),
+                        variantId: parseInt(variantId),
                         quantity: 1
                       }, "*");
                       const success = await cartPromise;
@@ -1150,7 +1181,7 @@ const Index = () => {
 
                   <Select value="" onValueChange={(v) => {
                   if (!v) return;
-                  setSelectedLook(v as LookId);
+                  setSelectedRecIndex(Number(v));
                   setAddedToCart(false);
                   setCartError(false);
                   setAddingToCart(false);
@@ -1161,16 +1192,17 @@ const Index = () => {
                       <SelectValue placeholder="Try another look" />
                     </SelectTrigger>
                     <SelectContent>
-                      {LIPSTICK_LOOKS.map((look) =>
-                    <SelectItem key={look.id} value={look.id}>
+                      {recommendations.map((rec, i) =>
+                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
                           <div className="flex items-start gap-2.5">
                             <span
                           className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: look.color }} />
+                          style={{ backgroundColor: rec.color }} />
                         
                             <div className="flex flex-col">
-                              <span className="font-display text-sm">{look.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
+                              <span className="font-display text-sm">{rec.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
                             </div>
                           </div>
                         </SelectItem>
