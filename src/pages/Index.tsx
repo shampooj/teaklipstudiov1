@@ -945,11 +945,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
-                            isSelected
-                              ? "ring-2 ring-foreground"
-                              : "hover:bg-foreground/[0.02]"
-                          }`}
+                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg"
                         >
                           <span className="font-sans text-[10px] text-muted-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
