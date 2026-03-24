@@ -948,7 +948,7 @@ const Index = () => {
                 </div>
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
-                     Our Top Recommendations for Your Complexion
+                     The Founders' Top Recommendations for Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
