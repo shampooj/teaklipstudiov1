@@ -1180,7 +1180,7 @@ const Index = () => {
 
                   <Select value="" onValueChange={(v) => {
                   if (!v) return;
-                  setSelectedLook(v as LookId);
+                  setSelectedRecIndex(Number(v));
                   setAddedToCart(false);
                   setCartError(false);
                   setAddingToCart(false);
@@ -1191,16 +1191,17 @@ const Index = () => {
                       <SelectValue placeholder="Try another look" />
                     </SelectTrigger>
                     <SelectContent>
-                      {LIPSTICK_LOOKS.map((look) =>
-                    <SelectItem key={look.id} value={look.id}>
+                      {recommendations.map((rec, i) =>
+                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
                           <div className="flex items-start gap-2.5">
                             <span
                           className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: look.color }} />
+                          style={{ backgroundColor: rec.color }} />
                         
                             <div className="flex flex-col">
-                              <span className="font-display text-sm">{look.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
+                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
+                              <span className="font-display text-sm">{rec.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
                             </div>
                           </div>
                         </SelectItem>
