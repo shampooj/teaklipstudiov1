@@ -987,12 +987,12 @@ const Index = () => {
                           )}
                           <Button
                             size="sm"
-                            className={`w-full font-sans text-[8px] uppercase tracking-wider transition-all duration-300 ${
+                            className={`w-full font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full ${
                               cartStates[rec.variantId] === "added"
-                                ? "bg-green-700 text-white hover:bg-green-700"
+                                ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                 : cartStates[rec.variantId] === "error"
-                                ? "bg-red-700 text-white hover:bg-red-700"
-                                : "bg-foreground text-background hover:bg-foreground/85"
+                                ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
+                                : "bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
                             }`}
                             disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
                             onClick={async (e) => {
