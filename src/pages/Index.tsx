@@ -28,7 +28,7 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.jpg";
 import lipBrownPink from "@/assets/lip-brown-pink.jpg";
 import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
 
 const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
