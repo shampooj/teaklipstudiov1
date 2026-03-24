@@ -983,7 +983,7 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {img?.price && (
-                            <span className="font-sans text-[10px] text-muted-foreground">${parseFloat(img.price).toFixed(2)}</span>
+                            <span className="font-sans text-[10px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
                           )}
                           <Button
                             size="sm"
@@ -992,7 +992,7 @@ const Index = () => {
                                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                 : cartStates[rec.variantId] === "error"
                                 ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
-                                : "bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                                : "bg-background text-foreground border-2 border-foreground hover:bg-foreground hover:text-background"
                             }`}
                             disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
                             onClick={async (e) => {
