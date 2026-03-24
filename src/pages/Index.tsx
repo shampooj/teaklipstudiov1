@@ -582,7 +582,7 @@ const Index = () => {
     link.click();
   };
 
-  const currentLookLabel = LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
+  const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
 
   return (
     <div className="bg-background flex flex-col">
