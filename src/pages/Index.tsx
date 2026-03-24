@@ -414,6 +414,8 @@ const Index = () => {
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
+  const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
+  const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
   const startProgress = useCallback(() => {
     setProgress(0);
