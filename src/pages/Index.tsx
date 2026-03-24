@@ -844,6 +844,18 @@ const Index = () => {
                         } else {
                           console.error("Failed to save submission:", insertError);
                         }
+
+                        // Generate discount code
+                        try {
+                          const { data: discountData, error: discountError } = await supabase.functions.invoke("generate-discount", {
+                            body: { skinTone, lipTone }
+                          });
+                          if (!discountError && discountData?.code) {
+                            setDiscountCode(discountData.code);
+                          }
+                        } catch (discountErr) {
+                          console.error("Failed to generate discount code:", discountErr);
+                        }
                       } catch (e) {
                         console.error("Failed to process consent upload:", e);
                       }
