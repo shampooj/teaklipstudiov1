@@ -986,6 +986,30 @@ const Index = () => {
                    <label className="font-display text-lg text-foreground text-center">
                      Choose your lipstick look
                    </label>
+                  {recommendations.length > 0 ? (
+                  <Select value={String(selectedRecIndex)} onValueChange={(v) => setSelectedRecIndex(Number(v))}>
+                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
+                      <SelectValue placeholder="Select a look" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {recommendations.map((rec, i) =>
+                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
+                          <div className="flex items-start gap-2.5">
+                            <span
+                          className="mt-1 h-3 w-3 rounded-full shrink-0"
+                          style={{ backgroundColor: rec.color }} />
+                        
+                            <div className="flex flex-col">
+                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
+                              <span className="font-display text-sm">{rec.label}</span>
+                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                    )}
+                    </SelectContent>
+                  </Select>
+                  ) : (
                   <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
                     <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
                       <SelectValue placeholder="Select a look" />
@@ -1007,6 +1031,7 @@ const Index = () => {
                     )}
                     </SelectContent>
                   </Select>
+                  )}
 
                   {/* Model toggle for A/B testing */}
                   <Select value={aiModel} onValueChange={setAiModel}>
