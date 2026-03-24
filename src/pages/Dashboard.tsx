@@ -490,7 +490,7 @@ const Dashboard = () => {
               {/* Pie chart: admin approved lip tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                adminLabels.forEach((l) => {
+                filteredAdminLabels.forEach((l) => {
                   const cat = l.admin_lip_tone_category || "unlabeled";
                   counts[cat] = (counts[cat] || 0) + 1;
                 });
