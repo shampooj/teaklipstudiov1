@@ -51,6 +51,7 @@ const LIP_TONES = [
 { id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown }] as
 const;
 
+// LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
 const LIPSTICK_LOOKS = [
 { id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
 { id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
