@@ -187,3 +187,10 @@ export function getRecommendations(skinToneId: string, lipToneId: string): Recom
     };
   }).filter(Boolean) as Recommendation[];
 }
+
+export function getComplexionType(skinToneId: string, lipToneId: string): number | null {
+  const csvSkin = SKIN_TONE_MAP[skinToneId];
+  const csvLip = LIP_TONE_MAP[lipToneId];
+  if (!csvSkin || !csvLip) return null;
+  return COMPLEXION_TYPE_MAP[`${csvSkin}|${csvLip}`] ?? null;
+}
