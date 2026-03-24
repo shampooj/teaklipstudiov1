@@ -1029,7 +1029,7 @@ const Index = () => {
                           <span className="font-display text-xs leading-tight text-center">
                             {rec.variantName}
                           </span>
-                        </button>
+                        </a>
                       );
                     })}
                   </div>
