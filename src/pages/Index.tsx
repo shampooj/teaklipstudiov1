@@ -773,48 +773,25 @@ const Index = () => {
                     // If consent checked and email provided, store image + submission
                     if (consentChecked && userEmail.trim()) {
                       try {
+                        // Use the face-cropped image (or fall back to original)
+                        const sourceImage = faceCropImage || originalImage!;
                         const img = new Image();
                         img.crossOrigin = "anonymous";
                         await new Promise<void>((resolve, reject) => {
                           img.onload = () => resolve();
                           img.onerror = reject;
-                          img.src = originalImage!;
+                          img.src = sourceImage;
                         });
 
-                        const detectCanvas = document.createElement("canvas");
-                        const maxDetectSize = 512;
-                        const scale = Math.min(maxDetectSize / img.width, maxDetectSize / img.height, 1);
-                        detectCanvas.width = Math.round(img.width * scale);
-                        detectCanvas.height = Math.round(img.height * scale);
-                        const detectCtx = detectCanvas.getContext("2d")!;
-                        detectCtx.drawImage(img, 0, 0, detectCanvas.width, detectCanvas.height);
-                        const detectBase64 = detectCanvas.toDataURL("image/jpeg", 0.7);
-
-                        let cropTop = 0.0, cropBottom = 1.0, cropLeft = 0.0, cropRight = 1.0;
-                        try {
-                          const { data: regionData, error: regionError } = await supabase.functions.invoke("detect-lip-region", {
-                            body: { imageBase64: detectBase64 }
-                          });
-                          if (!regionError && regionData && regionData.top !== undefined) {
-                            cropTop = regionData.top;
-                            cropBottom = regionData.bottom;
-                            cropLeft = regionData.left;
-                            cropRight = regionData.right;
-                          }
-                        } catch (detectErr) {
-                          console.warn("Lip detection error, using fallback crop:", detectErr);
-                        }
-
+                        // Downscale to max 768px and compress as JPEG
+                        const maxSize = 768;
+                        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
                         const canvas = document.createElement("canvas");
-                        const startX = Math.floor(img.width * cropLeft);
-                        const startY = Math.floor(img.height * cropTop);
-                        const cropWidth = Math.floor(img.width * (cropRight - cropLeft));
-                        const cropHeight = Math.floor(img.height * (cropBottom - cropTop));
-                        canvas.width = cropWidth;
-                        canvas.height = cropHeight;
+                        canvas.width = Math.round(img.width * scale);
+                        canvas.height = Math.round(img.height * scale);
                         const ctx = canvas.getContext("2d")!;
-                        ctx.drawImage(img, startX, startY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
-                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.85));
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.7));
                         const imageId = crypto.randomUUID();
                         const fileName = `${imageId}.jpg`;
 
@@ -823,7 +800,6 @@ const Index = () => {
                         if (uploadError) {
                           console.error("Failed to upload image:", uploadError);
                         } else {
-                          // Store the file path, not a long-lived signed URL
                           imageUrl = uploadData.path;
                         }
 
