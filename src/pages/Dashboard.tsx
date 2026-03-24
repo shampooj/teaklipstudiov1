@@ -159,6 +159,8 @@ const Dashboard = () => {
     { key: "selfie_uploaded", label: "Selfie Uploaded" },
     { key: "results_viewed", label: "Results Viewed" },
     { key: "add_to_cart", label: "Add to Cart" },
+    { key: "checkout_initiated", label: "Checkout Initiated" },
+    { key: "checkout_completed", label: "Checkout Completed" },
   ];
 
   // Filter data and adminLabels by date range

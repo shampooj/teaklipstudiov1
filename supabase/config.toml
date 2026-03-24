@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-discount]
 verify_jwt = false
+
+[functions.shopify-webhook]
+verify_jwt = false
