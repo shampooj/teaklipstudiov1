@@ -933,7 +933,6 @@ const Dashboard = () => {
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
-                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Email</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone Label</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone Label</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Labeled By</TableHead>
@@ -955,7 +954,6 @@ const Dashboard = () => {
                             <span className="text-muted-foreground text-[9px]">—</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-[9px]">{row.email || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell className="capitalize text-[9px]">{row.admin_lip_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell className="capitalize text-[9px]">{row.admin_skin_tone_category || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell className="text-[9px]">{row.labeled_by_email || row.labeled_by_user_id || <span className="text-muted-foreground">—</span>}</TableCell>
@@ -1002,6 +1000,7 @@ const Dashboard = () => {
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Date</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image ID</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Variant ID</TableHead>
+                       <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Email</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Lip Tone</TableHead>
                        <TableHead className="text-[9px] uppercase tracking-widest text-muted-foreground">Image</TableHead>
@@ -1018,6 +1017,7 @@ const Dashboard = () => {
                         <TableCell className="font-mono text-[9px]">
                           {row.variant_id}
                         </TableCell>
+                        <TableCell className="text-[9px]">{row.email || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell className="capitalize text-[9px]">{row.skin_tone || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell className="capitalize text-[9px]">{row.lip_tone || <span className="text-muted-foreground">—</span>}</TableCell>
                         <TableCell>
