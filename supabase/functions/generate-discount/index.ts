@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -24,7 +25,22 @@ serve(async (req) => {
       );
     }
 
-    const SHOPIFY_ACCESS_TOKEN = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+    let SHOPIFY_ACCESS_TOKEN = Deno.env.get("SHOPIFY_ACCESS_TOKEN");
+    
+    // Fall back to DB-stored token if env secret is not set
+    if (!SHOPIFY_ACCESS_TOKEN) {
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { data } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "SHOPIFY_ACCESS_TOKEN")
+        .single();
+      SHOPIFY_ACCESS_TOKEN = data?.value;
+    }
+    
     if (!SHOPIFY_ACCESS_TOKEN) {
       throw new Error("SHOPIFY_ACCESS_TOKEN is not configured");
     }
