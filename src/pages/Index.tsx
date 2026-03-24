@@ -1005,6 +1005,9 @@ const Index = () => {
                               : "border-foreground/10 hover:border-foreground/30 hover:bg-foreground/[0.02]"
                           }`}
                         >
+                          <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
+                            {rec.categoryLabel}
+                          </span>
                           <div className="w-full aspect-square rounded-md overflow-hidden bg-muted">
                             {img?.imageUrl ? (
                               <img
@@ -1021,14 +1024,9 @@ const Index = () => {
                               </div>
                             )}
                           </div>
-                          <div className="flex flex-col items-center text-center gap-0.5">
-                            <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
-                              {rec.categoryLabel}
-                            </span>
-                            <span className="font-display text-xs leading-tight">
-                              {rec.variantName}
-                            </span>
-                          </div>
+                          <span className="font-display text-xs leading-tight text-center">
+                            {rec.variantName}
+                          </span>
                           {isSelected && (
                             <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-foreground rounded-full flex items-center justify-center">
                               <Check className="w-2.5 h-2.5 text-background" />
