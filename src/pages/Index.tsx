@@ -28,7 +28,7 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.jpg";
 import lipBrownPink from "@/assets/lip-brown-pink.jpg";
 import lipGreyBrown from "@/assets/lip-grey-brown.jpg";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded" | "processing" | "done";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
 
 const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
@@ -399,39 +399,17 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
   const [croppingFace, setCroppingFace] = useState(false);
-  const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
-  const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
-  const [progress, setProgress] = useState(0);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [cartError, setCartError] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
-  const startProgress = useCallback(() => {
-    setProgress(0);
-    progressInterval.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 8;
-      });
-    }, 500);
-  }, []);
-
-  const stopProgress = useCallback(() => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
-    progressInterval.current = null;
-    setProgress(100);
-  }, []);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -505,45 +483,6 @@ const Index = () => {
     });
   };
 
-  const applyLipstick = useCallback(async () => {
-    const sourceImage = faceCropImage || originalImage;
-    if (!sourceImage) return;
-    setState("processing");
-    startProgress();
-
-    try {
-      const resizedImage = await downscaleImage(sourceImage, 768);
-      const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: resizedImage, look: selectedRec?.variantName || selectedLook, skinTone, lipTone, model: aiModel }
-      });
-
-      // supabase-js puts non-2xx body in `data` and sets a generic `error`
-      if (error) {
-        const msg = data?.error || error.message || "Something went wrong.";
-        throw new Error(msg);
-      }
-      if (data?.error) throw new Error(data.error);
-      if (!data?.resultImage) throw new Error("No edited image returned.");
-
-      // Temporarily bypassing blendLipstickPreservingTeeth — using AI output directly
-      setResultImage(data.resultImage as string);
-      stopProgress();
-      setState("done");
-      toast.success("Lipstick applied!");
-    } catch (err: any) {
-      console.error(err);
-      stopProgress();
-      const message = err.message || "Something went wrong. Please try again.";
-      if (message.includes("Rate limit")) {
-        toast.error("Rate limit reached — please wait a moment and try again.");
-      } else if (message.includes("Payment") || message.includes("credits")) {
-        toast.error("Usage limit reached — please add credits to continue.");
-      } else {
-        toast.error(message);
-      }
-      setState("uploaded");
-    }
-  }, [originalImage, faceCropImage, selectedLook, skinTone, aiModel]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -568,22 +507,8 @@ const Index = () => {
     setLipTone("");
     setOriginalImage(null);
     setFaceCropImage(null);
-    setResultImage(null);
     setSelectedLook("classic-red");
     setSelectedRecIndex(0);
-  };
-
-  const tryAnotherLook = () => {
-    setState("uploaded");
-    setResultImage(null);
-  };
-
-  const downloadResult = () => {
-    if (!resultImage) return;
-    const link = document.createElement("a");
-    link.href = resultImage;
-    link.download = `lipstick-${selectedLook}.png`;
-    link.click();
   };
 
   const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
@@ -996,9 +921,11 @@ const Index = () => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
                       return (
-                        <button
+                        <a
                           key={`${rec.category}-${rec.variantName}`}
-                          onClick={() => setSelectedRecIndex(i)}
+                          href={img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}` : "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
                             isSelected
                               ? "ring-2 ring-foreground"
@@ -1027,7 +954,7 @@ const Index = () => {
                           <span className="font-display text-xs leading-tight text-center">
                             {rec.variantName}
                           </span>
-                        </button>
+                        </a>
                       );
                     })}
                   </div>
@@ -1035,190 +962,11 @@ const Index = () => {
                   <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
 
-                  {/* Model toggle for A/B testing */}
-                  <Select value={aiModel} onValueChange={setAiModel}>
-                    <SelectTrigger className="w-full border-foreground/20 font-sans text-xs">
-                      <SelectValue placeholder="AI Model" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="google/gemini-3.1-flash-image-preview">
-                        <span className="font-display text-sm">Flash (fast)</span>
-                      </SelectItem>
-                      <SelectItem value="google/gemini-3-pro-image-preview">
-                        <span className="font-display text-sm">Pro (higher quality)</span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-
                   <div className="flex gap-3 justify-center pt-2">
-                    <Button
-                    onClick={applyLipstick}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Apply Look
-                    </Button>
-                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background">
                       Go Back
                     </Button>
                   </div>
-                </div>
-              </motion.div>
-            }
-
-            {/* Processing */}
-            {state === "processing" &&
-            <motion.div
-              key="processing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-8 py-12">
-              
-                {originalImage &&
-              <div className="relative w-64 h-64 overflow-hidden">
-                    <img src={faceCropImage || originalImage} alt="Your photo" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-foreground/10 animate-pulse" />
-                  </div>
-              }
-                <div className="flex flex-col items-center gap-4 w-full max-w-xs">
-                  <Progress value={progress} className="h-2 w-full" />
-                  <p className="text-muted-foreground font-display text-sm">
-                    Applying {currentLookLabel}…
-                  </p>
-                </div>
-              </motion.div>
-            }
-
-            {/* Result */}
-            {state === "done" && resultImage &&
-            <motion.div
-              key="result"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="flex flex-col items-center gap-8">
-              
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-                  <div className="flex flex-col items-center gap-3">
-                    <span className="font-sans text-[9px] text-foreground uppercase">Before</span>
-                    <div className="w-64 h-64 overflow-hidden">
-                      <img src={originalImage!} alt="Before" className="w-full h-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-center gap-3">
-                    <span className="font-sans text-[9px] text-foreground uppercase">
-                      {currentLookLabel}
-                    </span>
-                    <div className="w-64 h-64 overflow-hidden">
-                      <img src={resultImage} alt={`With ${currentLookLabel}`} className="w-full h-full object-cover" />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex flex-col items-center gap-3 w-full max-w-sm mx-auto">
-                  <Button
-                  size="lg"
-                  className={`font-sans text-[9px] uppercase gap-2 px-8 w-full transition-all duration-300 ${
-                  addedToCart ?
-                  "bg-green-700 text-white hover:bg-green-700 border-green-700" :
-                  cartError ?
-                  "bg-red-700 text-white hover:bg-red-700 border-red-700" :
-                  "bg-foreground text-background hover:bg-foreground/85"}`
-                  }
-                  disabled={addedToCart || cartError || addingToCart}
-                  onClick={async () => {
-                    const variantId = selectedRec?.variantId || LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.variantId;
-                    if (!variantId || !resultImage) return;
-
-                    // Ask the Shopify parent page to add to cart via postMessage bridge
-                    setAddingToCart(true);
-                    try {
-                      const cartPromise = new Promise<boolean>((resolve) => {
-                        const timeout = setTimeout(() => resolve(false), 5000);
-                        const handler = (event: MessageEvent) => {
-                          if (event.data?.type === "cart-add-response") {
-                            clearTimeout(timeout);
-                            window.removeEventListener("message", handler);
-                            resolve(!!event.data.success);
-                          }
-                        };
-                        window.addEventListener("message", handler);
-                      });
-                      window.top?.postMessage({
-                        type: "cart-add",
-                        variantId: parseInt(variantId),
-                        quantity: 1
-                      }, "*");
-                      const success = await cartPromise;
-                      if (success) {
-                        setAddedToCart(true);
-                      } else {
-                        setCartError(true);
-                      }
-                    } catch {
-                      setCartError(true);
-                    } finally {
-                      setAddingToCart(false);
-                    }
-                  }}>
-                  
-                    {addingToCart ?
-                  <>
-                        <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
-                        Adding to Cart…
-                      </> :
-                  addedToCart ?
-                  <>
-                        <Check className="w-3 h-3" />
-                        Added to Cart
-                      </> :
-                  cartError ?
-                  <>Failed to add to cart</> :
-
-                  <>Add to Cart — {currentLookLabel}</>
-                  }
-                  </Button>
-
-                  <div className="w-full">
-                    <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider text-center mb-3">Try another look</p>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {recommendations.filter((_, i) => i !== selectedRecIndex).map((rec, _i) => {
-                        const origIndex = recommendations.indexOf(rec);
-                        const img = variantImages[rec.variantId];
-                        return (
-                          <button
-                            key={`${rec.category}-${rec.variantName}`}
-                            onClick={() => {
-                              setSelectedRecIndex(origIndex);
-                              setAddedToCart(false);
-                              setCartError(false);
-                              setAddingToCart(false);
-                              setResultImage(null);
-                              setState("uploaded");
-                            }}
-                            className="flex flex-col items-center gap-1 p-1.5 rounded-lg border border-foreground/10 hover:border-foreground/30 transition-all"
-                          >
-                            <div className="w-full aspect-square rounded overflow-hidden bg-muted">
-                              {img?.imageUrl ? (
-                                <img src={img.imageUrl} alt={rec.label} className="w-full h-full object-cover" />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span className="w-6 h-6 rounded-full" style={{ backgroundColor: rec.color }} />
-                                </div>
-                              )}
-                            </div>
-                            <span className="font-sans text-[7px] text-muted-foreground uppercase">{rec.categoryLabel}</span>
-                            <span className="font-display text-[10px] leading-tight text-center">{rec.variantName}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    New Photo
-                  </Button>
                 </div>
               </motion.div>
             }

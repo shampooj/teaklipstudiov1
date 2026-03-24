@@ -32,6 +32,7 @@ export interface VariantImageData {
   altText: string | null;
   price: string | null;
   productTitle: string | null;
+  productHandle: string | null;
 }
 
 export function useVariantImages(variantIds: string[]): Record<string, VariantImageData> {
@@ -63,6 +64,7 @@ export function useVariantImages(variantIds: string[]): Record<string, VariantIm
             altText: node.image?.altText ?? null,
             price: node.price?.amount ?? null,
             productTitle: node.product?.title ?? null,
+            productHandle: node.product?.handle ?? null,
           };
         }
         setData(map);
