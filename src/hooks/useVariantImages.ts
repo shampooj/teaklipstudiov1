@@ -21,10 +21,29 @@ const VARIANT_IMAGE_QUERY = `
           title
           handle
         }
+        metaImages: metafield(namespace: "custom", key: "image") {
+          references(first: 10) {
+            edges {
+              node {
+                ... on MediaImage {
+                  image {
+                    url
+                    altText
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 `;
+
+export interface MetaImage {
+  url: string;
+  altText: string | null;
+}
 
 export interface VariantImageData {
   variantId: string;
@@ -33,6 +52,44 @@ export interface VariantImageData {
   price: string | null;
   productTitle: string | null;
   productHandle: string | null;
+  metaImages: MetaImage[];
+}
+
+/**
+ * Given the user's skin tone id and the list of metafield images,
+ * pick the one whose filename best matches. Falls back to the first non-packshot image.
+ */
+export function getSkinToneImage(
+  skinToneId: string,
+  metaImages: MetaImage[]
+): MetaImage | null {
+  if (metaImages.length === 0) return null;
+
+  // Map skin-tone ids to filename keywords
+  const keywordMap: Record<string, string[]> = {
+    "light-brown": ["light"],
+    "medium-brown": ["medium"],
+    "deep-brown": ["dark", "deep"],
+    "rich-brown": ["dark", "deep"],
+  };
+
+  const keywords = keywordMap[skinToneId] || [];
+
+  for (const kw of keywords) {
+    const match = metaImages.find((img) => {
+      const filename = img.url.split("/").pop()?.toLowerCase() ?? "";
+      return filename.includes(kw) && !filename.includes("packshot") && !filename.includes("smear");
+    });
+    if (match) return match;
+  }
+
+  // Fallback: first non-packshot, non-smear image
+  return (
+    metaImages.find((img) => {
+      const filename = img.url.split("/").pop()?.toLowerCase() ?? "";
+      return !filename.includes("packshot") && !filename.includes("smear");
+    }) ?? null
+  );
 }
 
 export function useVariantImages(variantIds: string[]): Record<string, VariantImageData> {
@@ -58,6 +115,16 @@ export function useVariantImages(variantIds: string[]): Record<string, VariantIm
         for (const node of nodes) {
           if (!node?.id) continue;
           const numericId = node.id.replace("gid://shopify/ProductVariant/", "");
+
+          const metaImages: MetaImage[] = [];
+          const edges = node.metaImages?.references?.edges ?? [];
+          for (const edge of edges) {
+            const img = edge?.node?.image;
+            if (img?.url) {
+              metaImages.push({ url: img.url, altText: img.altText ?? null });
+            }
+          }
+
           map[numericId] = {
             variantId: numericId,
             imageUrl: node.image?.url ?? null,
@@ -65,6 +132,7 @@ export function useVariantImages(variantIds: string[]): Record<string, VariantIm
             price: node.price?.amount ?? null,
             productTitle: node.product?.title ?? null,
             productHandle: node.product?.handle ?? null,
+            metaImages,
           };
         }
         setData(map);
