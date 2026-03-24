@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
+import { useVariantImages } from "@/hooks/useVariantImages";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
@@ -413,6 +414,8 @@ const Index = () => {
   const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
+  const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
+  const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
   const startProgress = useCallback(() => {
     setProgress(0);
@@ -983,55 +986,60 @@ const Index = () => {
                 
                 </div>
 
-                <div className="w-full max-w-sm flex flex-col gap-5">
+                <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
                      Choose your lipstick look
                    </label>
                   {recommendations.length > 0 ? (
-                  <Select value={String(selectedRecIndex)} onValueChange={(v) => setSelectedRecIndex(Number(v))}>
-                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
-                      <SelectValue placeholder="Select a look" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {recommendations.map((rec, i) =>
-                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
-                          <div className="flex items-start gap-2.5">
-                            <span
-                          className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: rec.color }} />
-                        
-                            <div className="flex flex-col">
-                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
-                              <span className="font-display text-sm">{rec.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
-                            </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {recommendations.map((rec, i) => {
+                      const img = variantImages[rec.variantId];
+                      const isSelected = selectedRecIndex === i;
+                      return (
+                        <button
+                          key={`${rec.category}-${rec.variantName}`}
+                          onClick={() => setSelectedRecIndex(i)}
+                          className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg border transition-all duration-200 ${
+                            isSelected
+                              ? "border-foreground ring-2 ring-foreground/20 bg-foreground/5"
+                              : "border-foreground/10 hover:border-foreground/30 hover:bg-foreground/[0.02]"
+                          }`}
+                        >
+                          <div className="w-full aspect-square rounded-md overflow-hidden bg-muted">
+                            {img?.imageUrl ? (
+                              <img
+                                src={img.imageUrl}
+                                alt={rec.label}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span
+                                  className="w-10 h-10 rounded-full"
+                                  style={{ backgroundColor: rec.color }}
+                                />
+                              </div>
+                            )}
                           </div>
-                        </SelectItem>
-                    )}
-                    </SelectContent>
-                  </Select>
+                          <div className="flex flex-col items-center text-center gap-0.5">
+                            <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
+                              {rec.categoryLabel}
+                            </span>
+                            <span className="font-display text-xs leading-tight">
+                              {rec.variantName}
+                            </span>
+                          </div>
+                          {isSelected && (
+                            <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-foreground rounded-full flex items-center justify-center">
+                              <Check className="w-2.5 h-2.5 text-background" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                   ) : (
-                  <Select value={selectedLook} onValueChange={(v) => setSelectedLook(v as LookId)}>
-                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
-                      <SelectValue placeholder="Select a look" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {LIPSTICK_LOOKS.map((look) =>
-                    <SelectItem key={look.id} value={look.id}>
-                          <div className="flex items-start gap-2.5">
-                            <span
-                          className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: look.color }} />
-                        
-                            <div className="flex flex-col">
-                              <span className="font-display text-sm">{look.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{look.description}</span>
-                            </div>
-                          </div>
-                        </SelectItem>
-                    )}
-                    </SelectContent>
-                  </Select>
+                  <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
 
                   {/* Model toggle for A/B testing */}
@@ -1179,36 +1187,41 @@ const Index = () => {
                   }
                   </Button>
 
-                  <Select value="" onValueChange={(v) => {
-                  if (!v) return;
-                  setSelectedRecIndex(Number(v));
-                  setAddedToCart(false);
-                  setCartError(false);
-                  setAddingToCart(false);
-                  setResultImage(null);
-                  setState("uploaded");
-                }}>
-                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
-                      <SelectValue placeholder="Try another look" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {recommendations.map((rec, i) =>
-                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
-                          <div className="flex items-start gap-2.5">
-                            <span
-                          className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: rec.color }} />
-                        
-                            <div className="flex flex-col">
-                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
-                              <span className="font-display text-sm">{rec.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
+                  <div className="w-full">
+                    <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider text-center mb-3">Try another look</p>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {recommendations.filter((_, i) => i !== selectedRecIndex).map((rec, _i) => {
+                        const origIndex = recommendations.indexOf(rec);
+                        const img = variantImages[rec.variantId];
+                        return (
+                          <button
+                            key={`${rec.category}-${rec.variantName}`}
+                            onClick={() => {
+                              setSelectedRecIndex(origIndex);
+                              setAddedToCart(false);
+                              setCartError(false);
+                              setAddingToCart(false);
+                              setResultImage(null);
+                              setState("uploaded");
+                            }}
+                            className="flex flex-col items-center gap-1 p-1.5 rounded-lg border border-foreground/10 hover:border-foreground/30 transition-all"
+                          >
+                            <div className="w-full aspect-square rounded overflow-hidden bg-muted">
+                              {img?.imageUrl ? (
+                                <img src={img.imageUrl} alt={rec.label} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="w-6 h-6 rounded-full" style={{ backgroundColor: rec.color }} />
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </SelectItem>
-                    )}
-                    </SelectContent>
-                  </Select>
+                            <span className="font-sans text-[7px] text-muted-foreground uppercase">{rec.categoryLabel}</span>
+                            <span className="font-display text-[10px] leading-tight text-center">{rec.variantName}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
                   <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     New Photo
