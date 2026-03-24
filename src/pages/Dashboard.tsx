@@ -161,6 +161,25 @@ const Dashboard = () => {
     { key: "add_to_cart", label: "Add to Cart" },
   ];
 
+  // Filter data and adminLabels by date range
+  const filteredData = useMemo(() => {
+    const from = startOfDay(funnelDateFrom).getTime();
+    const to = endOfDay(funnelDateTo).getTime();
+    return data.filter((r) => {
+      const t = new Date(r.created_at).getTime();
+      return t >= from && t <= to;
+    });
+  }, [data, funnelDateFrom, funnelDateTo]);
+
+  const filteredAdminLabels = useMemo(() => {
+    const from = startOfDay(funnelDateFrom).getTime();
+    const to = endOfDay(funnelDateTo).getTime();
+    return adminLabels.filter((l) => {
+      const t = new Date(l.created_at || l.labeled_at || "").getTime();
+      return t >= from && t <= to;
+    });
+  }, [adminLabels, funnelDateFrom, funnelDateTo]);
+
   const funnelData = useMemo(() => {
     const sessionsByEvent = new Map<string, Set<string>>();
     quizEvents.forEach((e) => {
