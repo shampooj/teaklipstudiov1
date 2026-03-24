@@ -68,6 +68,7 @@ serve(async (req) => {
         title: discountCode,
         code: discountCode,
         startsAt: new Date().toISOString(),
+        endsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
         usageLimit: 1,
         appliesOncePerCustomer: true,
         customerSelection: {
