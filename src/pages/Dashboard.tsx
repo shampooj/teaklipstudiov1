@@ -213,7 +213,7 @@ const Dashboard = () => {
 
       const labelMap = new Map<string, AdminLabel>();
       const submissionUrlMap = new Map<string, string | null>();
-      (rows || []).forEach((r: any) => submissionUrlMap.set(r.id, r.image_url));
+      // Will be populated with resolved URLs after signed URL generation below
       const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
         ...l,
         labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
