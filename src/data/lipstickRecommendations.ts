@@ -139,7 +139,7 @@ const RECOMMENDATIONS: Record<string, [string, string, string, string, string]> 
 
 const CATEGORY_LABELS: Record<number, { key: RecommendationCategory; label: string }> = {
   0: { key: "MLBB", label: "Your Best \"My Lips But Better\" Shade" },
-  1: { key: "RED", label: "Red" },
+  1: { key: "RED", label: "A Statement Red" },
   2: { key: "DAY", label: "Day" },
   3: { key: "EVENING", label: "Evening" },
   4: { key: "LIPSET", label: "Lip Set" },
