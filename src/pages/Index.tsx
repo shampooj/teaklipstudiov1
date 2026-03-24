@@ -996,9 +996,11 @@ const Index = () => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
                       return (
-                        <button
+                        <a
                           key={`${rec.category}-${rec.variantName}`}
-                          onClick={() => setSelectedRecIndex(i)}
+                          href={img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}` : "#"}
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
                             isSelected
                               ? "ring-2 ring-foreground"
