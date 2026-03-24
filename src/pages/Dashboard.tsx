@@ -251,14 +251,9 @@ const Dashboard = () => {
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
         const aiCat = aiCatMap.get(r.id);
-        // Resolve image URL: use fresh signed URL for paths, keep existing URLs as-is
-        let resolvedImageUrl = r.image_url;
-        if (r.image_url && !r.image_url.startsWith('http')) {
-          resolvedImageUrl = signedUrlMap.get(r.image_url) ?? null;
-        }
         return {
           ...r,
-          image_url: resolvedImageUrl,
+          image_url: submissionUrlMap.get(r.id) ?? r.image_url,
           is_labeled: !!label,
           admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
           admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
