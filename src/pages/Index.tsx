@@ -943,6 +943,7 @@ const Index = () => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
                       const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}` : "#";
+                      const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
@@ -952,13 +953,22 @@ const Index = () => {
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                            <div className="w-full aspect-square rounded-md overflow-hidden bg-muted">
+                            <div className="w-full aspect-square rounded-md overflow-hidden bg-muted relative">
                               {img?.imageUrl ? (
-                                <img
-                                  src={img.imageUrl}
-                                  alt={rec.label}
-                                  className="w-full h-full object-cover"
-                                />
+                                <>
+                                  <img
+                                    src={img.imageUrl}
+                                    alt={rec.label}
+                                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                                  />
+                                  {skinImage && (
+                                    <img
+                                      src={skinImage.url}
+                                      alt={skinImage.altText || `${rec.label} on skin`}
+                                      className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                                    />
+                                  )}
+                                </>
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center">
                                   <span
