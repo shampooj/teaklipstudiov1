@@ -245,6 +245,9 @@ const Dashboard = () => {
       setAdminLabels(enrichedLabels);
 
 
+      const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
+      (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
+
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
         const aiCat = aiCatMap.get(r.id);
