@@ -130,6 +130,53 @@ const Dashboard = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  // Funnel tracking state
+  const [funnelDateFrom, setFunnelDateFrom] = useState<Date>(subDays(new Date(), 30));
+  const [funnelDateTo, setFunnelDateTo] = useState<Date>(new Date());
+  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string }[]>([]);
+  const [funnelLoading, setFunnelLoading] = useState(false);
+
+  const fetchFunnelData = useCallback(async () => {
+    setFunnelLoading(true);
+    const { data: events, error } = await (supabase.from as any)("quiz_events")
+      .select("event_name, session_id, created_at")
+      .gte("created_at", startOfDay(funnelDateFrom).toISOString())
+      .lte("created_at", endOfDay(funnelDateTo).toISOString());
+    if (!error && events) {
+      setQuizEvents(events);
+    }
+    setFunnelLoading(false);
+  }, [funnelDateFrom, funnelDateTo]);
+
+  useEffect(() => {
+    fetchFunnelData();
+  }, [fetchFunnelData]);
+
+  const FUNNEL_STEPS = [
+    { key: "quiz_started", label: "Quiz Started" },
+    { key: "skin_tone_selected", label: "Skin Tone Selected" },
+    { key: "lip_tone_selected", label: "Lip Tone Selected" },
+    { key: "selfie_uploaded", label: "Selfie Uploaded" },
+    { key: "results_viewed", label: "Results Viewed" },
+    { key: "add_to_cart", label: "Add to Cart" },
+  ];
+
+  const funnelData = useMemo(() => {
+    const sessionsByEvent = new Map<string, Set<string>>();
+    quizEvents.forEach((e) => {
+      if (!sessionsByEvent.has(e.event_name)) sessionsByEvent.set(e.event_name, new Set());
+      sessionsByEvent.get(e.event_name)!.add(e.session_id);
+    });
+    const firstCount = sessionsByEvent.get("quiz_started")?.size || 0;
+    return FUNNEL_STEPS.map((step, i) => {
+      const count = sessionsByEvent.get(step.key)?.size || 0;
+      const prevCount = i === 0 ? count : (sessionsByEvent.get(FUNNEL_STEPS[i - 1].key)?.size || 0);
+      const conversionFromPrev = prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : "—";
+      const conversionFromStart = firstCount > 0 ? ((count / firstCount) * 100).toFixed(1) : "—";
+      return { ...step, count, conversionFromPrev, conversionFromStart };
+    });
+  }, [quizEvents]);
+
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
       (supabase.from as any)("customer_submissions")
