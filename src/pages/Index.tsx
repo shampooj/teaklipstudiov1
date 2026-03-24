@@ -929,7 +929,7 @@ const Index = () => {
                      The Founders' Top Recs for Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
-                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2 scrollbar-hide" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
