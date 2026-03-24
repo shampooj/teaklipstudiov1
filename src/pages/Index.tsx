@@ -406,6 +406,7 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
@@ -843,6 +844,18 @@ const Index = () => {
                         } else {
                           console.error("Failed to save submission:", insertError);
                         }
+
+                        // Generate discount code
+                        try {
+                          const { data: discountData, error: discountError } = await supabase.functions.invoke("generate-discount", {
+                            body: { skinTone, lipTone }
+                          });
+                          if (!discountError && discountData?.code) {
+                            setDiscountCode(discountData.code);
+                          }
+                        } catch (discountErr) {
+                          console.error("Failed to generate discount code:", discountErr);
+                        }
                       } catch (e) {
                         console.error("Failed to process consent upload:", e);
                       }
@@ -913,6 +926,13 @@ const Index = () => {
                 </div>
 
                 <div className="w-full max-w-lg flex flex-col gap-5">
+                  {discountCode && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-2xl p-4 text-center">
+                      <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code</p>
+                      <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
+                      <p className="font-sans text-[9px] text-muted-foreground mt-1">Apply at checkout</p>
+                    </div>
+                  )}
                    <label className="font-display text-lg text-foreground text-center">
                      Our Top Recommendations for Your Complexion
                    </label>
