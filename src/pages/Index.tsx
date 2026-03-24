@@ -937,6 +937,7 @@ const Index = () => {
                     </div>
                   )}
                 </div>
+                <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
                      Our Top Recommendations for Your Complexion
                    </label>
