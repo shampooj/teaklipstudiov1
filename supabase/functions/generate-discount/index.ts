@@ -56,6 +56,7 @@ serve(async (req) => {
           usage_limit: 1,
           once_per_customer: true,
           starts_at: new Date().toISOString(),
+          prerequisite_to_entitlement_purchase: { prerequisite_amount: null },
         },
       }),
     });
