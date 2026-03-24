@@ -840,14 +840,23 @@ const Index = () => {
                       }
 
                       // Generate discount code (only with consent)
+                      // Use direct fetch instead of supabase.functions.invoke to avoid
+                      // third-party cookie / auth issues when running inside a Shopify iframe
                       try {
-                        const { data: discountData, error: discountError } = await supabase.functions.invoke("generate-discount", {
-                          body: { skinTone, lipTone }
+                        const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
+                        const discountRes = await fetch(edgeFunctionUrl, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                          },
+                          body: JSON.stringify({ skinTone, lipTone }),
                         });
-                        if (!discountError && discountData?.code) {
+                        const discountData = await discountRes.json();
+                        if (discountRes.ok && discountData?.code) {
                           setDiscountCode(discountData.code);
                         } else {
-                          console.error("Discount generation failed:", discountError, discountData);
+                          console.error("Discount generation failed:", discountData);
                         }
                       } catch (discountErr) {
                         console.error("Failed to generate discount code:", discountErr);
