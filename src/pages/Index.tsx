@@ -982,6 +982,9 @@ const Index = () => {
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline">
                             {rec.variantName}
                           </a>
+                          {img?.productTitle && (
+                            <span className="font-sans text-[10px] text-muted-foreground text-center leading-tight">{img.productTitle}</span>
+                          )}
                           {img?.price && (
                             <span className="font-sans text-[10px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
                           )}
