@@ -1029,6 +1029,9 @@ const Index = () => {
                                   quantity: 1
                                 }, "*");
                                 const success = await cartPromise;
+                                if (success) {
+                                  trackEvent("add_to_cart", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
+                                }
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: success ? "added" : "error" }));
                               } catch {
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: "error" }));
