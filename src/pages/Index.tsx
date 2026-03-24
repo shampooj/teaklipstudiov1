@@ -947,7 +947,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg"
+                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg h-full"
                         >
                           <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
@@ -990,7 +990,7 @@ const Index = () => {
                           )}
                           <Button
                             size="sm"
-                            className={`w-full font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full ${
+                            className={`w-full mt-auto font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full ${
                               cartStates[rec.variantId] === "added"
                                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                 : cartStates[rec.variantId] === "error"
