@@ -105,6 +105,7 @@ interface Submission {
   image_url: string | null;
   skin_tone: string | null;
   lip_tone: string | null;
+  email: string | null;
   // joined from admin_labels
   admin_lip_tone_category: string | null;
   admin_skin_tone_category: string | null;
