@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRecommendations, getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -408,10 +409,17 @@ const Index = () => {
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
 
+  const { trackEvent } = useQuizTracking();
+
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
+
+  // Track quiz_started once on mount
+  useEffect(() => {
+    trackEvent("quiz_started", {}, true);
+  }, [trackEvent]);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -428,6 +436,7 @@ const Index = () => {
       const base64 = e.target?.result as string;
       setOriginalImage(base64);
       setState("idle");
+      trackEvent("selfie_uploaded", {}, true);
       
       // Detect and crop face
       setCroppingFace(true);
@@ -583,7 +592,7 @@ const Index = () => {
                    </div>
                   <div className="mt-8">
                     <Button
-                    onClick={() => setState("lip-tone")}
+                    onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("lip-tone"); }}
                     disabled={!skinTone}
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
@@ -640,7 +649,7 @@ const Index = () => {
                       Back
                     </Button>
                     <Button
-                    onClick={() => setState("idle")}
+                    onClick={() => { trackEvent("lip_tone_selected", { lip_tone: lipTone }); setState("idle"); }}
                     disabled={!lipTone}
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
@@ -862,6 +871,7 @@ const Index = () => {
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
+                    trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone) });
                     setState("uploaded");
                   }}
                   size="lg"
@@ -1019,6 +1029,9 @@ const Index = () => {
                                   quantity: 1
                                 }, "*");
                                 const success = await cartPromise;
+                                if (success) {
+                                  trackEvent("add_to_cart", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
+                                }
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: success ? "added" : "error" }));
                               } catch {
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: "error" }));
