@@ -871,6 +871,7 @@ const Index = () => {
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
+                    trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone) });
                     setState("uploaded");
                   }}
                   size="lg"
