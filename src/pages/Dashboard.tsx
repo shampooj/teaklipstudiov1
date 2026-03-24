@@ -161,6 +161,25 @@ const Dashboard = () => {
     { key: "add_to_cart", label: "Add to Cart" },
   ];
 
+  // Filter data and adminLabels by date range
+  const filteredData = useMemo(() => {
+    const from = startOfDay(funnelDateFrom).getTime();
+    const to = endOfDay(funnelDateTo).getTime();
+    return data.filter((r) => {
+      const t = new Date(r.created_at).getTime();
+      return t >= from && t <= to;
+    });
+  }, [data, funnelDateFrom, funnelDateTo]);
+
+  const filteredAdminLabels = useMemo(() => {
+    const from = startOfDay(funnelDateFrom).getTime();
+    const to = endOfDay(funnelDateTo).getTime();
+    return adminLabels.filter((l) => {
+      const t = new Date(l.created_at || l.labeled_at || "").getTime();
+      return t >= from && t <= to;
+    });
+  }, [adminLabels, funnelDateFrom, funnelDateTo]);
+
   const funnelData = useMemo(() => {
     const sessionsByEvent = new Map<string, Set<string>>();
     quizEvents.forEach((e) => {
@@ -381,46 +400,46 @@ const Dashboard = () => {
 
         {activeTab === "dashboard" && (
           <>
+            {/* Date range picker */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3 w-3" />
+                    {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+              <span className="text-[10px] text-muted-foreground">to</span>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
+                    <CalendarIcon className="h-3 w-3" />
+                    {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+            </div>
+
             {/* Stats row */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
               <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Customer Submissions</p>
                 <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-                  {data.length}
+                  {filteredData.length}
                 </p>
               </div>
             </div>
 
             {/* Quiz Funnel Analytics */}
             <div className="border border-border rounded-2xl p-5 w-full space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                  <span className="text-[10px] text-muted-foreground">to</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
+              <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
 
               {funnelLoading ? (
                 <p className="text-muted-foreground text-sm text-center py-8">Loading funnel data…</p>
@@ -471,7 +490,7 @@ const Dashboard = () => {
               {/* Pie chart: admin approved lip tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                adminLabels.forEach((l) => {
+                filteredAdminLabels.forEach((l) => {
                   const cat = l.admin_lip_tone_category || "unlabeled";
                   counts[cat] = (counts[cat] || 0) + 1;
                 });
@@ -516,7 +535,7 @@ const Dashboard = () => {
               {/* Pie chart: admin approved skin tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                adminLabels.forEach((l) => {
+                filteredAdminLabels.forEach((l) => {
                   const cat = l.admin_skin_tone_category || "unlabeled";
                   counts[cat] = (counts[cat] || 0) + 1;
                 });
@@ -560,7 +579,7 @@ const Dashboard = () => {
               {/* Pie chart: customer submission lip tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                data.forEach((r) => {
+                filteredData.forEach((r) => {
                   const tone = r.lip_tone || "unknown";
                   counts[tone] = (counts[tone] || 0) + 1;
                 });
@@ -610,7 +629,7 @@ const Dashboard = () => {
               {/* Pie chart: customer submission skin tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                data.forEach((r) => {
+                filteredData.forEach((r) => {
                   const tone = r.skin_tone || "unknown";
                   counts[tone] = (counts[tone] || 0) + 1;
                 });
