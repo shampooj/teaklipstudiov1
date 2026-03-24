@@ -769,6 +769,11 @@ const Index = () => {
                 {originalImage &&
                 <Button
                   onClick={async () => {
+                    // If consent is checked but no email, show error and block
+                    if (consentChecked && !userEmail.trim()) {
+                      setEmailError(true);
+                      return;
+                    }
                     setState("analyzing");
                     // If consent checked and email provided, store image + submission
                     if (consentChecked && userEmail.trim()) {
