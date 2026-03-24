@@ -436,6 +436,7 @@ const Index = () => {
       const base64 = e.target?.result as string;
       setOriginalImage(base64);
       setState("idle");
+      trackEvent("selfie_uploaded", {}, true);
       
       // Detect and crop face
       setCroppingFace(true);
