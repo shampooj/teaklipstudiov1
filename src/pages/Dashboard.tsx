@@ -395,7 +395,85 @@ const Dashboard = () => {
                   {data.filter((r) => !r.is_labeled).length}
                 </p>
               </div>
+            </div>
 
+            {/* Quiz Funnel Analytics */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3 w-3" />
+                        {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    </PopoverContent>
+                  </Popover>
+                  <span className="text-[10px] text-muted-foreground">to</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3 w-3" />
+                        {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {funnelLoading ? (
+                <p className="text-muted-foreground text-sm text-center py-8">Loading funnel data…</p>
+              ) : (
+                <>
+                  {/* Bar chart */}
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={funnelData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={50} />
+                        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-[9px] uppercase tracking-widest">Step</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">Unique Sessions</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Previous</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Start</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {funnelData.map((step) => (
+                          <TableRow key={step.key}>
+                            <TableCell className="text-xs">{step.label}</TableCell>
+                            <TableCell className="text-xs text-right font-medium">{step.count}</TableCell>
+                            <TableCell className="text-xs text-right">{step.conversionFromPrev === "—" ? "—" : `${step.conversionFromPrev}%`}</TableCell>
+                            <TableCell className="text-xs text-right">{step.conversionFromStart === "—" ? "—" : `${step.conversionFromStart}%`}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Tone Distribution Charts */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 sm:gap-6 items-stretch sm:items-start">
               {/* Pie chart: admin approved lip tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
@@ -580,81 +658,6 @@ const Dashboard = () => {
                   </div>
                 );
               })()}
-            </div>
-
-            {/* Quiz Funnel Analytics */}
-            <div className="border border-border rounded-2xl p-5 w-full space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                  <span className="text-[10px] text-muted-foreground">to</span>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
-                        <CalendarIcon className="h-3 w-3" />
-                        {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              {funnelLoading ? (
-                <p className="text-muted-foreground text-sm text-center py-8">Loading funnel data…</p>
-              ) : (
-                <>
-                  {/* Bar chart */}
-                  <div className="h-52">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={funnelData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={50} />
-                        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
-                        <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
-                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-
-                  {/* Table */}
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-[9px] uppercase tracking-widest">Step</TableHead>
-                          <TableHead className="text-[9px] uppercase tracking-widest text-right">Unique Sessions</TableHead>
-                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Previous</TableHead>
-                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Start</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {funnelData.map((step) => (
-                          <TableRow key={step.key}>
-                            <TableCell className="text-xs">{step.label}</TableCell>
-                            <TableCell className="text-xs text-right font-medium">{step.count}</TableCell>
-                            <TableCell className="text-xs text-right">{step.conversionFromPrev === "—" ? "—" : `${step.conversionFromPrev}%`}</TableCell>
-                            <TableCell className="text-xs text-right">{step.conversionFromStart === "—" ? "—" : `${step.conversionFromStart}%`}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </>
-              )}
             </div>
           </>
         )}
