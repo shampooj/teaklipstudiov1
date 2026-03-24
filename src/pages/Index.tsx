@@ -983,7 +983,7 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {img?.price && (
-                            <span className="font-sans text-[10px] text-muted-foreground">${parseFloat(img.price).toFixed(2)}</span>
+                            <span className="font-sans text-[10px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
                           )}
                           <Button
                             size="sm"
