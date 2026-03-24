@@ -921,7 +921,7 @@ const Index = () => {
                   const complexionNum = getComplexionType(skinTone, lipTone);
                   return complexionNum ? (
                      <p className="font-display text-lg text-foreground text-center">
-                      You Are <span className="text-muted-foreground">Complexion Type {complexionNum}</span>
+                      You Are <span style={{ color: "#A0522D" }}>Complexion Type {complexionNum}</span>
                     </p>
                   ) : null;
                 })()}
