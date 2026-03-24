@@ -924,27 +924,6 @@ const Index = () => {
                       alt="Your photo"
                       className="w-full h-full object-cover" />
                   </div>
-                  {discountCode && (
-                    <div className="flex flex-col gap-3">
-                      <div className="bg-background border-2 border-foreground p-4 text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code</p>
-                        <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(discountCode); }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Copy code"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                        <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Expires in 7 days · Apply at checkout</p>
-                      </div>
-                      <div className="bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
