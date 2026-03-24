@@ -917,27 +917,26 @@ const Index = () => {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
               
-                <div className="w-64 h-64 overflow-hidden">
-                  <img
-                  src={faceCropImage || originalImage}
-                  alt="Your photo"
-                  className="w-full h-full object-cover" />
-                
-                </div>
-
-                <div className="w-full max-w-lg flex flex-col gap-5">
+                <div className="flex items-start justify-center gap-4">
+                  <div className="w-64 h-64 overflow-hidden flex-shrink-0">
+                    <img
+                      src={faceCropImage || originalImage}
+                      alt="Your photo"
+                      className="w-full h-full object-cover" />
+                  </div>
                   {discountCode && (
-                    <div className="flex gap-3">
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
+                    <div className="flex flex-col gap-3">
+                      <div className="bg-background border-2 border-foreground p-4 text-center">
                         <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code</p>
                         <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
                         <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Expires in 7 days · Apply at checkout</p>
                       </div>
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
+                      <div className="bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
                         <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>
                   )}
+                </div>
                    <label className="font-display text-lg text-foreground text-center">
                      Our Top Recommendations for Your Complexion
                    </label>
