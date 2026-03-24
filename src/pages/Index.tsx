@@ -1027,11 +1027,6 @@ const Index = () => {
                           <span className="font-display text-xs leading-tight text-center">
                             {rec.variantName}
                           </span>
-                          {isSelected && (
-                            <div className="absolute top-1.5 right-1.5 w-4 h-4 bg-foreground rounded-full flex items-center justify-center">
-                              <Check className="w-2.5 h-2.5 text-background" />
-                            </div>
-                          )}
                         </button>
                       );
                     })}
