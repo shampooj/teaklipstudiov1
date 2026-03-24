@@ -1187,36 +1187,41 @@ const Index = () => {
                   }
                   </Button>
 
-                  <Select value="" onValueChange={(v) => {
-                  if (!v) return;
-                  setSelectedRecIndex(Number(v));
-                  setAddedToCart(false);
-                  setCartError(false);
-                  setAddingToCart(false);
-                  setResultImage(null);
-                  setState("uploaded");
-                }}>
-                    <SelectTrigger className="w-full font-sans text-[9px] border-foreground/20 text-left">
-                      <SelectValue placeholder="Try another look" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {recommendations.map((rec, i) =>
-                    <SelectItem key={`${rec.category}-${rec.variantName}`} value={String(i)}>
-                          <div className="flex items-start gap-2.5">
-                            <span
-                          className="mt-1 h-3 w-3 rounded-full shrink-0"
-                          style={{ backgroundColor: rec.color }} />
-                        
-                            <div className="flex flex-col">
-                              <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">{rec.categoryLabel}</span>
-                              <span className="font-display text-sm">{rec.label}</span>
-                              <span className="font-sans text-[9px] text-muted-foreground">{rec.description}</span>
+                  <div className="w-full">
+                    <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider text-center mb-3">Try another look</p>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {recommendations.filter((_, i) => i !== selectedRecIndex).map((rec, _i) => {
+                        const origIndex = recommendations.indexOf(rec);
+                        const img = variantImages[rec.variantId];
+                        return (
+                          <button
+                            key={`${rec.category}-${rec.variantName}`}
+                            onClick={() => {
+                              setSelectedRecIndex(origIndex);
+                              setAddedToCart(false);
+                              setCartError(false);
+                              setAddingToCart(false);
+                              setResultImage(null);
+                              setState("uploaded");
+                            }}
+                            className="flex flex-col items-center gap-1 p-1.5 rounded-lg border border-foreground/10 hover:border-foreground/30 transition-all"
+                          >
+                            <div className="w-full aspect-square rounded overflow-hidden bg-muted">
+                              {img?.imageUrl ? (
+                                <img src={img.imageUrl} alt={rec.label} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span className="w-6 h-6 rounded-full" style={{ backgroundColor: rec.color }} />
+                                </div>
+                              )}
                             </div>
-                          </div>
-                        </SelectItem>
-                    )}
-                    </SelectContent>
-                  </Select>
+                            <span className="font-sans text-[7px] text-muted-foreground uppercase">{rec.categoryLabel}</span>
+                            <span className="font-display text-[10px] leading-tight text-center">{rec.variantName}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
 
                   <Button onClick={reset} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
                     New Photo
