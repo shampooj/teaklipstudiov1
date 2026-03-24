@@ -951,7 +951,7 @@ const Index = () => {
                               : "hover:bg-foreground/[0.02]"
                           }`}
                         >
-                          <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
+                          <span className="font-sans text-[10px] text-muted-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full">
