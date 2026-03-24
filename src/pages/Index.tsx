@@ -823,8 +823,8 @@ const Index = () => {
                         if (uploadError) {
                           console.error("Failed to upload image:", uploadError);
                         } else {
-                          const { data: signedUrlData, error: signedUrlError } = await supabase.storage.from("cart-images").createSignedUrl(uploadData.path, 60 * 60 * 24 * 365);
-                          if (!signedUrlError) imageUrl = signedUrlData.signedUrl;
+                          // Store the file path, not a long-lived signed URL
+                          imageUrl = uploadData.path;
                         }
 
                         // Store submission with image, tones, and email

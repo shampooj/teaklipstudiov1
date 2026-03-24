@@ -225,11 +225,30 @@ const Dashboard = () => {
       const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
       (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
 
+      // Generate fresh 1-hour signed URLs for images that have file paths stored
+      const imageRows = (rows || []).filter((r: any) => r.image_url && !r.image_url.startsWith('http'));
+      const signedUrlMap = new Map<string, string>();
+      if (imageRows.length > 0) {
+        const paths = imageRows.map((r: any) => r.image_url as string);
+        const { data: signedUrls } = await supabase.storage.from("cart-images").createSignedUrls(paths, 60 * 60); // 1 hour
+        if (signedUrls) {
+          signedUrls.forEach((s: any) => {
+            if (s.signedUrl) signedUrlMap.set(s.path, s.signedUrl);
+          });
+        }
+      }
+
       const enriched = (rows || []).map((r: any) => {
         const label = labelMap.get(r.id);
         const aiCat = aiCatMap.get(r.id);
+        // Resolve image URL: use fresh signed URL for paths, keep existing URLs as-is
+        let resolvedImageUrl = r.image_url;
+        if (r.image_url && !r.image_url.startsWith('http')) {
+          resolvedImageUrl = signedUrlMap.get(r.image_url) ?? null;
+        }
         return {
           ...r,
+          image_url: resolvedImageUrl,
           is_labeled: !!label,
           admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
           admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
