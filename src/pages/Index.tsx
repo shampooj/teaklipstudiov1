@@ -1126,8 +1126,8 @@ const Index = () => {
                   }
                   disabled={addedToCart || cartError || addingToCart}
                   onClick={async () => {
-                    const look = LIPSTICK_LOOKS.find((l) => l.id === selectedLook);
-                    if (!look || !resultImage) return;
+                    const variantId = selectedRec?.variantId || LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.variantId;
+                    if (!variantId || !resultImage) return;
 
                     // Ask the Shopify parent page to add to cart via postMessage bridge
                     setAddingToCart(true);
@@ -1145,7 +1145,7 @@ const Index = () => {
                       });
                       window.top?.postMessage({
                         type: "cart-add",
-                        variantId: parseInt(look.variantId),
+                        variantId: parseInt(variantId),
                         quantity: 1
                       }, "*");
                       const success = await cartPromise;
