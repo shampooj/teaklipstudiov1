@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useVariantImages } from "@/hooks/useVariantImages";
+import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Copy } from "lucide-react";
