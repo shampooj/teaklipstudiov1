@@ -535,7 +535,7 @@ const Dashboard = () => {
               {/* Pie chart: admin approved skin tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                adminLabels.forEach((l) => {
+                filteredAdminLabels.forEach((l) => {
                   const cat = l.admin_skin_tone_category || "unlabeled";
                   counts[cat] = (counts[cat] || 0) + 1;
                 });
