@@ -507,22 +507,8 @@ const Index = () => {
     setLipTone("");
     setOriginalImage(null);
     setFaceCropImage(null);
-    setResultImage(null);
     setSelectedLook("classic-red");
     setSelectedRecIndex(0);
-  };
-
-  const tryAnotherLook = () => {
-    setState("uploaded");
-    setResultImage(null);
-  };
-
-  const downloadResult = () => {
-    if (!resultImage) return;
-    const link = document.createElement("a");
-    link.href = resultImage;
-    link.download = `lipstick-${selectedLook}.png`;
-    link.click();
   };
 
   const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
