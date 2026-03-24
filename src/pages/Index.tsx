@@ -648,7 +648,7 @@ const Index = () => {
                       Back
                     </Button>
                     <Button
-                    onClick={() => setState("idle")}
+                    onClick={() => { trackEvent("lip_tone_selected", { lip_tone: lipTone }); setState("idle"); }}
                     disabled={!lipTone}
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
