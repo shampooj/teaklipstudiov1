@@ -32,6 +32,7 @@ export interface VariantImageData {
   altText: string | null;
   price: string | null;
   productTitle: string | null;
+  productHandle: string | null;
 }
 
 export function useVariantImages(variantIds: string[]): Record<string, VariantImageData> {
