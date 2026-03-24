@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-
-const SHOPIFY_STORE_DOMAIN = "nupoora-784.myshopify.com";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
   try {
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
     const shop = url.searchParams.get("shop");
-    const state = url.searchParams.get("state");
-    const hmac = url.searchParams.get("hmac");
 
     if (!code || !shop) {
       return new Response(
@@ -17,7 +14,6 @@ serve(async (req) => {
       );
     }
 
-    // Validate shop domain
     if (!/^[a-zA-Z0-9][a-zA-Z0-9\-]*\.myshopify\.com$/.test(shop)) {
       return new Response(
         renderHTML("Error", "Invalid shop domain."),
@@ -36,9 +32,7 @@ serve(async (req) => {
     }
 
     // Exchange the authorization code for an access token
-    const tokenUrl = `https://${shop}/admin/oauth/access_token`;
-
-    const tokenRes = await fetch(tokenUrl, {
+    const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -52,7 +46,7 @@ serve(async (req) => {
       const errorText = await tokenRes.text();
       console.error("Token exchange failed:", tokenRes.status, errorText);
       return new Response(
-        renderHTML("Token Exchange Failed", `Shopify returned status ${tokenRes.status}: ${errorText}`),
+        renderHTML("Token Exchange Failed", `Shopify returned an error. The authorization code may have already been used. Please try the OAuth flow again.`),
         { status: 500, headers: { "Content-Type": "text/html" } }
       );
     }
@@ -61,7 +55,6 @@ serve(async (req) => {
     const accessToken = tokenData.access_token;
 
     if (!accessToken) {
-      console.error("No access_token in response:", JSON.stringify(tokenData));
       return new Response(
         renderHTML("Error", "No access_token returned from Shopify."),
         { status: 500, headers: { "Content-Type": "text/html" } }
@@ -70,14 +63,38 @@ serve(async (req) => {
 
     console.log("Successfully obtained access token. Scope:", tokenData.scope);
 
-    // Return the token to the user so they can store it as a secret
+    // Store the token in a database table for the edge functions to use
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Upsert the token into a config table
+    const { error: dbError } = await supabase
+      .from("app_config")
+      .upsert(
+        { key: "SHOPIFY_ACCESS_TOKEN", value: accessToken },
+        { onConflict: "key" }
+      );
+
+    if (dbError) {
+      console.error("Failed to store token in DB:", dbError);
+      // Still show the token so user can manually copy it
+      return new Response(
+        renderHTML(
+          "⚠️ Partial Success",
+          `<p>Token obtained but could not be auto-saved. Please copy it manually:</p>
+           <p style="margin-top:16px;padding:12px;background:#f0f0f0;border-radius:8px;word-break:break-all;font-family:monospace;font-size:14px;">${accessToken}</p>`
+        ),
+        { status: 200, headers: { "Content-Type": "text/html" } }
+      );
+    }
+
     return new Response(
       renderHTML(
         "✅ Authorization Successful!",
-        `<p>Access token obtained successfully.</p>
+        `<p>Your Shopify access token has been saved automatically.</p>
          <p><strong>Scope:</strong> ${tokenData.scope || "N/A"}</p>
-         <p style="margin-top:16px;padding:12px;background:#f0f0f0;border-radius:8px;word-break:break-all;font-family:monospace;font-size:14px;">${accessToken}</p>
-         <p style="margin-top:12px;color:#666;">Copy this token and add it as the <code>SHOPIFY_ACCESS_TOKEN</code> secret in your Lovable project.</p>`
+         <p style="margin-top:16px;color:#666;">You can close this page now. Your discount code generation should work.</p>`
       ),
       { status: 200, headers: { "Content-Type": "text/html" } }
     );
