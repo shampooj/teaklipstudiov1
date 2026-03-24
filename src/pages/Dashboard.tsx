@@ -212,8 +212,30 @@ const Dashboard = () => {
       (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
 
       const labelMap = new Map<string, AdminLabel>();
+
+      // Generate fresh 1-hour signed URLs for images that have file paths stored
+      const imageRows = (rows || []).filter((r: any) => r.image_url && !r.image_url.startsWith('http'));
+      const signedUrlMap = new Map<string, string>();
+      if (imageRows.length > 0) {
+        const paths = imageRows.map((r: any) => r.image_url as string);
+        const { data: signedUrls } = await supabase.storage.from("cart-images").createSignedUrls(paths, 60 * 60); // 1 hour
+        if (signedUrls) {
+          signedUrls.forEach((s: any) => {
+            if (s.signedUrl) signedUrlMap.set(s.path, s.signedUrl);
+          });
+        }
+      }
+
+      // Build submission URL map with resolved signed URLs
       const submissionUrlMap = new Map<string, string | null>();
-      (rows || []).forEach((r: any) => submissionUrlMap.set(r.id, r.image_url));
+      (rows || []).forEach((r: any) => {
+        let resolvedUrl = r.image_url;
+        if (r.image_url && !r.image_url.startsWith('http')) {
+          resolvedUrl = signedUrlMap.get(r.image_url) ?? null;
+        }
+        submissionUrlMap.set(r.id, resolvedUrl);
+      });
+
       const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
         ...l,
         labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
@@ -221,6 +243,7 @@ const Dashboard = () => {
       }));
       enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
       setAdminLabels(enrichedLabels);
+
 
       const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
       (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
@@ -230,6 +253,7 @@ const Dashboard = () => {
         const aiCat = aiCatMap.get(r.id);
         return {
           ...r,
+          image_url: submissionUrlMap.get(r.id) ?? r.image_url,
           is_labeled: !!label,
           admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
           admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
