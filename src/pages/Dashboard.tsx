@@ -579,7 +579,7 @@ const Dashboard = () => {
               {/* Pie chart: customer submission lip tone distribution */}
               {(() => {
                 const counts: Record<string, number> = {};
-                data.forEach((r) => {
+                filteredData.forEach((r) => {
                   const tone = r.lip_tone || "unknown";
                   counts[tone] = (counts[tone] || 0) + 1;
                 });
