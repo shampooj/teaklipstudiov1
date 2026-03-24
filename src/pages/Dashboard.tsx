@@ -134,7 +134,7 @@ const Dashboard = () => {
   // Funnel tracking state
   const [funnelDateFrom, setFunnelDateFrom] = useState<Date>(subDays(new Date(), 30));
   const [funnelDateTo, setFunnelDateTo] = useState<Date>(new Date());
-  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string }[]>([]);
+  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string; event_data: any }[]>([]);
   const [funnelLoading, setFunnelLoading] = useState(false);
 
   const fetchFunnelData = useCallback(async () => {
