@@ -414,7 +414,7 @@ const Index = () => {
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
-
+  const startProgress = useCallback(() => {
     setProgress(0);
     progressInterval.current = setInterval(() => {
       setProgress((prev) => {
