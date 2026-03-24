@@ -140,7 +140,7 @@ const Dashboard = () => {
   const fetchFunnelData = useCallback(async () => {
     setFunnelLoading(true);
     const { data: events, error } = await (supabase.from as any)("quiz_events")
-      .select("event_name, session_id, created_at")
+      .select("event_name, session_id, created_at, event_data")
       .gte("created_at", startOfDay(funnelDateFrom).toISOString())
       .lte("created_at", endOfDay(funnelDateTo).toISOString());
     if (!error && events) {
