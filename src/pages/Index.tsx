@@ -920,12 +920,10 @@ const Index = () => {
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
+                      const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}` : "#";
                       return (
-                        <a
+                        <div
                           key={`${rec.category}-${rec.variantName}`}
-                          href={img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}` : "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
                             isSelected
                               ? "ring-2 ring-foreground"
@@ -935,26 +933,75 @@ const Index = () => {
                           <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
                           </span>
-                          <div className="w-full aspect-square rounded-md overflow-hidden bg-muted">
-                            {img?.imageUrl ? (
-                              <img
-                                src={img.imageUrl}
-                                alt={rec.label}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center">
-                                <span
-                                  className="w-10 h-10 rounded-full"
-                                  style={{ backgroundColor: rec.color }}
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full">
+                            <div className="w-full aspect-square rounded-md overflow-hidden bg-muted">
+                              {img?.imageUrl ? (
+                                <img
+                                  src={img.imageUrl}
+                                  alt={rec.label}
+                                  className="w-full h-full object-cover"
                                 />
-                              </div>
-                            )}
-                          </div>
-                          <span className="font-display text-xs leading-tight text-center">
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <span
+                                    className="w-10 h-10 rounded-full"
+                                    style={{ backgroundColor: rec.color }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </a>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline">
                             {rec.variantName}
-                          </span>
-                        </a>
+                          </a>
+                          <Button
+                            size="sm"
+                            className={`w-full font-sans text-[8px] uppercase tracking-wider transition-all duration-300 ${
+                              cartStates[rec.variantId] === "added"
+                                ? "bg-green-700 text-white hover:bg-green-700"
+                                : cartStates[rec.variantId] === "error"
+                                ? "bg-red-700 text-white hover:bg-red-700"
+                                : "bg-foreground text-background hover:bg-foreground/85"
+                            }`}
+                            disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              setCartStates((prev) => ({ ...prev, [rec.variantId]: "adding" }));
+                              try {
+                                const cartPromise = new Promise<boolean>((resolve) => {
+                                  const timeout = setTimeout(() => resolve(false), 5000);
+                                  const handler = (event: MessageEvent) => {
+                                    if (event.data?.type === "cart-add-response") {
+                                      clearTimeout(timeout);
+                                      window.removeEventListener("message", handler);
+                                      resolve(!!event.data.success);
+                                    }
+                                  };
+                                  window.addEventListener("message", handler);
+                                });
+                                window.top?.postMessage({
+                                  type: "cart-add",
+                                  variantId: parseInt(rec.variantId),
+                                  quantity: 1
+                                }, "*");
+                                const success = await cartPromise;
+                                setCartStates((prev) => ({ ...prev, [rec.variantId]: success ? "added" : "error" }));
+                              } catch {
+                                setCartStates((prev) => ({ ...prev, [rec.variantId]: "error" }));
+                              }
+                            }}
+                          >
+                            {cartStates[rec.variantId] === "adding" ? (
+                              <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
+                            ) : cartStates[rec.variantId] === "added" ? (
+                              <><Check className="w-2.5 h-2.5" /> Added</>
+                            ) : cartStates[rec.variantId] === "error" ? (
+                              <>Failed</>
+                            ) : (
+                              <>Add to Cart</>
+                            )}
+                          </Button>
+                        </div>
                       );
                     })}
                   </div>
