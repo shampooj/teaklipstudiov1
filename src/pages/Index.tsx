@@ -409,10 +409,17 @@ const Index = () => {
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
 
+  const { trackEvent } = useQuizTracking();
+
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
+
+  // Track quiz_started once on mount
+  useEffect(() => {
+    trackEvent("quiz_started", {}, true);
+  }, [trackEvent]);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
