@@ -838,20 +838,22 @@ const Index = () => {
                       } catch (e) {
                         console.error("Failed to process consent upload:", e);
                       }
+
+                      // Generate discount code (only with consent)
+                      try {
+                        const { data: discountData, error: discountError } = await supabase.functions.invoke("generate-discount", {
+                          body: { skinTone, lipTone }
+                        });
+                        if (!discountError && discountData?.code) {
+                          setDiscountCode(discountData.code);
+                        } else {
+                          console.error("Discount generation failed:", discountError, discountData);
+                        }
+                      } catch (discountErr) {
+                        console.error("Failed to generate discount code:", discountErr);
+                      }
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
-                    }
-
-                    // Generate discount code (always, regardless of consent)
-                    try {
-                      const { data: discountData, error: discountError } = await supabase.functions.invoke("generate-discount", {
-                        body: { skinTone, lipTone }
-                      });
-                      if (!discountError && discountData?.code) {
-                        setDiscountCode(discountData.code);
-                      }
-                    } catch (discountErr) {
-                      console.error("Failed to generate discount code:", discountErr);
                     }
 
                     trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone) });
