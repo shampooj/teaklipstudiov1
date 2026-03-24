@@ -949,7 +949,7 @@ const Index = () => {
                           key={`${rec.category}-${rec.variantName}`}
                           className="group relative flex flex-col items-center gap-2 p-2 rounded-lg"
                         >
-                          <span className="font-sans text-[10px] text-muted-foreground uppercase tracking-wider">
+                          <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full">
