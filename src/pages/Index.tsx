@@ -400,6 +400,7 @@ const Index = () => {
   const [croppingFace, setCroppingFace] = useState(false);
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
+  const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
   const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
   const [progress, setProgress] = useState(0);
   const [addedToCart, setAddedToCart] = useState(false);
