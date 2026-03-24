@@ -947,7 +947,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg"
+                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg h-full"
                         >
                           <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
