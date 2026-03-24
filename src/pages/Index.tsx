@@ -406,6 +406,7 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
