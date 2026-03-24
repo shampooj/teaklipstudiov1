@@ -399,19 +399,12 @@ const Index = () => {
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
   const [croppingFace, setCroppingFace] = useState(false);
-  const [resultImage, setResultImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
-  const [aiModel, setAiModel] = useState<string>("google/gemini-3.1-flash-image-preview");
-  const [progress, setProgress] = useState(0);
-  const [addedToCart, setAddedToCart] = useState(false);
-  const [cartError, setCartError] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
   const [consentChecked, setConsentChecked] = useState(false);
   const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const progressInterval = useRef<NodeJS.Timeout | null>(null);
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
