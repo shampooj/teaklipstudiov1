@@ -511,7 +511,7 @@ const Index = () => {
     try {
       const resizedImage = await downscaleImage(sourceImage, 768);
       const { data, error } = await supabase.functions.invoke("apply-lipstick", {
-        body: { imageBase64: resizedImage, look: selectedLook, skinTone, lipTone, model: aiModel }
+        body: { imageBase64: resizedImage, look: selectedRec?.variantName || selectedLook, skinTone, lipTone, model: aiModel }
       });
 
       // supabase-js puts non-2xx body in `data` and sets a generic `error`
