@@ -459,6 +459,15 @@ const Dashboard = () => {
                   {filteredData.length}
                 </p>
               </div>
+              <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Revenue</p>
+                <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
+                  ${quizEvents
+                    .filter((e) => e.event_name === "checkout_completed" && e.event_data?.total_price)
+                    .reduce((sum, e) => sum + parseFloat(e.event_data.total_price || "0"), 0)
+                    .toFixed(2)}
+                </p>
+              </div>
             </div>
 
             {/* Quiz Funnel Analytics */}
