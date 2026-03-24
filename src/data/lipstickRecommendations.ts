@@ -142,7 +142,7 @@ const CATEGORY_LABELS: Record<number, { key: RecommendationCategory; label: stri
   1: { key: "RED", label: "A Statement Red" },
   2: { key: "DAY", label: "An Easy, Everyday" },
   3: { key: "EVENING", label: "An Evening Look" },
-  4: { key: "LIPSET", label: "Lip Set" },
+  4: { key: "LIPSET", label: "A Giftable Lip Set" },
 };
 
 export function getRecommendations(skinToneId: string, lipToneId: string): Recommendation[] {
