@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getRecommendations, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { getRecommendations, getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -917,6 +917,14 @@ const Index = () => {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
               
+                {(() => {
+                  const complexionNum = getComplexionType(skinTone, lipTone);
+                  return complexionNum ? (
+                    <p className="font-display text-lg text-foreground text-center">
+                      You Are Complexion Type {complexionNum}
+                    </p>
+                  ) : null;
+                })()}
                 <div className="flex items-start justify-center gap-4">
                   <div className="w-64 h-64 overflow-hidden flex-shrink-0">
                     <img
