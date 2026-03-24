@@ -856,6 +856,16 @@ const Dashboard = () => {
                           className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 text-[9px] h-8"
                           onClick={async () => {
                             if (!currentImage) return;
+                            // Delete related admin_labels and ai_categorization first
+                            await Promise.all([
+                              (supabase.from as any)("admin_labels").delete().eq("image_id", currentImage.id),
+                              (supabase.from as any)("ai_categorization").delete().eq("submission_id", currentImage.id),
+                            ]);
+                            // Delete the image from storage
+                            if (currentImage.image_id) {
+                              await supabase.storage.from("cart-images").remove([`${currentImage.image_id}.jpg`]);
+                            }
+                            // Delete the submission row
                             const { error } = await (supabase.from as any)("customer_submissions")
                               .delete()
                               .eq("id", currentImage.id);
@@ -864,6 +874,7 @@ const Dashboard = () => {
                             } else {
                               toast.success("Submission discarded");
                               setData((prev) => prev.filter((r) => r.id !== currentImage.id));
+                              setAdminLabels((prev) => prev.filter((l) => l.image_id !== currentImage.id));
                               setLabelIndex((prev) => Math.min(prev, Math.max(0, unlabeled.length - 2)));
                             }
                           }}
