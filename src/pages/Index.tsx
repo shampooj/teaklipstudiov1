@@ -410,21 +410,6 @@ const Index = () => {
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
-  const startProgress = useCallback(() => {
-    setProgress(0);
-    progressInterval.current = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 90) return prev;
-        return prev + Math.random() * 8;
-      });
-    }, 500);
-  }, []);
-
-  const stopProgress = useCallback(() => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
-    progressInterval.current = null;
-    setProgress(100);
-  }, []);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
