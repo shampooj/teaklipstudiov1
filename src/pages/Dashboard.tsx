@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,8 +61,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -124,6 +129,53 @@ const Dashboard = () => {
   const [saving, setSaving] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Funnel tracking state
+  const [funnelDateFrom, setFunnelDateFrom] = useState<Date>(subDays(new Date(), 30));
+  const [funnelDateTo, setFunnelDateTo] = useState<Date>(new Date());
+  const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string }[]>([]);
+  const [funnelLoading, setFunnelLoading] = useState(false);
+
+  const fetchFunnelData = useCallback(async () => {
+    setFunnelLoading(true);
+    const { data: events, error } = await (supabase.from as any)("quiz_events")
+      .select("event_name, session_id, created_at")
+      .gte("created_at", startOfDay(funnelDateFrom).toISOString())
+      .lte("created_at", endOfDay(funnelDateTo).toISOString());
+    if (!error && events) {
+      setQuizEvents(events);
+    }
+    setFunnelLoading(false);
+  }, [funnelDateFrom, funnelDateTo]);
+
+  useEffect(() => {
+    fetchFunnelData();
+  }, [fetchFunnelData]);
+
+  const FUNNEL_STEPS = [
+    { key: "quiz_started", label: "Quiz Started" },
+    { key: "skin_tone_selected", label: "Skin Tone Selected" },
+    { key: "lip_tone_selected", label: "Lip Tone Selected" },
+    { key: "selfie_uploaded", label: "Selfie Uploaded" },
+    { key: "results_viewed", label: "Results Viewed" },
+    { key: "add_to_cart", label: "Add to Cart" },
+  ];
+
+  const funnelData = useMemo(() => {
+    const sessionsByEvent = new Map<string, Set<string>>();
+    quizEvents.forEach((e) => {
+      if (!sessionsByEvent.has(e.event_name)) sessionsByEvent.set(e.event_name, new Set());
+      sessionsByEvent.get(e.event_name)!.add(e.session_id);
+    });
+    const firstCount = sessionsByEvent.get("quiz_started")?.size || 0;
+    return FUNNEL_STEPS.map((step, i) => {
+      const count = sessionsByEvent.get(step.key)?.size || 0;
+      const prevCount = i === 0 ? count : (sessionsByEvent.get(FUNNEL_STEPS[i - 1].key)?.size || 0);
+      const conversionFromPrev = prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : "—";
+      const conversionFromStart = firstCount > 0 ? ((count / firstCount) * 100).toFixed(1) : "—";
+      return { ...step, count, conversionFromPrev, conversionFromStart };
+    });
+  }, [quizEvents]);
 
   const fetchData = async () => {
     const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
@@ -528,6 +580,81 @@ const Dashboard = () => {
                   </div>
                 );
               })()}
+            </div>
+
+            {/* Quiz Funnel Analytics */}
+            <div className="border border-border rounded-2xl p-5 w-full space-y-5">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Quiz Funnel Analytics</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateFrom && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3 w-3" />
+                        {funnelDateFrom ? format(funnelDateFrom, "MMM d, yyyy") : "From"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={funnelDateFrom} onSelect={(d) => d && setFunnelDateFrom(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    </PopoverContent>
+                  </Popover>
+                  <span className="text-[10px] text-muted-foreground">to</span>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className={cn("text-[10px] gap-1.5 border-foreground/20", !funnelDateTo && "text-muted-foreground")}>
+                        <CalendarIcon className="h-3 w-3" />
+                        {funnelDateTo ? format(funnelDateTo, "MMM d, yyyy") : "To"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {funnelLoading ? (
+                <p className="text-muted-foreground text-sm text-center py-8">Loading funnel data…</p>
+              ) : (
+                <>
+                  {/* Bar chart */}
+                  <div className="h-52">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={funnelData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="label" tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} interval={0} angle={-20} textAnchor="end" height={50} />
+                        <YAxis tick={{ fontSize: 9, fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: "11px", fontFamily: "'ABC ROM', sans-serif" }} />
+                        <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+
+                  {/* Table */}
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-[9px] uppercase tracking-widest">Step</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">Unique Sessions</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Previous</TableHead>
+                          <TableHead className="text-[9px] uppercase tracking-widest text-right">From Start</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {funnelData.map((step) => (
+                          <TableRow key={step.key}>
+                            <TableCell className="text-xs">{step.label}</TableCell>
+                            <TableCell className="text-xs text-right font-medium">{step.count}</TableCell>
+                            <TableCell className="text-xs text-right">{step.conversionFromPrev === "—" ? "—" : `${step.conversionFromPrev}%`}</TableCell>
+                            <TableCell className="text-xs text-right">{step.conversionFromStart === "—" ? "—" : `${step.conversionFromStart}%`}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}
