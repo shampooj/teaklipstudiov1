@@ -137,6 +137,22 @@ const RECOMMENDATIONS: Record<string, [string, string, string, string, string]> 
   "rich brown|grey brown": ["Amrit", "Kiran", "Aaliyah", "Amrit", "Lip Set for Rich Brown Skin"],
 };
 
+// Skin tone + lip tone → Complexion Type number
+const COMPLEXION_TYPE_MAP: Record<string, number> = {
+  "light|bright pink": 1, "light|brown pink": 2, "light|mauve pink": 3, "light|beige": 4,
+  "light|two-toned purple": 5, "light|two-toned brown": 6, "light|two-toned grey": 7, "light|two-toned beige": 8,
+  "light|neutral brown": 9, "light|medium brown": 10, "light|deep brown": 11, "light|grey brown": 12,
+  "medium brown|bright pink": 13, "medium brown|brown pink": 14, "medium brown|mauve pink": 15, "medium brown|beige": 16,
+  "medium brown|two-toned purple": 17, "medium brown|two-toned brown": 18, "medium brown|two-toned grey": 19, "medium brown|two-toned beige": 20,
+  "medium brown|neutral brown": 21, "medium brown|medium brown": 22, "medium brown|deep brown": 23, "medium brown|grey brown": 24,
+  "deep brown|bright pink": 25, "deep brown|brown pink": 26, "deep brown|mauve pink": 27, "deep brown|beige": 28,
+  "deep brown|two-toned purple": 29, "deep brown|two-toned brown": 30, "deep brown|two-toned grey": 31, "deep brown|two-toned beige": 32,
+  "deep brown|neutral brown": 33, "deep brown|medium brown": 34, "deep brown|deep brown": 35, "deep brown|grey brown": 36,
+  "rich brown|bright pink": 37, "rich brown|brown pink": 38, "rich brown|mauve pink": 39, "rich brown|beige": 40,
+  "rich brown|two-toned purple": 41, "rich brown|two-toned brown": 42, "rich brown|two-toned grey": 43, "rich brown|two-toned beige": 44,
+  "rich brown|neutral brown": 45, "rich brown|medium brown": 46, "rich brown|deep brown": 47, "rich brown|grey brown": 48,
+};
+
 const CATEGORY_LABELS: Record<number, { key: RecommendationCategory; label: string }> = {
   0: { key: "MLBB", label: "\"My Lips But Better\"" },
   1: { key: "RED", label: "A Statement Red" },
