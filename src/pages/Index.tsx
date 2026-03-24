@@ -999,10 +999,10 @@ const Index = () => {
                         <button
                           key={`${rec.category}-${rec.variantName}`}
                           onClick={() => setSelectedRecIndex(i)}
-                          className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg border transition-all duration-200 ${
+                          className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
                             isSelected
-                              ? "border-foreground ring-2 ring-foreground/20 bg-foreground/5"
-                              : "border-foreground/10 hover:border-foreground/30 hover:bg-foreground/[0.02]"
+                              ? "ring-2 ring-foreground"
+                              : "hover:bg-foreground/[0.02]"
                           }`}
                         >
                           <span className="font-sans text-[8px] text-muted-foreground uppercase tracking-wider">
