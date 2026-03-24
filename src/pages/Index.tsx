@@ -927,10 +927,14 @@ const Index = () => {
 
                 <div className="w-full max-w-lg flex flex-col gap-5">
                   {discountCode && (
-                    <div className="bg-background border-2 border-foreground p-4 text-center">
-                      <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code · Expires in 7 days · Apply at checkout</p>
-                      <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
-                      <p className="font-sans text-xs text-muted-foreground mt-2">Free U.S. Standard Shipping for 2+ Lipsticks</p>
+                    <div className="flex gap-3">
+                      <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
+                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code · Expires in 7 days · Apply at checkout</p>
+                        <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
+                      </div>
+                      <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
+                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
+                      </div>
                     </div>
                   )}
                    <label className="font-display text-lg text-foreground text-center">
