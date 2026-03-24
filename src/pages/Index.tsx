@@ -923,7 +923,7 @@ const Index = () => {
                       return (
                         <a
                           key={`${rec.category}-${rec.variantName}`}
-                          href={img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}` : "#"}
+                          href={img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}` : "#"}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={`group relative flex flex-col items-center gap-2 p-2 rounded-lg transition-all duration-200 ${
