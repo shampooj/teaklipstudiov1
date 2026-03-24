@@ -567,6 +567,7 @@ const Index = () => {
     setFaceCropImage(null);
     setResultImage(null);
     setSelectedLook("classic-red");
+    setSelectedRecIndex(0);
   };
 
   const tryAnotherLook = () => {
