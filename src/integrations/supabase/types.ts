@@ -185,7 +185,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      insert_customer_submission: {
+        Args: {
+          p_email?: string
+          p_image_id?: string
+          p_image_url?: string
+          p_lip_tone?: string
+          p_skin_tone?: string
+          p_variant_id: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
