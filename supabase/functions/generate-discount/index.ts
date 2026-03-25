@@ -109,6 +109,8 @@ serve(async (req) => {
       },
     };
 
+    console.log("Calling Shopify GraphQL:", graphqlUrl, JSON.stringify(variables));
+
     const graphqlRes = await fetch(graphqlUrl, {
       method: "POST",
       headers: {
@@ -128,6 +130,7 @@ serve(async (req) => {
     }
 
     const graphqlData = await graphqlRes.json();
+    console.log("Shopify GraphQL response:", JSON.stringify(graphqlData));
     const userErrors = graphqlData?.data?.discountCodeBasicCreate?.userErrors;
 
     if (userErrors && userErrors.length > 0) {
