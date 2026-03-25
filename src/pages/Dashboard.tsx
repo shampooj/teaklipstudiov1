@@ -122,6 +122,8 @@ interface Submission {
 const Dashboard = () => {
   const [data, setData] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
+  const [authUserId, setAuthUserId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [labelSearch, setLabelSearch] = useState("");
   const [adminLabels, setAdminLabels] = useState<AdminLabel[]>([]);
@@ -138,20 +140,22 @@ const Dashboard = () => {
   const [funnelLoading, setFunnelLoading] = useState(false);
 
   const fetchFunnelData = useCallback(async () => {
+    if (!authReady || !authUserId) return;
+
     setFunnelLoading(true);
     const { data: events, error } = await (supabase.from as any)("quiz_events")
       .select("event_name, session_id, created_at, event_data")
       .gte("created_at", startOfDay(funnelDateFrom).toISOString())
       .lte("created_at", endOfDay(funnelDateTo).toISOString());
-    if (!error && events) {
+
+    if (error) {
+      console.error("Failed to fetch funnel data:", error);
+    } else if (events) {
       setQuizEvents(events);
     }
-    setFunnelLoading(false);
-  }, [funnelDateFrom, funnelDateTo]);
 
-  useEffect(() => {
-    fetchFunnelData();
-  }, [fetchFunnelData]);
+    setFunnelLoading(false);
+  }, [authReady, authUserId, funnelDateFrom, funnelDateTo]);
 
   const FUNNEL_STEPS = [
     { key: "quiz_started", label: "Quiz Started" },
@@ -199,7 +203,10 @@ const Dashboard = () => {
     });
   }, [quizEvents]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!authReady || !authUserId) return;
+
+    setLoading(true);
     const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
       (supabase.from as any)("customer_submissions")
         .select("*")
@@ -208,78 +215,115 @@ const Dashboard = () => {
       (supabase.from as any)("profiles").select("id, email"),
       (supabase.from as any)("ai_categorization").select("*"),
     ]);
+
     if (error) {
       console.error("Failed to fetch submissions:", error);
-    } else {
-      const emailMap = new Map<string, string>();
-      (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
-
-      const labelMap = new Map<string, AdminLabel>();
-
-      // Generate fresh 1-hour signed URLs for images that have file paths stored
-      const imageRows = (rows || []).filter((r: any) => r.image_url && !r.image_url.startsWith('http'));
-      const signedUrlMap = new Map<string, string>();
-      if (imageRows.length > 0) {
-        const paths = imageRows.map((r: any) => r.image_url as string);
-        const { data: signedUrls } = await supabase.storage.from("cart-images").createSignedUrls(paths, 60 * 60); // 1 hour
-        if (signedUrls) {
-          signedUrls.forEach((s: any) => {
-            if (s.signedUrl) signedUrlMap.set(s.path, s.signedUrl);
-          });
-        }
-      }
-
-      // Build submission URL map with resolved signed URLs
-      const submissionUrlMap = new Map<string, string | null>();
-      (rows || []).forEach((r: any) => {
-        let resolvedUrl = r.image_url;
-        if (r.image_url && !r.image_url.startsWith('http')) {
-          resolvedUrl = signedUrlMap.get(r.image_url) ?? null;
-        }
-        submissionUrlMap.set(r.id, resolvedUrl);
-      });
-
-      const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
-        ...l,
-        labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
-        image_url: submissionUrlMap.get(l.image_id) ?? null,
-      }));
-      enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
-      setAdminLabels(enrichedLabels);
-
-
-      const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
-      (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
-
-      const enriched = (rows || []).map((r: any) => {
-        const label = labelMap.get(r.id);
-        const aiCat = aiCatMap.get(r.id);
-        return {
-          ...r,
-          image_url: submissionUrlMap.get(r.id) ?? r.image_url,
-          is_labeled: !!label,
-          admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
-          admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
-          labeled_by_user_id: label?.labeled_by_user_id ?? null,
-          labeled_at: label?.labeled_at ?? null,
-          admin_label_id: label?.id,
-          labeled_by_email: label?.labeled_by_user_id ? emailMap.get(label.labeled_by_user_id) ?? null : null,
-          ai_skin_tone: aiCat?.ai_skin_tone ?? null,
-          ai_lip_tone: aiCat?.ai_lip_tone ?? null,
-          ai_model_name: aiCat?.model_name ?? null,
-        };
-      });
-      setData(enriched);
+      setLoading(false);
+      return;
     }
+
+    const emailMap = new Map<string, string>();
+    (profiles || []).forEach((p: { id: string; email: string }) => emailMap.set(p.id, p.email));
+
+    const labelMap = new Map<string, AdminLabel>();
+
+    // Generate fresh 1-hour signed URLs for images that have file paths stored
+    const imageRows = (rows || []).filter((r: any) => r.image_url && !r.image_url.startsWith("http"));
+    const signedUrlMap = new Map<string, string>();
+    if (imageRows.length > 0) {
+      const paths = imageRows.map((r: any) => r.image_url as string);
+      const { data: signedUrls } = await supabase.storage.from("cart-images").createSignedUrls(paths, 60 * 60);
+      if (signedUrls) {
+        signedUrls.forEach((s: any) => {
+          if (s.signedUrl) signedUrlMap.set(s.path, s.signedUrl);
+        });
+      }
+    }
+
+    // Build submission URL map with resolved signed URLs
+    const submissionUrlMap = new Map<string, string | null>();
+    (rows || []).forEach((r: any) => {
+      let resolvedUrl = r.image_url;
+      if (r.image_url && !r.image_url.startsWith("http")) {
+        resolvedUrl = signedUrlMap.get(r.image_url) ?? null;
+      }
+      submissionUrlMap.set(r.id, resolvedUrl);
+    });
+
+    const enrichedLabels = (labels || []).map((l: AdminLabel) => ({
+      ...l,
+      labeled_by_email: l.labeled_by_user_id ? emailMap.get(l.labeled_by_user_id) ?? undefined : undefined,
+      image_url: submissionUrlMap.get(l.image_id) ?? null,
+    }));
+    enrichedLabels.forEach((l: AdminLabel) => labelMap.set(l.image_id, l));
+    setAdminLabels(enrichedLabels);
+
+    const aiCatMap = new Map<string, { ai_skin_tone: string | null; ai_lip_tone: string | null; model_name: string }>();
+    (aiCats || []).forEach((a: any) => aiCatMap.set(a.submission_id, a));
+
+    const enriched = (rows || []).map((r: any) => {
+      const label = labelMap.get(r.id);
+      const aiCat = aiCatMap.get(r.id);
+      return {
+        ...r,
+        image_url: submissionUrlMap.get(r.id) ?? r.image_url,
+        is_labeled: !!label,
+        admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
+        admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
+        labeled_by_user_id: label?.labeled_by_user_id ?? null,
+        labeled_at: label?.labeled_at ?? null,
+        admin_label_id: label?.id,
+        labeled_by_email: label?.labeled_by_user_id ? emailMap.get(label.labeled_by_user_id) ?? null : null,
+        ai_skin_tone: aiCat?.ai_skin_tone ?? null,
+        ai_lip_tone: aiCat?.ai_lip_tone ?? null,
+        ai_model_name: aiCat?.model_name ?? null,
+      };
+    });
+
+    setData(enriched);
     setLoading(false);
-  };
+  }, [authReady, authUserId]);
 
   useEffect(() => {
-    fetchData();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUserEmail(user?.email ?? null);
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!isMounted) return;
+      setAuthUserId(session?.user.id ?? null);
+      setUserEmail(session?.user.email ?? null);
+      setAuthReady(true);
+    };
+
+    void initializeAuth();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!isMounted) return;
+      setAuthUserId(session?.user.id ?? null);
+      setUserEmail(session?.user.email ?? null);
+      setAuthReady(true);
     });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
+
+  useEffect(() => {
+    if (!authReady || !authUserId) return;
+    void fetchData();
+  }, [authReady, authUserId, fetchData]);
+
+  useEffect(() => {
+    if (!authReady || !authUserId) return;
+    void fetchFunnelData();
+  }, [authReady, authUserId, fetchFunnelData]);
 
   const unlabeled = useMemo(() => data.filter((r) => !r.is_labeled), [data]);
   const [labelIndex, setLabelIndex] = useState(0);
@@ -287,16 +331,15 @@ const Dashboard = () => {
   const currentImage = unlabeled.length > 0 ? unlabeled[clampedIndex] : null;
 
   const handleSaveLabel = async () => {
-    if (!currentImage || !selectedCategory || !selectedSkinTone) return;
+    if (!currentImage || !selectedCategory || !selectedSkinTone || !authUserId) return;
     setSaving(true);
-    const { data: { user } } = await supabase.auth.getUser();
     const now = new Date().toISOString();
     const { error } = await (supabase.from as any)("admin_labels")
       .insert({
         image_id: currentImage.id,
         admin_lip_tone_category: selectedCategory,
         admin_skin_tone_category: selectedSkinTone,
-        labeled_by_user_id: user?.id,
+        labeled_by_user_id: authUserId,
         labeled_at: now,
       });
     if (error) {
