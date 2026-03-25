@@ -820,17 +820,16 @@ const Index = () => {
                             imageUrl = uploadData.path;
                           }
 
-                          const { data: insertData, error: insertError } = await supabase.from("customer_submissions" as any).insert({
-                            variant_id: "consent-upload",
-                            image_url: imageUrl,
-                            image_id: imageId,
-                            skin_tone: skinTone,
-                            lip_tone: lipTone,
-                            email: trimmedEmail
-                          } as any).select();
+                          const { data: submissionId, error: insertError } = await supabase.rpc("insert_customer_submission" as any, {
+                            p_variant_id: "consent-upload",
+                            p_image_url: imageUrl,
+                            p_image_id: imageId,
+                            p_skin_tone: skinTone,
+                            p_lip_tone: lipTone,
+                            p_email: trimmedEmail
+                          });
 
                           if (!insertError) {
-                            const submissionId = (insertData as any)?.[0]?.id;
                             if (submissionId) {
                               const c = document.createElement("canvas");
                               c.width = Math.min(img.width, 1024);
