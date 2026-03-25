@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 serve(async (req) => {
   try {
@@ -31,7 +30,7 @@ serve(async (req) => {
       );
     }
 
-    // Exchange the authorization code for an access token
+    // Exchange the authorization code for an offline access token
     const tokenRes = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -61,40 +60,20 @@ serve(async (req) => {
       );
     }
 
-    console.log("Successfully obtained access token. Scope:", tokenData.scope);
+    console.log("Successfully obtained offline access token. Scope:", tokenData.scope);
 
-    // Store the token in a database table for the edge functions to use
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Upsert the token into a config table
-    const { error: dbError } = await supabase
-      .from("app_config")
-      .upsert(
-        { key: "SHOPIFY_ACCESS_TOKEN", value: accessToken },
-        { onConflict: "key" }
-      );
-
-    if (dbError) {
-      console.error("Failed to store token in DB:", dbError);
-      // Still show the token so user can manually copy it
-      return new Response(
-        renderHTML(
-          "⚠️ Partial Success",
-          `<p>Token obtained but could not be auto-saved. Please copy it manually:</p>
-           <p style="margin-top:16px;padding:12px;background:#f0f0f0;border-radius:8px;word-break:break-all;font-family:monospace;font-size:14px;">${accessToken}</p>`
-        ),
-        { status: 200, headers: { "Content-Type": "text/html" } }
-      );
-    }
-
+    // Display the token for the user to copy and store as an env secret
     return new Response(
       renderHTML(
         "✅ Authorization Successful!",
-        `<p>Your Shopify access token has been saved automatically.</p>
+        `<p>Your Shopify <strong>offline</strong> access token has been obtained.</p>
          <p><strong>Scope:</strong> ${tokenData.scope || "N/A"}</p>
-         <p style="margin-top:16px;color:#666;">You can close this page now. Your discount code generation should work.</p>`
+         <p style="margin-top:16px;"><strong>Copy the token below</strong> and paste it into the Lovable chat so it can be stored as a secret:</p>
+         <div style="margin-top:12px;padding:16px;background:#f0f0f0;border-radius:8px;word-break:break-all;font-family:monospace;font-size:14px;border:2px solid #333;position:relative;">
+           <span id="token">${accessToken}</span>
+           <button onclick="navigator.clipboard.writeText(document.getElementById('token').textContent).then(()=>this.textContent='Copied!')" style="position:absolute;top:8px;right:8px;padding:4px 12px;background:#333;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;">Copy</button>
+         </div>
+         <p style="margin-top:16px;color:#666;">This token does not expire. You can close this page after copying.</p>`
       ),
       { status: 200, headers: { "Content-Type": "text/html" } }
     );
