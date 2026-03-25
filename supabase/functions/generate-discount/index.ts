@@ -16,7 +16,7 @@ serve(async (req) => {
   }
 
   try {
-    const { skinTone, lipTone } = await req.json();
+    const { skinTone, lipTone, requestedCode } = await req.json();
 
     if (!skinTone || !lipTone) {
       return new Response(
@@ -49,7 +49,10 @@ serve(async (req) => {
     const skinSlug = skinTone.toUpperCase().replace(/[^A-Z0-9]/g, "");
     const lipSlug = lipTone.toUpperCase().replace(/[^A-Z0-9]/g, "");
     const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
-    const discountCode = `TEAK-${skinSlug}-${lipSlug}-${randomSuffix}`;
+    const generatedCode = `TEAK-${skinSlug}-${lipSlug}-${randomSuffix}`;
+    const discountCode = typeof requestedCode === "string" && /^TEAK-[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]{5}$/.test(requestedCode)
+      ? requestedCode
+      : generatedCode;
 
     const graphqlUrl = `https://${SHOPIFY_STORE_DOMAIN}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`;
 

@@ -393,6 +393,14 @@ const blendLipstickPreservingTeeth = async (originalSrc: string, editedSrc: stri
   return outputCanvas.toDataURL("image/png");
 };
 
+const createDiscountCode = (skinTone: string, lipTone: string) => {
+  const skinSlug = skinTone.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const lipSlug = lipTone.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const randomSuffix = Math.random().toString(36).substring(2, 7).toUpperCase();
+
+  return `TEAK-${skinSlug}-${lipSlug}-${randomSuffix}`;
+};
+
 const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
   const [skinTone, setSkinTone] = useState<string>("medium-brown");
@@ -769,98 +777,110 @@ const Index = () => {
                 {originalImage &&
                 <Button
                   onClick={async () => {
+                    const trimmedEmail = userEmail.trim();
+
                     // If consent is checked but no email, show error and block
-                    if (consentChecked && !userEmail.trim()) {
+                    if (consentChecked && !trimmedEmail) {
                       setEmailError(true);
                       return;
                     }
+
                     setState("analyzing");
+
                     // If consent checked and email provided, store image + submission
-                    if (consentChecked && userEmail.trim()) {
-                      try {
-                        // Use the face-cropped image (or fall back to original)
-                        const sourceImage = faceCropImage || originalImage!;
-                        const img = new Image();
-                        img.crossOrigin = "anonymous";
-                        await new Promise<void>((resolve, reject) => {
-                          img.onload = () => resolve();
-                          img.onerror = reject;
-                          img.src = sourceImage;
-                        });
+                    if (consentChecked && trimmedEmail) {
+                      const requestedCode = createDiscountCode(skinTone, lipTone);
+                      setDiscountCode(requestedCode);
 
-                        // Downscale to max 768px and compress as JPEG
-                        const maxSize = 768;
-                        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-                        const canvas = document.createElement("canvas");
-                        canvas.width = Math.round(img.width * scale);
-                        canvas.height = Math.round(img.height * scale);
-                        const ctx = canvas.getContext("2d")!;
-                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.7));
-                        const imageId = crypto.randomUUID();
-                        const fileName = `${imageId}.jpg`;
+                      void (async () => {
+                        try {
+                          // Use the face-cropped image (or fall back to original)
+                          const sourceImage = faceCropImage || originalImage!;
+                          const img = new Image();
+                          img.crossOrigin = "anonymous";
+                          await new Promise<void>((resolve, reject) => {
+                            img.onload = () => resolve();
+                            img.onerror = reject;
+                            img.src = sourceImage;
+                          });
 
-                        let imageUrl: string | null = null;
-                        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
-                        if (uploadError) {
-                          console.error("Failed to upload image:", uploadError);
-                        } else {
-                          imageUrl = uploadData.path;
-                        }
+                          // Downscale to max 768px and compress as JPEG
+                          const maxSize = 768;
+                          const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+                          const canvas = document.createElement("canvas");
+                          canvas.width = Math.round(img.width * scale);
+                          canvas.height = Math.round(img.height * scale);
+                          const ctx = canvas.getContext("2d")!;
+                          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                          const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.7));
+                          const imageId = crypto.randomUUID();
+                          const fileName = `${imageId}.jpg`;
 
-                        // Store submission with image, tones, and email
-                        const { data: insertData, error: insertError } = await supabase.from("customer_submissions" as any).insert({
-                          variant_id: "consent-upload",
-                          image_url: imageUrl,
-                          image_id: imageId,
-                          skin_tone: skinTone,
-                          lip_tone: lipTone,
-                          email: userEmail
-                        } as any).select();
-
-                        if (!insertError) {
-                          const submissionId = (insertData as any)?.[0]?.id;
-                          if (submissionId) {
-                            const c = document.createElement("canvas");
-                            c.width = Math.min(img.width, 1024);
-                            c.height = Math.round(img.height * (c.width / img.width));
-                            const cx = c.getContext("2d")!;
-                            cx.drawImage(img, 0, 0, c.width, c.height);
-                            const base64 = c.toDataURL("image/jpeg", 0.7);
-                            supabase.functions.invoke("categorize-skin-lip", {
-                              body: { imageBase64: base64, submissionId }
-                            }).catch((err) => console.error("AI categorization failed:", err));
+                          let imageUrl: string | null = null;
+                          const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+                          if (uploadError) {
+                            console.error("Failed to upload image:", uploadError);
+                          } else {
+                            imageUrl = uploadData.path;
                           }
-                        } else {
-                          console.error("Failed to save submission:", insertError);
-                        }
 
-                      } catch (e) {
-                        console.error("Failed to process consent upload:", e);
-                      }
+                          // Store submission with image, tones, and email
+                          const { data: insertData, error: insertError } = await supabase.from("customer_submissions" as any).insert({
+                            variant_id: "consent-upload",
+                            image_url: imageUrl,
+                            image_id: imageId,
+                            skin_tone: skinTone,
+                            lip_tone: lipTone,
+                            email: trimmedEmail
+                          } as any).select();
 
-                      // Generate discount code (only with consent)
-                      // Use direct fetch instead of supabase.functions.invoke to avoid
-                      // third-party cookie / auth issues when running inside a Shopify iframe
-                      try {
-                        const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
-                        const discountRes = await fetch(edgeFunctionUrl, {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                          },
-                          body: JSON.stringify({ skinTone, lipTone }),
-                        });
-                        const discountData = await discountRes.json();
-                        if (discountRes.ok && discountData?.code) {
-                          setDiscountCode(discountData.code);
-                        } else {
-                          console.error("Discount generation failed:", discountData);
+                          if (!insertError) {
+                            const submissionId = (insertData as any)?.[0]?.id;
+                            if (submissionId) {
+                              const c = document.createElement("canvas");
+                              c.width = Math.min(img.width, 1024);
+                              c.height = Math.round(img.height * (c.width / img.width));
+                              const cx = c.getContext("2d")!;
+                              cx.drawImage(img, 0, 0, c.width, c.height);
+                              const base64 = c.toDataURL("image/jpeg", 0.7);
+                              supabase.functions.invoke("categorize-skin-lip", {
+                                body: { imageBase64: base64, submissionId }
+                              }).catch((err) => console.error("AI categorization failed:", err));
+                            }
+                          } else {
+                            console.error("Failed to save submission:", insertError);
+                          }
+                        } catch (e) {
+                          console.error("Failed to process consent upload:", e);
                         }
-                      } catch (discountErr) {
-                        console.error("Failed to generate discount code:", discountErr);
-                      }
+                      })();
+
+                      // Generate the code immediately and create it in the backend in parallel
+                      void (async () => {
+                        try {
+                          const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
+                          const discountRes = await fetch(edgeFunctionUrl, {
+                            method: "POST",
+                            headers: {
+                              "Content-Type": "application/json",
+                              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                            },
+                            body: JSON.stringify({ skinTone, lipTone, requestedCode }),
+                          });
+                          const discountData = await discountRes.json();
+
+                          if (discountRes.ok && discountData?.code) {
+                            setDiscountCode(discountData.code);
+                          } else {
+                            console.error("Discount generation failed:", discountData);
+                          }
+                        } catch (discountErr) {
+                          console.error("Failed to generate discount code:", discountErr);
+                        }
+                      })();
+
+                      await new Promise((resolve) => setTimeout(resolve, 800));
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
