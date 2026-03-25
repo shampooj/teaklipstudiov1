@@ -852,7 +852,8 @@ const Index = () => {
 
                       // Await discount creation from Shopify — only show code if confirmed
                       try {
-                        const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
+                        const edgeFunctionUrl = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/generate-discount`;
+                        console.log("[discount] calling:", edgeFunctionUrl);
                         const discountRes = await fetch(edgeFunctionUrl, {
                           method: "POST",
                           headers: {
@@ -862,15 +863,25 @@ const Index = () => {
                           },
                           body: JSON.stringify({ skinTone, lipTone }),
                         });
-                        const discountData = await discountRes.json();
+                        console.log("[discount] status:", discountRes.status);
+                        const discountText = await discountRes.text();
+                        console.log("[discount] raw response:", discountText);
+                        
+                        let discountData;
+                        try {
+                          discountData = JSON.parse(discountText);
+                        } catch (parseErr) {
+                          console.error("[discount] JSON parse error:", parseErr);
+                        }
 
                         if (discountRes.ok && discountData?.code) {
                           setDiscountCode(discountData.code);
+                          console.log("[discount] code set:", discountData.code);
                         } else {
-                          console.error("Discount generation failed:", discountData);
+                          console.error("[discount] generation failed:", discountData);
                         }
                       } catch (discountErr) {
-                        console.error("Failed to generate discount code:", discountErr);
+                        console.error("[discount] fetch error:", discountErr);
                       }
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
