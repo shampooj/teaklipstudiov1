@@ -789,12 +789,9 @@ const Index = () => {
 
                     // If consent checked and email provided, store image + submission
                     if (consentChecked && trimmedEmail) {
-                      const requestedCode = createDiscountCode(skinTone, lipTone);
-                      setDiscountCode(requestedCode);
-
+                      // Fire-and-forget: upload image + save submission in the background
                       void (async () => {
                         try {
-                          // Use the face-cropped image (or fall back to original)
                           const sourceImage = faceCropImage || originalImage!;
                           const img = new Image();
                           img.crossOrigin = "anonymous";
@@ -804,7 +801,6 @@ const Index = () => {
                             img.src = sourceImage;
                           });
 
-                          // Downscale to max 768px and compress as JPEG
                           const maxSize = 768;
                           const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
                           const canvas = document.createElement("canvas");
@@ -824,7 +820,6 @@ const Index = () => {
                             imageUrl = uploadData.path;
                           }
 
-                          // Store submission with image, tones, and email
                           const { data: insertData, error: insertError } = await supabase.from("customer_submissions" as any).insert({
                             variant_id: "consent-upload",
                             image_url: imageUrl,
@@ -855,32 +850,28 @@ const Index = () => {
                         }
                       })();
 
-                      // Generate the code immediately and create it in the backend in parallel
-                      void (async () => {
-                        try {
-                          const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
-                          const discountRes = await fetch(edgeFunctionUrl, {
-                            method: "POST",
-                            headers: {
-                              "Content-Type": "application/json",
-                              "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                              "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-                            },
-                            body: JSON.stringify({ skinTone, lipTone, requestedCode }),
-                          });
-                          const discountData = await discountRes.json();
+                      // Await discount creation from Shopify — only show code if confirmed
+                      try {
+                        const edgeFunctionUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-discount`;
+                        const discountRes = await fetch(edgeFunctionUrl, {
+                          method: "POST",
+                          headers: {
+                            "Content-Type": "application/json",
+                            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+                          },
+                          body: JSON.stringify({ skinTone, lipTone }),
+                        });
+                        const discountData = await discountRes.json();
 
-                          if (discountRes.ok && discountData?.code) {
-                            setDiscountCode(discountData.code);
-                          } else {
-                            console.error("Discount generation failed:", discountData);
-                          }
-                        } catch (discountErr) {
-                          console.error("Failed to generate discount code:", discountErr);
+                        if (discountRes.ok && discountData?.code) {
+                          setDiscountCode(discountData.code);
+                        } else {
+                          console.error("Discount generation failed:", discountData);
                         }
-                      })();
-
-                      await new Promise((resolve) => setTimeout(resolve, 800));
+                      } catch (discountErr) {
+                        console.error("Failed to generate discount code:", discountErr);
+                      }
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
