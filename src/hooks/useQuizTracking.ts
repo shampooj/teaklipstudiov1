@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import posthog from "posthog-js";
 
 const getSessionId = (): string => {
   const key = "quiz_session_id";
@@ -19,6 +20,8 @@ export const useQuizTracking = () => {
     (eventName: string, eventData: Record<string, unknown> = {}, dedupe = false) => {
       if (dedupe && firedEvents.current.has(eventName)) return;
       if (dedupe) firedEvents.current.add(eventName);
+
+      posthog.capture(eventName, { ...eventData, quiz_session_id: sessionId.current });
 
       supabase
         .from("quiz_events" as any)
