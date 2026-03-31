@@ -413,6 +413,7 @@ const Index = () => {
    const [researchChecked, setResearchChecked] = useState(false);
    const [consentChecked, setConsentChecked] = useState(false);
    const [noStoreChecked, setNoStoreChecked] = useState(false);
+   const [aiAnalysisChecked, setAiAnalysisChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
