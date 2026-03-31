@@ -763,7 +763,7 @@ const Index = () => {
                        }}
                        className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
                      <div>
-                       <span className="block font-display text-sm text-foreground leading-tight">Add my photo to Brown Skin Database</span>
+                       <span className="block font-display text-sm text-foreground leading-tight">Add my photo to Teak's Brown Skin Database</span>
                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps AI work better for brown skin</span>
                        <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded font-sans text-xs font-medium text-primary bg-primary/10">10% off as a thank you</span>
                      </div>
