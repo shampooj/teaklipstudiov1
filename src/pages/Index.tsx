@@ -1042,7 +1042,7 @@ const Index = () => {
                               )}
                             </div>
                           </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline">
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
