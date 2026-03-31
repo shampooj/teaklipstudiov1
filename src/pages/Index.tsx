@@ -753,41 +753,38 @@ const Index = () => {
                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">For more accurate product recommendations</span>
                      </div>
                    </label>
-                   <label htmlFor="consent" className="flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/5 cursor-pointer select-none">
-                     <Checkbox
-                       id="consent"
-                       checked={consentChecked}
-                       onCheckedChange={(checked) => {
-                         setConsentChecked(checked === true);
-                         if (checked) setNoStoreChecked(false);
-                       }}
-                       className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
-                     <div>
-                       <span className="block font-display text-sm text-foreground leading-tight">Add my photo to Teak's Brown Skin Database</span>
-                       <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps AI work better for brown skin</span>
-                       <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded font-sans text-xs font-medium text-primary bg-primary/10">10% off as a thank you</span>
-                     </div>
-                   </label>
-                  <p className="text-muted-foreground font-sans text-[10px] leading-relaxed text-center px-2">
-                    <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Learn more</a> about how we use data at Teak and see our{" "}
-                    <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>
-                  </p>
-                  {consentChecked &&
-                <div className="pl-7">
-                      <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
-                        Email address
-                      </label>
-                      <input
-                    id="user-email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={userEmail}
-                    onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                    className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring`} />
-                      {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
-                  
-                    </div>
-                }
+                   <div className={`rounded-2xl border ${consentChecked ? 'border-primary/30' : 'border-primary/30'} bg-primary/5 cursor-pointer select-none`}>
+                     <label htmlFor="consent" className="flex items-center gap-3 p-4 cursor-pointer">
+                       <Checkbox
+                         id="consent"
+                         checked={consentChecked}
+                         onCheckedChange={(checked) => {
+                           setConsentChecked(checked === true);
+                           if (checked) setNoStoreChecked(false);
+                         }}
+                         className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
+                       <div>
+                         <span className="block font-display text-sm text-foreground leading-tight">Add my photo to Teak's Brown Skin Database</span>
+                         <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps AI work better for brown skin</span>
+                         <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded font-sans text-xs font-medium text-primary bg-primary/10">10% off as a thank you</span>
+                       </div>
+                     </label>
+                     {consentChecked &&
+                       <div className="px-4 pb-4 pt-0 ml-8">
+                         <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
+                           Email address
+                         </label>
+                         <input
+                           id="user-email"
+                           type="email"
+                           placeholder="you@example.com"
+                           value={userEmail}
+                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
+                           className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring`} />
+                         {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
+                       </div>
+                     }
+                   </div>
                 </div>}
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
