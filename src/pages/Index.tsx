@@ -742,6 +742,18 @@ const Index = () => {
                     className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
                       Yes, you can save my selections to help Teak's research and design process for brown complexions!
                     </label>
+                   </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id="ai-analysis"
+                      checked={aiAnalysisChecked}
+                      onCheckedChange={(checked) => setAiAnalysisChecked(checked === true)}
+                      className="mt-0.5 shrink-0" />
+                    <label
+                      htmlFor="ai-analysis"
+                      className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
+                      Yes, you can use AI to analyze my skin tone and give me even better product recommendations.
+                    </label>
                   </div>
                   <div className="flex items-start gap-3">
                     <Checkbox
