@@ -752,7 +752,7 @@ const Index = () => {
                     <label
                       htmlFor="ai-analysis"
                       className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Yes, you can use AI to analyze my skin tone and give me even better product recommendations.
+                      Analyze my skin tone with AI for better recommendations
                     </label>
                   </div>
                   <div className="flex items-start gap-3">
