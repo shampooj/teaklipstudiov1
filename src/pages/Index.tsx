@@ -772,6 +772,10 @@ const Index = () => {
                       <span className="font-bold text-primary">(and get 10% off as a thank you)</span>
                     </label>
                   </div>
+                  <p className="text-muted-foreground font-sans text-[10px] leading-relaxed text-center px-2">
+                    <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Learn more</a> about how we use data at Teak and see our{" "}
+                    <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>
+                  </p>
                   {consentChecked &&
                 <div className="pl-7">
                       <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
