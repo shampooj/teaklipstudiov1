@@ -731,6 +731,18 @@ const Index = () => {
                 <div className="mt-5 space-y-3">
                   <div className="flex items-start gap-3">
                     <Checkbox
+                    id="research"
+                    checked={researchChecked}
+                    onCheckedChange={(checked) => setResearchChecked(checked === true)}
+                    className="mt-0.5 shrink-0" />
+                    <label
+                    htmlFor="research"
+                    className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
+                      Yes, you can save my selections to help Teak's research and design process for brown complexions!
+                    </label>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
                     id="consent"
                     checked={consentChecked}
                     onCheckedChange={(checked) => {
