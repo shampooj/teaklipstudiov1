@@ -738,7 +738,7 @@ const Index = () => {
                        onCheckedChange={(checked) => setResearchChecked(checked === true)}
                        className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
                      <div>
-                       <span className="block font-sans text-sm font-semibold text-foreground leading-tight">Save my quiz selections</span>
+                       <span className="block font-display text-sm text-foreground leading-tight">Save my quiz selections</span>
                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps Teak's research for brown complexions</span>
                      </div>
                    </label>
