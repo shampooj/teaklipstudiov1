@@ -729,7 +729,7 @@ const Index = () => {
                     </div>
                   </div>
               }
-                <div className="mt-5 space-y-3">
+                {faceCropImage && <div className="mt-5 space-y-3">
                   <h3 className="font-display text-xl text-foreground text-center">Great! Before we continue...</h3>
                   <div className="flex items-start gap-3">
                     <Checkbox
