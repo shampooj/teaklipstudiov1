@@ -858,7 +858,7 @@ const Index = () => {
                           });
 
                           if (!insertError) {
-                            if (submissionId) {
+                            if (submissionId && aiAnalysisChecked) {
                               const c = document.createElement("canvas");
                               c.width = Math.min(img.width, 1024);
                               c.height = Math.round(img.height * (c.width / img.width));
