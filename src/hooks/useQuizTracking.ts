@@ -21,6 +21,8 @@ export const useQuizTracking = () => {
       if (dedupe && firedEvents.current.has(eventName)) return;
       if (dedupe) firedEvents.current.add(eventName);
 
+      posthog.capture(eventName, { ...eventData, quiz_session_id: sessionId.current });
+
       supabase
         .from("quiz_events" as any)
         .insert({
