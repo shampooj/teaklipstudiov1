@@ -410,8 +410,9 @@ const Index = () => {
   const [croppingFace, setCroppingFace] = useState(false);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
-  const [consentChecked, setConsentChecked] = useState(false);
-  const [noStoreChecked, setNoStoreChecked] = useState(false);
+   const [researchChecked, setResearchChecked] = useState(false);
+   const [consentChecked, setConsentChecked] = useState(false);
+   const [noStoreChecked, setNoStoreChecked] = useState(false);
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
