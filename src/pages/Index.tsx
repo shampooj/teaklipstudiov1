@@ -752,7 +752,7 @@ const Index = () => {
                     <label
                       htmlFor="ai-analysis"
                       className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Analyze my skin tone with AI for better recommendations
+                      Analyze my skin tone with AI
                     </label>
                   </div>
                   <div className="flex items-start gap-3">
