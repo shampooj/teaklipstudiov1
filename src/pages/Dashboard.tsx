@@ -163,6 +163,7 @@ const Dashboard = () => {
     { key: "lip_tone_selected", label: "Lip Tone Selected" },
     { key: "selfie_uploaded", label: "Selfie Uploaded" },
     { key: "results_viewed", label: "Results Viewed" },
+    { key: "product_clicked", label: "Product Clicked" },
     { key: "add_to_cart", label: "Add to Cart" },
     { key: "checkout_initiated", label: "Checkout Initiated" },
     { key: "checkout_completed", label: "Checkout Completed" },
