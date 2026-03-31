@@ -877,6 +877,17 @@ const Index = () => {
                         }
                       })();
 
+                    // Save quiz selections (skin/lip tone) if research checkbox is checked
+                    if (researchChecked) {
+                      supabase.rpc("insert_customer_submission" as any, {
+                        p_variant_id: "research-selections",
+                        p_skin_tone: skinTone,
+                        p_lip_tone: lipTone,
+                      }).then(({ error }: any) => {
+                        if (error) console.error("Failed to save research selections:", error);
+                      });
+                    }
+
                       // Await discount creation from Shopify — only show code if confirmed
                       try {
                         const edgeFunctionUrl = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/generate-discount`;
