@@ -740,7 +740,7 @@ const Index = () => {
                     <label
                     htmlFor="research"
                     className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Yes, you can save my selections to help Teak's research and design process for brown complexions!
+                      Save my quiz selections to help Teak's lip color research
                     </label>
                    </div>
                   <div className="flex items-start gap-3">
