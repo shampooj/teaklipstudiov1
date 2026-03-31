@@ -792,7 +792,7 @@ const Index = () => {
                   
                     </div>
                 }
-                </div>
+                </div>}
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
                   onClick={() => setState("lip-tone")}
