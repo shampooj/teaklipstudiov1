@@ -768,7 +768,7 @@ const Index = () => {
                     <label
                     htmlFor="consent"
                     className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Add my photo to Teak's Brown Skin Database{" "}
+                      Add my photo to Teak's Brown Skin Database for brown skin research{" "}
                       <span className="font-bold text-primary">(and get 10% off as a thank you)</span>
                     </label>
                   </div>
