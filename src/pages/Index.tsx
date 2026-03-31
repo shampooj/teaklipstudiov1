@@ -789,7 +789,7 @@ const Index = () => {
                  <p className="text-center text-xs text-muted-foreground mt-3 font-sans">
                    <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
                    {" · "}
-                   <a href="#" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                   <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
                  </p>
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
