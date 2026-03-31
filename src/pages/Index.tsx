@@ -731,47 +731,43 @@ const Index = () => {
               }
                 {faceCropImage && <div className="mt-5 space-y-3">
                   <h3 className="font-display text-xl text-foreground text-center">Great! Before we continue...</h3>
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                    id="research"
-                    checked={researchChecked}
-                    onCheckedChange={(checked) => setResearchChecked(checked === true)}
-                    className="mt-0.5 shrink-0" />
-                    <label
-                    htmlFor="research"
-                    className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Save my quiz selections to help Teak's lip color research
-                    </label>
-                   </div>
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="ai-analysis"
-                      checked={aiAnalysisChecked}
-                      onCheckedChange={(checked) => setAiAnalysisChecked(checked === true)}
-                      className="mt-0.5 shrink-0" />
-                    <label
-                      htmlFor="ai-analysis"
-                      className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Analyze my skin tone with AI
-                    </label>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <Checkbox
-                    id="consent"
-                    checked={consentChecked}
-                    onCheckedChange={(checked) => {
-                      setConsentChecked(checked === true);
-                      if (checked) setNoStoreChecked(false);
-                    }}
-                    className="mt-0.5 shrink-0" />
-                  
-                    <label
-                    htmlFor="consent"
-                    className="text-muted-foreground font-sans text-xs leading-relaxed cursor-pointer select-none">
-                      Add my photo to Teak's Brown Skin Database for brown skin research{" "}
-                      <span className="font-bold text-primary">(and get 10% off as a thank you)</span>
-                    </label>
-                  </div>
+                  <label htmlFor="research" className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-background cursor-pointer select-none">
+                     <Checkbox
+                       id="research"
+                       checked={researchChecked}
+                       onCheckedChange={(checked) => setResearchChecked(checked === true)}
+                       className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
+                     <div>
+                       <span className="block font-sans text-sm font-semibold text-foreground leading-tight">Save my quiz selections</span>
+                       <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps Teak's research for brown complexions</span>
+                     </div>
+                   </label>
+                   <label htmlFor="ai-analysis" className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-background cursor-pointer select-none">
+                     <Checkbox
+                       id="ai-analysis"
+                       checked={aiAnalysisChecked}
+                       onCheckedChange={(checked) => setAiAnalysisChecked(checked === true)}
+                       className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
+                     <div>
+                       <span className="block font-sans text-sm font-semibold text-foreground leading-tight">Analyse my skin tone with AI</span>
+                       <span className="block font-sans text-xs text-muted-foreground mt-0.5">For more accurate product recommendations</span>
+                     </div>
+                   </label>
+                   <label htmlFor="consent" className="flex items-center gap-3 p-4 rounded-2xl border border-primary/30 bg-primary/5 cursor-pointer select-none">
+                     <Checkbox
+                       id="consent"
+                       checked={consentChecked}
+                       onCheckedChange={(checked) => {
+                         setConsentChecked(checked === true);
+                         if (checked) setNoStoreChecked(false);
+                       }}
+                       className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
+                     <div>
+                       <span className="block font-sans text-sm font-semibold text-foreground leading-tight">Add my photo to Brown Skin Database</span>
+                       <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps AI work better for brown skin</span>
+                       <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded font-sans text-xs font-medium text-primary bg-primary/10">10% off as a thank you</span>
+                     </div>
+                   </label>
                   <p className="text-muted-foreground font-sans text-[10px] leading-relaxed text-center px-2">
                     <a href="https://www.thebrrownskinproject.com" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Learn more</a> about how we use data at Teak and see our{" "}
                     <a href="https://www.teakbeauty.com/privacy" target="_blank" rel="noopener noreferrer" className="underline text-foreground">Privacy Policy</a>
