@@ -730,6 +730,9 @@ const Index = () => {
               }
                 <div className="mt-5 space-y-3">
                   <h3 className="font-display text-xl text-foreground text-center">Before we continue...</h3>
+                  <p className="text-muted-foreground font-sans text-xs leading-relaxed text-center px-2">
+                    Hi! We're trying to build the best possible products and experience for people with brown skin, but to do that, we need to know what our customers look like. We would so appreciate if you'd allow us to store your selections and analyze your skin tone, and we'll promise to never sell or share your data. As a thank you, we'll share a 10% off code with you. Sincerely, Nupoora &amp; Pooja, co-founders
+                  </p>
                   <div className="flex items-start gap-3">
                     <Checkbox
                     id="research"
