@@ -749,7 +749,7 @@ const Index = () => {
                        onCheckedChange={(checked) => setAiAnalysisChecked(checked === true)}
                        className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
                      <div>
-                       <span className="block font-display text-sm text-foreground leading-tight">Analyse my skin tone with AI</span>
+                       <span className="block font-display text-sm font-bold text-foreground leading-tight">Analyse my skin tone with AI</span>
                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">For more accurate product recommendations</span>
                      </div>
                    </label>
