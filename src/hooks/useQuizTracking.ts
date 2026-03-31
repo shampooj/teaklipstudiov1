@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import posthog from "posthog-js";
 
 const getSessionId = (): string => {
   const key = "quiz_session_id";
