@@ -703,7 +703,27 @@ const Index = () => {
                         </p>
                       </div>
                     </div>
-                  </label> :
+                  </label>
+                <div className="mt-4 flex justify-center gap-3">
+                  <Button
+                    onClick={() => setState("lip-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    Go Back
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true });
+                      setState("uploaded");
+                    }}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    Skip <ArrowRight className="h-3 w-3" />
+                  </Button>
+                </div>
+                 :
 
               <div className="flex flex-col items-center">
                     <div className="w-80 h-80 mx-auto overflow-hidden relative">
