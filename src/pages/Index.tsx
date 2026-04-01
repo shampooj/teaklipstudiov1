@@ -983,7 +983,7 @@ const Index = () => {
             }
 
             {/* Step 2: Pick a look */}
-            {state === "uploaded" && originalImage &&
+            {state === "uploaded" &&
             <motion.div
               key="pick-look"
               initial={{ opacity: 0, y: 20 }}
