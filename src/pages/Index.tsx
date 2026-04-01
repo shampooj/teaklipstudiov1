@@ -740,8 +740,8 @@ const Index = () => {
                        onCheckedChange={(checked) => setResearchChecked(checked === true)}
                        className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
                      <div>
-                       <span className="block font-display text-sm font-bold text-foreground leading-tight">Save my quiz selections</span>
-                       <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps Teak's research for brown complexions</span>
+                        <span className="block font-display text-sm font-bold text-foreground leading-tight">Yes, you can save my quiz selections and analyze my skin tone using AI</span>
+                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">For more accurate product recommendations</span>
                      </div>
                    </label>
                    <label htmlFor="ai-analysis" className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-background cursor-pointer select-none">
