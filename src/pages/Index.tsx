@@ -1003,7 +1003,7 @@ const Index = () => {
                      The Best Shades For Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
-                  <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-2 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <div className="flex flex-col gap-6 px-2">
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
@@ -1012,8 +1012,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg snap-start flex-shrink-0"
-                          style={{ width: '200px' }}
+                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg w-full"
                         >
                           <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
