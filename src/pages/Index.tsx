@@ -1003,7 +1003,7 @@ const Index = () => {
                      The Best Shades For Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
-                  <div className="flex flex-col gap-6 px-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-2">
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
