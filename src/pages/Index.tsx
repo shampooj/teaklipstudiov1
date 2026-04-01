@@ -1000,6 +1000,7 @@ const Index = () => {
                     </p>
                   ) : null;
                 })()}
+                {(faceCropImage || originalImage) && (
                 <div className="flex items-start justify-center gap-4">
                   <div className="w-64 h-64 overflow-hidden flex-shrink-0">
                     <img
@@ -1008,6 +1009,7 @@ const Index = () => {
                       className="w-full h-full object-cover" />
                   </div>
                 </div>
+                )}
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    <label className="font-display text-lg text-foreground text-center">
                      The Best Shades For Your Complexion
