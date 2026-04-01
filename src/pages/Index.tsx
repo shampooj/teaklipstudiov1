@@ -681,6 +681,7 @@ const Index = () => {
               transition={{ duration: 0.3 }}>
               
                 {!originalImage ?
+              <>
               <label
                 onDrop={handleDrop}
                 onDragOver={(e) => e.preventDefault()}
@@ -723,7 +724,7 @@ const Index = () => {
                     Skip <ArrowRight className="h-3 w-3" />
                   </Button>
                 </div>
-                 :
+              </> :
 
               <div className="flex flex-col items-center">
                     <div className="w-80 h-80 mx-auto overflow-hidden relative">
