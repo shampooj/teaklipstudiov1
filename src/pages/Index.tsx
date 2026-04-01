@@ -755,7 +755,7 @@ const Index = () => {
                        <span className="block font-sans text-xs text-muted-foreground mt-0.5">For more accurate product recommendations</span>
                      </div>
                    </label>
-                   <div className={`rounded-2xl border ${consentChecked ? 'border-primary/30' : 'border-primary/30'} bg-primary/5 cursor-pointer select-none`}>
+                   <div className={`rounded-2xl border border-primary/30 cursor-pointer select-none`}>
                      <label htmlFor="consent" className="flex items-center gap-3 p-4 cursor-pointer">
                        <Checkbox
                          id="consent"
