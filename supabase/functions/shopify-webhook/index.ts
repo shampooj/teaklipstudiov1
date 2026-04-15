@@ -25,16 +25,23 @@ async function verifyShopifyHmac(
     key,
     new TextEncoder().encode(body)
   );
-  const computed = new TextDecoder().decode(
-    hexEncode(new Uint8Array(signature))
-  );
 
-  // Shopify sends base64-encoded HMAC
   const expectedBase64 = btoa(
     String.fromCharCode(...new Uint8Array(signature))
   );
 
   return expectedBase64 === hmacHeader;
+}
+
+/**
+ * Check if a checkout/order originated from the quiz by looking for
+ * a "quiz_session_id" cart attribute (note attribute).
+ */
+function getQuizSessionId(payload: Record<string, unknown>): string | null {
+  const noteAttributes = payload.note_attributes as Array<{ name: string; value: string }> | undefined;
+  if (!noteAttributes || !Array.isArray(noteAttributes)) return null;
+  const attr = noteAttributes.find((a) => a.name === "quiz_session_id");
+  return attr?.value || null;
 }
 
 serve(async (req) => {
@@ -52,7 +59,6 @@ serve(async (req) => {
     const hmacHeader = req.headers.get("x-shopify-hmac-sha256") || "";
     const topic = req.headers.get("x-shopify-topic") || "";
 
-    // Verify webhook signature
     const isValid = await verifyShopifyHmac(body, hmacHeader, SHOPIFY_WEBHOOK_SECRET);
     if (!isValid) {
       console.error("Invalid HMAC signature");
@@ -63,6 +69,15 @@ serve(async (req) => {
     }
 
     const payload = JSON.parse(body);
+
+    // Only track checkout/order events that originated from the quiz
+    const quizSessionId = getQuizSessionId(payload);
+    if (!quizSessionId) {
+      console.log(`Skipping ${topic} for ${payload.id} — no quiz_session_id attribute`);
+      return new Response(JSON.stringify({ ok: true, skipped: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -101,11 +116,8 @@ serve(async (req) => {
       });
     }
 
-    // Use a dedicated session_id for webhook events (based on checkout/order id)
-    const sessionId = `shopify-${payload.id}`;
-
     const { error } = await supabase.from("quiz_events").insert({
-      session_id: sessionId,
+      session_id: quizSessionId,
       event_name: eventName,
       event_data: eventData,
     });
@@ -115,7 +127,7 @@ serve(async (req) => {
       throw error;
     }
 
-    console.log(`Logged ${eventName} for ${payload.id}`);
+    console.log(`Logged ${eventName} for ${payload.id} (quiz session: ${quizSessionId})`);
 
     return new Response(JSON.stringify({ ok: true }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

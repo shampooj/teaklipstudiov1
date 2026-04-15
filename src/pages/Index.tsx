@@ -419,7 +419,7 @@ const Index = () => {
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
 
-  const { trackEvent } = useQuizTracking();
+  const { trackEvent, sessionId } = useQuizTracking();
 
   const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
@@ -1081,7 +1081,8 @@ const Index = () => {
                                 window.top?.postMessage({
                                   type: "cart-add",
                                   variantId: parseInt(rec.variantId),
-                                  quantity: 1
+                                  quantity: 1,
+                                  quizSessionId: sessionId
                                 }, "*");
                                 const success = await cartPromise;
                                 if (success) {
