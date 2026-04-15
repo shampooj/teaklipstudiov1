@@ -740,7 +740,7 @@ const Index = () => {
                        onCheckedChange={(checked) => setResearchChecked(checked === true)}
                        className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
                      <div>
-                         <span className="block font-display text-sm font-bold text-foreground leading-tight">Yes, you can save my quiz selections and analyze my skin tone using AI</span>
+                         <span className="block font-display text-sm font-bold text-foreground leading-tight">Yes, you can save my quiz selections and analyze my skintone using AI</span>
                       </div>
                     </label>
                    <div className={`rounded-2xl border border-primary/30 cursor-pointer select-none`}>
