@@ -1007,7 +1007,7 @@ const Index = () => {
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
-                      const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}` : "#";
+                      const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
                       const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
                       return (
                         <div

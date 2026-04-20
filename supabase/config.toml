@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.shopify-oauth-callback]
 verify_jwt = false
+
+[functions.track-product-page-event]
+verify_jwt = false
