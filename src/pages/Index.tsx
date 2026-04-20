@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
+import { shopifyImg } from "@/lib/shopifyImg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Copy } from "lucide-react";
