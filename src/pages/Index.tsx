@@ -1017,11 +1017,7 @@ const Index = () => {
                           <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
                             {rec.categoryLabel}
                           </span>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => {
-                            const payload = { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle };
-                            trackEvent("product_clicked", payload);
-                            trackEvent("add_to_cart_via_product_page", payload);
-                          }}>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
                               {img?.imageUrl ? (
                                 <>
@@ -1048,11 +1044,7 @@ const Index = () => {
                               )}
                             </div>
                           </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => {
-                            const payload = { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle };
-                            trackEvent("product_clicked", payload);
-                            trackEvent("add_to_cart_via_product_page", payload);
-                          }}>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
