@@ -1044,11 +1044,7 @@ const Index = () => {
                               )}
                             </div>
                           </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => {
-                            const payload = { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle };
-                            trackEvent("product_clicked", payload);
-                            trackEvent("add_to_cart_via_product_page", payload);
-                          }}>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
