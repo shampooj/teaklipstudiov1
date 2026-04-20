@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
+import { shopifyImg } from "@/lib/shopifyImg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Copy } from "lucide-react";
@@ -1022,14 +1023,26 @@ const Index = () => {
                               {img?.imageUrl ? (
                                 <>
                                   <img
-                                    src={img.imageUrl}
+                                    src={shopifyImg(img.imageUrl, 400)}
+                                    srcSet={`${shopifyImg(img.imageUrl, 400)} 1x, ${shopifyImg(img.imageUrl, 800)} 2x`}
+                                    sizes="(max-width: 640px) 50vw, 240px"
                                     alt={rec.label}
+                                    loading={i < 2 ? "eager" : "lazy"}
+                                    decoding="async"
+                                    width={400}
+                                    height={533}
                                     className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
                                   />
                                   {skinImage && (
                                     <img
-                                      src={skinImage.url}
+                                      src={shopifyImg(skinImage.url, 400)}
+                                      srcSet={`${shopifyImg(skinImage.url, 400)} 1x, ${shopifyImg(skinImage.url, 800)} 2x`}
+                                      sizes="(max-width: 640px) 50vw, 240px"
                                       alt={skinImage.altText || `${rec.label} on skin`}
+                                      loading="lazy"
+                                      decoding="async"
+                                      width={400}
+                                      height={533}
                                       className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                                     />
                                   )}
