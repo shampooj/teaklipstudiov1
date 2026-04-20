@@ -1066,6 +1066,8 @@ const Index = () => {
                             onClick={async (e) => {
                               e.stopPropagation();
                               setCartStates((prev) => ({ ...prev, [rec.variantId]: "adding" }));
+                              // Track intent immediately so funnel works even if parent cart write fails (e.g. incognito)
+                              trackEvent("add_to_cart", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
                               try {
                                 const cartPromise = new Promise<boolean>((resolve) => {
                                   const timeout = setTimeout(() => resolve(false), 5000);
@@ -1085,11 +1087,12 @@ const Index = () => {
                                   quizSessionId: sessionId
                                 }, "*");
                                 const success = await cartPromise;
-                                if (success) {
-                                  trackEvent("add_to_cart", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
+                                if (!success) {
+                                  trackEvent("add_to_cart_failed", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, reason: "no_response_or_error" });
                                 }
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: success ? "added" : "error" }));
-                              } catch {
+                              } catch (err) {
+                                trackEvent("add_to_cart_failed", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, reason: "exception" });
                                 setCartStates((prev) => ({ ...prev, [rec.variantId]: "error" }));
                               }
                             }}
