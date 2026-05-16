@@ -711,7 +711,7 @@ const Index = () => {
                         <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-xl text-foreground">
-                            Try it on your selfie
+                            Upload a selfie
                           </p>
                           <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                             Drag & drop or click to upload
@@ -743,7 +743,7 @@ const Index = () => {
                       <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                       <div>
                         <p className="font-display text-xl text-foreground">
-                          See it on a model like me
+                          See lipsticks on a model instead
                         </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                           Skip the selfie
