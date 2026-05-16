@@ -412,7 +412,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data">("labeling");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades">("labeling");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
