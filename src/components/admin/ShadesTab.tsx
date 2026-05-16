@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_DETAILS } from "@/data/lipstickRecommendations";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Pencil } from "lucide-react";
-import BanubaPreviewModal from "./BanubaPreviewModal";
+import { Pencil, X } from "lucide-react";
+import BanubaInlinePreview from "./BanubaInlinePreview";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-medium-brown.webp";
@@ -187,7 +187,8 @@ const ShadesTab = () => {
                       ? "overlay"
                       : "multiply";
                   return (
-                    <tr key={t.id} className="border-t border-border">
+                    <Fragment key={t.id}>
+                    <tr className="border-t border-border">
                       <td className="py-2 pr-3">
                         <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border bg-muted">
                           <img
@@ -277,15 +278,35 @@ const ShadesTab = () => {
                       <td className="py-2 pr-3">
                         <button
                           type="button"
-                          onClick={() => setPreviewTone(t)}
+                          onClick={() =>
+                            setPreviewTone((cur) => (cur?.id === t.id ? null : t))
+                          }
                           className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors"
                           aria-label={`Preview ${t.label} with Banuba`}
-                          title="Preview with Banuba"
+                          title={previewTone?.id === t.id ? "Close preview" : "Preview with Banuba"}
                         >
-                          <Pencil className="w-3.5 h-3.5" />
+                          {previewTone?.id === t.id ? (
+                            <X className="w-3.5 h-3.5" />
+                          ) : (
+                            <Pencil className="w-3.5 h-3.5" />
+                          )}
                         </button>
                       </td>
                     </tr>
+                    {previewTone?.id === t.id && (
+                      <tr key={`${t.id}-preview`} className="bg-muted/30">
+                        <td colSpan={6} className="py-4 px-3">
+                          <BanubaInlinePreview
+                            lipToneLabel={t.label}
+                            lipToneImage={t.image}
+                            hex={row.hex}
+                            finish={row.finish}
+                            opacity={row.opacity}
+                          />
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                   );
                 })}
               </tbody>
@@ -293,18 +314,6 @@ const ShadesTab = () => {
           </div>
         )}
       </div>
-
-      {previewTone && rows[previewTone.id] && (
-        <BanubaPreviewModal
-          open={!!previewTone}
-          onClose={() => setPreviewTone(null)}
-          lipToneLabel={previewTone.label}
-          lipToneImage={previewTone.image}
-          hex={rows[previewTone.id].hex}
-          finish={rows[previewTone.id].finish}
-          opacity={rows[previewTone.id].opacity}
-        />
-      )}
     </div>
   );
 };
