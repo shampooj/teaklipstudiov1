@@ -980,6 +980,8 @@ const Dashboard = () => {
           </>
         )}
 
+        {activeTab === "shades" && <ShadesTab />}
+
         {activeTab === "data" && (
           <>
             <h2 className="text-xl" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>Admin Categorization of Customer Submissions</h2>
