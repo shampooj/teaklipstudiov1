@@ -419,6 +419,7 @@ const Index = () => {
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { trackEvent, sessionId } = useQuizTracking();
 
@@ -695,27 +696,38 @@ const Index = () => {
                 {!originalImage ?
               <>
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-4 md:gap-6">
-                  <label
-                    onDrop={handleDrop}
-                    onDragOver={(e) => e.preventDefault()}
-                    className="group relative flex cursor-pointer border border-border bg-background p-8 sm:p-10 text-center transition-all duration-300 hover:border-foreground/40">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleInputChange} />
-                    <div className="m-auto flex flex-col items-center gap-6">
-                      <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      <div>
-                        <p className="font-display text-xl text-foreground">
-                          Try it on your selfie
-                        </p>
-                        <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                          Drag & drop or click to upload
-                        </p>
+                  <div className="flex flex-col border border-border bg-background transition-all duration-300 hover:border-foreground/40">
+                    <div
+                      onDrop={handleDrop}
+                      onDragOver={(e) => e.preventDefault()}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="group relative flex flex-1 cursor-pointer p-8 sm:p-10 text-center">
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleInputChange} />
+                      <div className="m-auto flex flex-col items-center gap-6">
+                        <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                        <div>
+                          <p className="font-display text-xl text-foreground">
+                            Try it on your selfie
+                          </p>
+                          <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
+                            Drag & drop or click to upload
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </label>
+                    <div className="px-4 pb-4 text-center">
+                      <p className="text-xs text-muted-foreground font-sans">
+                        <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
+                        {" \u00B7 "}
+                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                      </p>
+                    </div>
+                  </div>
 
                   <div className="flex items-center justify-center">
                     <span className="font-display text-lg text-muted-foreground uppercase tracking-widest">or</span>
@@ -812,11 +824,6 @@ const Index = () => {
                      }
                    </div>
                  </div>}
-                 <p className="text-center text-xs text-muted-foreground mt-3 font-sans">
-                   <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
-                   {" · "}
-                   <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
-                 </p>
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
                     onClick={() => setState("lip-tone")}
