@@ -786,7 +786,7 @@ const Index = () => {
                           }}
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block font-display text-[15px] text-foreground leading-snug">
-                          Save my quiz selections and photo to help AI work better for brown skin and get a 10% off discount code in return
+                          Save my selections and photo to help AI work better for brown skin and get a 10% off discount code in return
                         </span>
                       </label>
                       <div className="mt-5 ml-8">
