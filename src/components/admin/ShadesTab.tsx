@@ -297,13 +297,15 @@ const ShadesTab = () => {
                     {previewTone?.id === t.id && (
                       <tr key={`${t.id}-preview`} className="bg-muted/30">
                         <td colSpan={6} className="py-4 px-3">
-                          <BanubaInlinePreview
-                            lipToneLabel={t.label}
-                            lipToneImage={t.image}
-                            hex={row.hex}
-                            finish={row.finish}
-                            opacity={row.opacity}
-                          />
+                          <ErrorBoundary>
+                            <BanubaInlinePreview
+                              lipToneLabel={t.label}
+                              lipToneImage={t.image}
+                              hex={row.hex}
+                              finish={row.finish}
+                              opacity={row.opacity}
+                            />
+                          </ErrorBoundary>
                         </td>
                       </tr>
                     )}
