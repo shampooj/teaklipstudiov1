@@ -306,7 +306,7 @@ const ShadesTab = () => {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                   );
                 })}
               </tbody>
