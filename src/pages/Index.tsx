@@ -819,17 +819,7 @@ const Index = () => {
                   <ArrowLeft className="h-3 w-3" /> Go Back
                 </Button>
 
-                {!originalImage ? (
-                  <Button
-                    onClick={() => {
-                      trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true });
-                      setState("uploaded");
-                    }}
-                    size="lg"
-                    className="font-sans text-[9px] uppercase gap-2 bg-foreground text-background hover:bg-foreground/90">
-                    See Results <ArrowRight className="h-3 w-3" />
-                  </Button>
-                ) : originalImage && (
+{originalImage && (
                 <Button
                   onClick={async () => {
                     const trimmedEmail = userEmail.trim();
