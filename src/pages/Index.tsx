@@ -792,6 +792,7 @@ const Index = () => {
                           <div className="flex items-start justify-between gap-3">
                             <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections and photo to help AI work better for brown skin</span>
                             <span className="shrink-0 inline-flex items-center px-2 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20">10% off</span>
+                          </div>
                         </div>
                       </label>
                       {consentChecked && (
