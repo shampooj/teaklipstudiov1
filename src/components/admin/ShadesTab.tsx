@@ -165,6 +165,7 @@ const ShadesTab = () => {
             <table className="w-full text-[10px]">
               <thead>
                 <tr className="text-left text-muted-foreground uppercase tracking-widest text-[9px]">
+                  <th className="py-2 pr-3 font-normal w-20">Preview</th>
                   <th className="py-2 pr-3 font-normal">Lip Tone</th>
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
@@ -175,8 +176,41 @@ const ShadesTab = () => {
                 {LIP_TONES.map((t) => {
                   const row = rows[t.id];
                   if (!row) return null;
+                  const blend =
+                    row.finish === "matte"
+                      ? "multiply"
+                      : row.finish === "glossy"
+                      ? "overlay"
+                      : "multiply";
                   return (
                     <tr key={t.id} className="border-t border-border">
+                      <td className="py-2 pr-3">
+                        <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border bg-muted">
+                          <img
+                            src={t.image}
+                            alt={t.label}
+                            className="absolute inset-0 w-full h-full object-cover"
+                          />
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              backgroundColor: row.hex,
+                              opacity: row.opacity,
+                              mixBlendMode: blend as any,
+                            }}
+                          />
+                          {row.finish === "glossy" && (
+                            <div
+                              className="absolute inset-0 pointer-events-none"
+                              style={{
+                                background:
+                                  "linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%)",
+                                mixBlendMode: "screen",
+                              }}
+                            />
+                          )}
+                        </div>
+                      </td>
                       <td className="py-2 pr-3 font-medium">{t.label}</td>
                       <td className="py-2 pr-3">
                         <div className="flex items-center gap-2">
