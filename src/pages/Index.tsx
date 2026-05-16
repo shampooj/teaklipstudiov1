@@ -816,6 +816,10 @@ const Index = () => {
                       </label>
                       {consentChecked && (
                         <div className="px-4 pb-4 pt-0 ml-8">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                            <span className="font-sans text-[10px] uppercase tracking-wider text-primary font-medium">Enter your email to receive your 10% discount code</span>
+                          </div>
                           <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase tracking-wider mb-1.5">
                             Email address
                           </label>
@@ -826,7 +830,7 @@ const Index = () => {
                             value={userEmail}
                             onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
                             className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans focus:outline-none focus:ring-1 focus:ring-foreground/40`} />
-                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
+                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to receive your discount code.</p>}
                         </div>
                       )}
                     </div>
