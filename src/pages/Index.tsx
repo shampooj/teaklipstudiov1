@@ -708,10 +708,10 @@ const Index = () => {
                       <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                       <div>
                         <p className="font-display text-xl text-foreground">
-                          Add a selfie to see how our lipsticks look on you
+                          Try it on your selfie
                         </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                          or click to browse · JPG, PNG up to 15MB
+                          Drag & drop or click to upload
                         </p>
                       </div>
                     </div>
@@ -732,7 +732,7 @@ const Index = () => {
                       <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                       <div>
                         <p className="font-display text-xl text-foreground">
-                          See how they look on someone who looks similar to me instead
+                          See it on a model like me
                         </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                           Skip the selfie
