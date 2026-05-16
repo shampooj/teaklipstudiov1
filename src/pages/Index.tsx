@@ -411,8 +411,7 @@ const Index = () => {
   const [croppingFace, setCroppingFace] = useState(false);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
-   const [researchChecked, setResearchChecked] = useState(false);
-   const [consentChecked, setConsentChecked] = useState(false);
+  const [consentChecked, setConsentChecked] = useState(false);
    const [noStoreChecked, setNoStoreChecked] = useState(false);
    
   const [userEmail, setUserEmail] = useState("");
@@ -784,18 +783,6 @@ const Index = () => {
                   </div>
 
                   <div className="space-y-3">
-                    <label htmlFor="research" className="flex items-start gap-3 p-4 border border-border bg-background cursor-pointer select-none transition-colors hover:border-foreground/40">
-                      <Checkbox
-                        id="research"
-                        checked={researchChecked}
-                        onCheckedChange={(checked) => setResearchChecked(checked === true)}
-                        className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
-                      <div>
-                        <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections</span>
-                        <span className="block font-sans text-xs text-muted-foreground mt-1">Lets us analyze your skintone with AI</span>
-                      </div>
-                    </label>
-
                     <div className="border border-primary/40 bg-primary/5 select-none transition-colors hover:border-primary/60">
                       <label htmlFor="consent" className="flex items-start gap-3 p-4 cursor-pointer">
                         <Checkbox
@@ -808,7 +795,7 @@ const Index = () => {
                           className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
                         <div className="flex-1">
                           <div className="flex items-start justify-between gap-3">
-                            <span className="block font-display text-base text-foreground leading-snug">Add my photo to Teak's Brown Skin Database</span>
+                            <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections and photo to help AI work better for brown skin</span>
                             <span className="shrink-0 inline-flex items-center px-2 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20">10% off</span>
                           </div>
                           <span className="block font-sans text-xs text-muted-foreground mt-1">Helps our AI work better for brown skin</span>
@@ -914,7 +901,7 @@ const Index = () => {
                           });
 
                           if (!insertError) {
-                            if (submissionId && researchChecked) {
+                            if (submissionId) {
                               const c = document.createElement("canvas");
                               c.width = Math.min(img.width, 1024);
                               c.height = Math.round(img.height * (c.width / img.width));
@@ -933,16 +920,14 @@ const Index = () => {
                         }
                       })();
 
-                    // Save quiz selections (skin/lip tone) if research checkbox is checked
-                    if (researchChecked) {
-                      supabase.rpc("insert_customer_submission" as any, {
-                        p_variant_id: "research-selections",
-                        p_skin_tone: skinTone,
-                        p_lip_tone: lipTone,
-                      }).then(({ error }: any) => {
-                        if (error) console.error("Failed to save research selections:", error);
-                      });
-                    }
+                    // Save quiz selections when consent is given
+                    supabase.rpc("insert_customer_submission" as any, {
+                      p_variant_id: "research-selections",
+                      p_skin_tone: skinTone,
+                      p_lip_tone: lipTone,
+                    }).then(({ error }: any) => {
+                      if (error) console.error("Failed to save research selections:", error);
+                    });
 
                       // Await discount creation from Shopify — only show code if confirmed
                       try {
