@@ -986,8 +986,8 @@ const Index = () => {
                   
                       Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
-                }
-                </div>
+                )}
+              </div>
               </motion.div>
             }
 
