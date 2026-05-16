@@ -11,20 +11,32 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import lipBeige from "@/assets/lip-beige.webp";
+import lipBrightPink from "@/assets/lip-bright-pink.webp";
+import lipMediumBrown from "@/assets/lip-medium-brown.webp";
+import lipDeepBrown from "@/assets/lip-deep-brown.webp";
+import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
+import lipNeutralBrown from "@/assets/lip-neutral-brown.webp";
+import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
+import lipMauvePink from "@/assets/lip-mauve-pink.webp";
+import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.webp";
+import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
+import lipBrownPink from "@/assets/lip-brown-pink.webp";
+import lipGreyBrown from "@/assets/lip-grey-brown.webp";
 
 const LIP_TONES = [
-  { id: "bright-pink", label: "Bright Pink" },
-  { id: "brown-pink", label: "Brown Pink" },
-  { id: "mauve-pink", label: "Mauve Pink" },
-  { id: "beige", label: "Beige" },
-  { id: "two-toned-purple", label: "Two-Toned Purple" },
-  { id: "two-toned-brown", label: "Two-Toned Brown" },
-  { id: "two-toned-grey", label: "Two-Toned Grey" },
-  { id: "two-toned-beige", label: "Two-Toned Beige" },
-  { id: "neutral-brown", label: "Neutral Brown" },
-  { id: "medium-brown", label: "Medium Brown" },
-  { id: "deep-brown", label: "Deep Brown" },
-  { id: "grey-brown", label: "Grey Brown" },
+  { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
+  { id: "brown-pink", label: "Brown Pink", image: lipBrownPink },
+  { id: "mauve-pink", label: "Mauve Pink", image: lipMauvePink },
+  { id: "beige", label: "Beige", image: lipBeige },
+  { id: "two-toned-purple", label: "Two-Toned Purple", image: lipTwoTonedPurple },
+  { id: "two-toned-brown", label: "Two-Toned Brown", image: lipTwoTonedBrown },
+  { id: "two-toned-grey", label: "Two-Toned Grey", image: lipTwoTonedGrey },
+  { id: "two-toned-beige", label: "Two-Toned Beige", image: lipTwoTonedBeige },
+  { id: "neutral-brown", label: "Neutral Brown", image: lipNeutralBrown },
+  { id: "medium-brown", label: "Medium Brown", image: lipMediumBrown },
+  { id: "deep-brown", label: "Deep Brown", image: lipDeepBrown },
+  { id: "grey-brown", label: "Grey Brown", image: lipGreyBrown },
 ] as const;
 
 const FINISHES = ["matte", "satin", "glossy"] as const;
