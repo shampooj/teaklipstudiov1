@@ -11,6 +11,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
+import BanubaPreviewModal from "./BanubaPreviewModal";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-medium-brown.webp";
@@ -60,6 +62,7 @@ const ShadesTab = () => {
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -170,6 +173,7 @@ const ShadesTab = () => {
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
                   <th className="py-2 pr-3 font-normal w-44">Opacity</th>
+                  <th className="py-2 pr-3 font-normal w-12"></th>
                 </tr>
               </thead>
               <tbody>
@@ -270,6 +274,17 @@ const ShadesTab = () => {
                           />
                         </div>
                       </td>
+                      <td className="py-2 pr-3">
+                        <button
+                          type="button"
+                          onClick={() => setPreviewTone(t)}
+                          className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors"
+                          aria-label={`Preview ${t.label} with Banuba`}
+                          title="Preview with Banuba"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}
@@ -278,6 +293,18 @@ const ShadesTab = () => {
           </div>
         )}
       </div>
+
+      {previewTone && rows[previewTone.id] && (
+        <BanubaPreviewModal
+          open={!!previewTone}
+          onClose={() => setPreviewTone(null)}
+          lipToneLabel={previewTone.label}
+          lipToneImage={previewTone.image}
+          hex={rows[previewTone.id].hex}
+          finish={rows[previewTone.id].finish}
+          opacity={rows[previewTone.id].opacity}
+        />
+      )}
     </div>
   );
 };
