@@ -777,9 +777,9 @@ const Index = () => {
               {faceCropImage && (
                   <div className="mt-6 max-w-md mx-auto">
 
-                  <div className="space-y-3">
-                    <div className="border border-primary/40 bg-primary/5 select-none transition-colors hover:border-primary/60">
-                      <label htmlFor="consent" className="flex items-start gap-3 p-4 cursor-pointer">
+                  <div className="border-t border-foreground/10 pt-6">
+                    <div className="select-none">
+                      <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                         <Checkbox
                           id="consent"
                           checked={consentChecked}
@@ -787,22 +787,20 @@ const Index = () => {
                             setConsentChecked(checked === true);
                             if (checked) setNoStoreChecked(false);
                           }}
-                          className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
-                        <div className="flex-1">
-                          <div className="flex items-start justify-between gap-3">
-                            <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections and photo to help AI work better for brown skin</span>
-                            <span className="shrink-0 inline-flex items-center justify-center flex-wrap px-2 py-1 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 max-w-[70px] leading-tight text-center">Get 10% off discount code</span>
-                          </div>
+                          className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
+                        <div className="flex-1 flex items-start justify-between gap-4">
+                          <span className="block font-display text-[15px] text-foreground leading-snug">
+                            Save my quiz selections and photo to help AI work better for brown skin
+                          </span>
+                          <span className="shrink-0 font-sans text-[9px] uppercase tracking-[0.18em] text-foreground/70 leading-[1.5] text-right">
+                            Get 10%<br />off discount<br />code
+                          </span>
                         </div>
                       </label>
                       {consentChecked && (
-                        <div className="px-4 pb-4 pt-0 ml-8">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-                            <span className="font-sans text-[10px] uppercase tracking-wider text-primary font-medium">Enter your email to receive your 10% discount code</span>
-                          </div>
-                          <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase tracking-wider mb-1.5">
-                            Email address
+                        <div className="mt-5 ml-8">
+                          <label htmlFor="user-email" className="block text-foreground/60 font-sans text-[9px] uppercase tracking-[0.2em] mb-2">
+                            Email for your discount code
                           </label>
                           <input
                             id="user-email"
@@ -810,8 +808,8 @@ const Index = () => {
                             placeholder="you@example.com"
                             value={userEmail}
                             onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                            className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans focus:outline-none focus:ring-1 focus:ring-foreground/40`} />
-                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to receive your discount code.</p>}
+                            className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-sm font-sans placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                          {emailError && <p className="text-destructive text-[10px] font-sans mt-2">Please enter your email address to receive your discount code.</p>}
                         </div>
                       )}
                     </div>
