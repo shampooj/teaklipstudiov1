@@ -62,6 +62,7 @@ const ShadesTab = () => {
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
 
   const fetchSettings = async () => {
     setLoading(true);
