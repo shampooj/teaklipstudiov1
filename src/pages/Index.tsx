@@ -745,9 +745,6 @@ const Index = () => {
                         <p className="font-display text-xl text-foreground">
                           See lipsticks on a model instead
                         </p>
-                        <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                          Skip the selfie
-                        </p>
                       </div>
                     </div>
                   </button>
