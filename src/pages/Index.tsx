@@ -732,7 +732,7 @@ const Index = () => {
                       <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
                       <div>
                         <p className="font-display text-xl text-foreground">
-                          See how they look on someone who looks similar to me instead
+                          See it on a model like me
                         </p>
                         <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
                           Skip the selfie
