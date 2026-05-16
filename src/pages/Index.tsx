@@ -794,9 +794,6 @@ const Index = () => {
                       </label>
                       {consentChecked && (
                         <div className="mt-5 ml-8">
-                          <label htmlFor="user-email" className="block text-foreground/60 font-sans text-[9px] uppercase tracking-[0.2em] mb-2">
-                            Email for your discount code
-                          </label>
                           <input
                             id="user-email"
                             type="email"
