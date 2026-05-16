@@ -788,14 +788,9 @@ const Index = () => {
                             if (checked) setNoStoreChecked(false);
                           }}
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
-                        <div className="flex-1 flex items-start justify-between gap-4">
-                          <span className="block font-display text-[15px] text-foreground leading-snug">
-                            Save my quiz selections and photo to help AI work better for brown skin
-                          </span>
-                          <span className="shrink-0 font-sans text-[9px] uppercase tracking-[0.18em] text-foreground/70 leading-[1.5] text-right">
-                            Get 10%<br />off discount<br />code
-                          </span>
-                        </div>
+                        <span className="block font-display text-[15px] text-foreground leading-snug">
+                          Save my quiz selections and photo to help AI work better for brown skin and get a 10% off discount code in return
+                        </span>
                       </label>
                       {consentChecked && (
                         <div className="mt-5 ml-8">
