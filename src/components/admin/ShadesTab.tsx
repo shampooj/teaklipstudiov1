@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, X } from "lucide-react";
 import BanubaInlinePreview from "./BanubaInlinePreview";
+import ErrorBoundary from "./ErrorBoundary";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-medium-brown.webp";
