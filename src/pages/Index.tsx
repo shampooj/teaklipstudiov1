@@ -777,18 +777,27 @@ const Index = () => {
 
               {faceCropImage && (
                 <div className="mt-6 max-w-md mx-auto">
+                  <div className="text-center mb-6">
+                    <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">One last step</p>
+                    <h3 className="font-display text-2xl text-foreground">Before we continue</h3>
+                    <div className="mt-3 mx-auto h-px w-10 bg-foreground/20" />
+                  </div>
+
                   <div className="space-y-3">
-                    <label htmlFor="research" className="flex items-center gap-3 p-4 border border-border bg-background cursor-pointer select-none transition-colors hover:border-foreground/40">
+                    <label htmlFor="research" className="flex items-start gap-3 p-4 border border-border bg-background cursor-pointer select-none transition-colors hover:border-foreground/40">
                       <Checkbox
                         id="research"
                         checked={researchChecked}
                         onCheckedChange={(checked) => setResearchChecked(checked === true)}
-                        className="shrink-0 h-5 w-5 rounded-sm border-muted-foreground/40" />
-                      <span className="font-display text-base text-foreground leading-snug">Save my selections</span>
+                        className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
+                      <div>
+                        <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections</span>
+                        <span className="block font-sans text-xs text-muted-foreground mt-1">Lets us analyze your skintone with AI</span>
+                      </div>
                     </label>
 
                     <div className="border border-primary/40 bg-primary/5 select-none transition-colors hover:border-primary/60">
-                      <label htmlFor="consent" className="flex items-center gap-3 p-4 cursor-pointer">
+                      <label htmlFor="consent" className="flex items-start gap-3 p-4 cursor-pointer">
                         <Checkbox
                           id="consent"
                           checked={consentChecked}
@@ -796,22 +805,32 @@ const Index = () => {
                             setConsentChecked(checked === true);
                             if (checked) setNoStoreChecked(false);
                           }}
-                          className="shrink-0 h-5 w-5 rounded-sm border-muted-foreground/40" />
-                        <div className="flex-1 flex items-center justify-between gap-3">
-                          <span className="font-display text-base text-foreground leading-snug">Add photo to Brown Skin Database</span>
-                          <span className="shrink-0 inline-flex items-center px-2 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20">10% off</span>
+                          className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="block font-display text-base text-foreground leading-snug">Add my photo to Teak's Brown Skin Database</span>
+                            <span className="shrink-0 inline-flex items-center px-2 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20">10% off</span>
+                          </div>
+                          <span className="block font-sans text-xs text-muted-foreground mt-1">Helps our AI work better for brown skin</span>
                         </div>
                       </label>
                       {consentChecked && (
                         <div className="px-4 pb-4 pt-0 ml-8">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+                            <span className="font-sans text-[10px] uppercase tracking-wider text-primary font-medium">Enter your email to receive your 10% discount code</span>
+                          </div>
+                          <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase tracking-wider mb-1.5">
+                            Email address
+                          </label>
                           <input
                             id="user-email"
                             type="email"
-                            placeholder="Email for your discount code"
+                            placeholder="you@example.com"
                             value={userEmail}
                             onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
                             className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans focus:outline-none focus:ring-1 focus:ring-foreground/40`} />
-                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Email required to send your discount.</p>}
+                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to receive your discount code.</p>}
                         </div>
                       )}
                     </div>
