@@ -756,30 +756,27 @@ const Index = () => {
               </> :
 
               <div className="flex flex-col items-center">
-                    <div className="w-80 h-80 mx-auto overflow-hidden relative">
-                      {croppingFace && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-                          <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
-                        </div>
-                      )}
-                      <img
+                <div className="w-80 h-80 mx-auto overflow-hidden relative">
+                  {croppingFace && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
+                      <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
+                    </div>
+                  )}
+                  <img
                     src={faceCropImage || originalImage}
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
-                  
-                    </div>
-                    <div className="mt-4 flex justify-center">
-                      <Button
-                        onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
-                        size="lg"
-                        variant="outline"
-                        className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                        Retake
-                      </Button>
-                    </div>
-                  </div>
+                </div>
+                <button
+                  onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
+                  className="mt-3 font-sans text-[9px] uppercase text-muted-foreground underline hover:text-foreground transition-colors tracking-wider">
+                  Retake
+                </button>
+              </div>
               }
-                {faceCropImage && <div className="mt-8 max-w-md mx-auto">
+
+              {faceCropImage && (
+                <div className="mt-6 max-w-md mx-auto">
                   <div className="text-center mb-6">
                     <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">One last step</p>
                     <h3 className="font-display text-2xl text-foreground">Before we continue</h3>
@@ -817,7 +814,7 @@ const Index = () => {
                           <span className="block font-sans text-xs text-muted-foreground mt-1">Helps our AI work better for brown skin</span>
                         </div>
                       </label>
-                      {consentChecked &&
+                      {consentChecked && (
                         <div className="px-4 pb-4 pt-0 ml-8">
                           <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase tracking-wider mb-1.5">
                             Email address
@@ -831,31 +828,33 @@ const Index = () => {
                             className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans focus:outline-none focus:ring-1 focus:ring-foreground/40`} />
                           {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
                         </div>
-                      }
+                      )}
                     </div>
                   </div>
-                </div>}
-                <div className="mt-6 flex justify-center gap-3">
+                </div>
+              )}
+
+              {/* Bottom action bar */}
+              <div className="mt-8 flex items-center justify-between max-w-md mx-auto w-full">
+                <Button
+                  onClick={() => setState("lip-tone")}
+                  size="lg"
+                  variant="ghost"
+                  className="font-sans text-[9px] uppercase gap-2 text-muted-foreground hover:text-foreground hover:bg-transparent">
+                  <ArrowLeft className="h-3 w-3" /> Go Back
+                </Button>
+
+                {!originalImage ? (
                   <Button
-                    onClick={() => setState("lip-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    Go Back
-                  </Button>
-                  {!originalImage && <Button
                     onClick={() => {
                       trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true });
                       setState("uploaded");
                     }}
                     size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    Skip <ArrowRight className="h-3 w-3" />
-                  </Button>}
-                </div>
-                <div className="mt-3 flex justify-center gap-3">
-                {originalImage &&
+                    className="font-sans text-[9px] uppercase gap-2 bg-foreground text-background hover:bg-foreground/90">
+                    See Results <ArrowRight className="h-3 w-3" />
+                  </Button>
+                ) : originalImage && (
                 <Button
                   onClick={async () => {
                     const trimmedEmail = userEmail.trim();
