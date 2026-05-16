@@ -293,6 +293,18 @@ const ShadesTab = () => {
           </div>
         )}
       </div>
+
+      {previewTone && rows[previewTone.id] && (
+        <BanubaPreviewModal
+          open={!!previewTone}
+          onClose={() => setPreviewTone(null)}
+          lipToneLabel={previewTone.label}
+          lipToneImage={previewTone.image}
+          hex={rows[previewTone.id].hex}
+          finish={rows[previewTone.id].finish}
+          opacity={rows[previewTone.id].opacity}
+        />
+      )}
     </div>
   );
 };
