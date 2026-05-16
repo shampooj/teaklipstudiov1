@@ -779,51 +779,62 @@ const Index = () => {
                     </div>
                   </div>
               }
-                {faceCropImage && <div className="mt-5 space-y-3">
-                  <h3 className="font-display text-xl text-foreground text-center">Great! Before we continue...</h3>
-                  <label htmlFor="research" className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-background cursor-pointer select-none">
-                     <Checkbox
-                       id="research"
-                       checked={researchChecked}
-                       onCheckedChange={(checked) => setResearchChecked(checked === true)}
-                       className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
-                     <div>
-                         <span className="block font-display text-sm font-bold text-foreground leading-tight">Yes, you can save my quiz selections and analyze my skintone using AI</span>
+                {faceCropImage && <div className="mt-8 max-w-md mx-auto">
+                  <div className="text-center mb-6">
+                    <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">One last step</p>
+                    <h3 className="font-display text-2xl text-foreground">Before we continue</h3>
+                    <div className="mt-3 mx-auto h-px w-10 bg-foreground/20" />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label htmlFor="research" className="flex items-start gap-3 p-4 border border-border bg-background cursor-pointer select-none transition-colors hover:border-foreground/40">
+                      <Checkbox
+                        id="research"
+                        checked={researchChecked}
+                        onCheckedChange={(checked) => setResearchChecked(checked === true)}
+                        className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
+                      <div>
+                        <span className="block font-display text-base text-foreground leading-snug">Save my quiz selections</span>
+                        <span className="block font-sans text-xs text-muted-foreground mt-1">Lets us analyze your skintone with AI</span>
                       </div>
                     </label>
-                   <div className={`rounded-2xl border border-primary/30 cursor-pointer select-none`}>
-                     <label htmlFor="consent" className="flex items-center gap-3 p-4 cursor-pointer">
-                       <Checkbox
-                         id="consent"
-                         checked={consentChecked}
-                         onCheckedChange={(checked) => {
-                           setConsentChecked(checked === true);
-                           if (checked) setNoStoreChecked(false);
-                         }}
-                         className="shrink-0 h-5 w-5 rounded-md border-muted-foreground/40" />
-                       <div>
-                         <span className="block font-display text-sm font-bold text-foreground leading-tight">Add my photo to Teak's Brown Skin Database</span>
-                         <span className="block font-sans text-xs text-muted-foreground mt-0.5">Helps AI work better for brown skin</span>
-                         <span className="inline-block mt-1.5 px-2.5 py-0.5 rounded font-sans text-xs font-medium text-primary bg-primary/10">10% off as a thank you</span>
-                       </div>
-                     </label>
-                     {consentChecked &&
-                       <div className="px-4 pb-4 pt-0 ml-8">
-                         <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase mb-1.5">
-                           Email address
-                         </label>
-                         <input
-                           id="user-email"
-                           type="email"
-                           placeholder="you@example.com"
-                           value={userEmail}
-                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                           className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans rounded-md focus:outline-none focus:ring-2 focus:ring-ring`} />
-                         {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
-                       </div>
-                     }
-                   </div>
-                 </div>}
+
+                    <div className="border border-primary/40 bg-primary/5 select-none transition-colors hover:border-primary/60">
+                      <label htmlFor="consent" className="flex items-start gap-3 p-4 cursor-pointer">
+                        <Checkbox
+                          id="consent"
+                          checked={consentChecked}
+                          onCheckedChange={(checked) => {
+                            setConsentChecked(checked === true);
+                            if (checked) setNoStoreChecked(false);
+                          }}
+                          className="shrink-0 h-5 w-5 mt-0.5 rounded-sm border-muted-foreground/40" />
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <span className="block font-display text-base text-foreground leading-snug">Add my photo to Teak's Brown Skin Database</span>
+                            <span className="shrink-0 inline-flex items-center px-2 py-0.5 font-sans text-[10px] font-medium uppercase tracking-wider text-primary bg-primary/10 border border-primary/20">10% off</span>
+                          </div>
+                          <span className="block font-sans text-xs text-muted-foreground mt-1">Helps our AI work better for brown skin</span>
+                        </div>
+                      </label>
+                      {consentChecked &&
+                        <div className="px-4 pb-4 pt-0 ml-8">
+                          <label htmlFor="user-email" className="block text-muted-foreground font-sans text-[10px] uppercase tracking-wider mb-1.5">
+                            Email address
+                          </label>
+                          <input
+                            id="user-email"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={userEmail}
+                            onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
+                            className={`w-full px-3 py-2 border ${emailError ? 'border-destructive ring-1 ring-destructive' : 'border-border'} bg-background text-foreground text-sm font-sans focus:outline-none focus:ring-1 focus:ring-foreground/40`} />
+                          {emailError && <p className="text-destructive text-[10px] font-sans mt-1">Please enter your email address to continue.</p>}
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>}
                 <div className="mt-6 flex justify-center gap-3">
                   <Button
                     onClick={() => setState("lip-tone")}
