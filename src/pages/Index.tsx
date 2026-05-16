@@ -789,18 +789,16 @@ const Index = () => {
                           Save my quiz selections and photo to help AI work better for brown skin and get a 10% off discount code in return
                         </span>
                       </label>
-                      {consentChecked && (
-                        <div className="mt-5 ml-8">
-                          <input
-                            id="user-email"
-                            type="email"
-                            placeholder="you@example.com"
-                            value={userEmail}
-                            onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                            className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-sm font-sans placeholder:text-foreground/30 focus:outline-none transition-colors`} />
-                          {emailError && <p className="text-destructive text-[10px] font-sans mt-2">Please enter your email address to receive your discount code.</p>}
-                        </div>
-                      )}
+                      <div className="mt-5 ml-8">
+                        <input
+                          id="user-email"
+                          type="email"
+                          placeholder="you@example.com"
+                          value={userEmail}
+                          onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
+                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-sm font-sans placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                        {emailError && <p className="text-destructive text-[10px] font-sans mt-2">Please enter your email address to receive your discount code.</p>}
+                      </div>
                     </div>
                   </div>
                 </div>
