@@ -187,6 +187,7 @@ const ShadesTab = () => {
                       ? "overlay"
                       : "multiply";
                   return (
+                    <>
                     <tr key={t.id} className="border-t border-border">
                       <td className="py-2 pr-3">
                         <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border bg-muted">
