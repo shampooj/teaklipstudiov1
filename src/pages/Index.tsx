@@ -558,6 +558,17 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
         <div className="w-full max-w-2xl">
+          {(state === "skin-tone" || state === "lip-tone") && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-center mb-8">
+              <p className="font-display text-xl md:text-2xl text-foreground leading-snug">
+                Get personalized shade recommendations and see how our lipsticks might look on you
+              </p>
+            </motion.div>
+          )}
           <AnimatePresence mode="wait">
             {/* Step 1: Skin Tone */}
             {state === "skin-tone" &&
