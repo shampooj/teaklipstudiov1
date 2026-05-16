@@ -775,12 +775,7 @@ const Index = () => {
               }
 
               {faceCropImage && (
-                <div className="mt-6 max-w-md mx-auto">
-                  <div className="text-center mb-6">
-                    <p className="font-sans text-[9px] uppercase tracking-[0.2em] text-muted-foreground mb-2">One last step</p>
-                    <h3 className="font-display text-2xl text-foreground">Before we continue</h3>
-                    <div className="mt-3 mx-auto h-px w-10 bg-foreground/20" />
-                  </div>
+                  <div className="mt-6 max-w-md mx-auto">
 
                   <div className="space-y-3">
                     <div className="border border-primary/40 bg-primary/5 select-none transition-colors hover:border-primary/60">
