@@ -565,7 +565,7 @@ const Index = () => {
               transition={{ delay: 0.1 }}
               className="text-center mb-8">
               <p className="font-display text-xl md:text-2xl text-foreground leading-snug">
-                Get personalized shade recommendations and see how our lipsticks might look on you
+                Add a selfie to see how our lipsticks look on you
               </p>
             </motion.div>
           )}
