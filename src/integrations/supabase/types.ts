@@ -141,6 +141,39 @@ export type Database = {
         }
         Relationships: []
       }
+      lipstick_shade_settings: {
+        Row: {
+          finish: string
+          hex: string
+          id: string
+          lip_tone: string
+          opacity: number
+          updated_at: string
+          updated_by_user_id: string | null
+          variant_name: string
+        }
+        Insert: {
+          finish?: string
+          hex?: string
+          id?: string
+          lip_tone: string
+          opacity?: number
+          updated_at?: string
+          updated_by_user_id?: string | null
+          variant_name: string
+        }
+        Update: {
+          finish?: string
+          hex?: string
+          id?: string
+          lip_tone?: string
+          opacity?: number
+          updated_at?: string
+          updated_by_user_id?: string | null
+          variant_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string | null
