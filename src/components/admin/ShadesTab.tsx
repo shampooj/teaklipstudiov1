@@ -173,6 +173,7 @@ const ShadesTab = () => {
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
                   <th className="py-2 pr-3 font-normal w-44">Opacity</th>
+                  <th className="py-2 pr-3 font-normal w-12"></th>
                 </tr>
               </thead>
               <tbody>
