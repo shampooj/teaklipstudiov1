@@ -462,8 +462,15 @@ const Dashboard = () => {
             >
               Data
             </button>
+            <button
+              onClick={() => setActiveTab("shades")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "shades" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Shades
+            </button>
           </div>
         </div>
+
 
 
         {activeTab === "dashboard" && (
