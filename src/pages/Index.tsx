@@ -558,7 +558,7 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-1 flex items-start justify-center px-4 pb-16">
         <div className="w-full max-w-2xl">
-          {(state === "skin-tone" || state === "lip-tone") && (
+          {state === "skin-tone" && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
