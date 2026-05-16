@@ -419,6 +419,7 @@ const Index = () => {
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { trackEvent, sessionId } = useQuizTracking();
 
