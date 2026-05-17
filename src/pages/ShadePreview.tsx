@@ -43,7 +43,7 @@ function buildBaseEffectZip() {
   const archive = zipSync({
     "config.json": strToU8(JSON.stringify(baseCfg, null, 2)),
   });
-  return new Blob([archive], { type: "application/zip" });
+  return new Blob([archive.buffer as ArrayBuffer], { type: "application/zip" });
 }
 
 const ShadePreview = () => {
