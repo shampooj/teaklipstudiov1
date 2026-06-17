@@ -60,6 +60,13 @@ const ShadePreview = () => {
 
     (async () => {
       try {
+        setStatus("Fetching token…");
+        const { data: tokenData, error: tokenErr } = await supabase.functions.invoke("get-banuba-token");
+        if (tokenErr || !tokenData?.token) {
+          throw new Error(tokenErr?.message || "Failed to load Banuba token");
+        }
+        const clientToken = tokenData.token as string;
+
         setStatus("Loading SDK…");
         const sdk: any = await import(
           /* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`
@@ -70,7 +77,7 @@ const ShadePreview = () => {
 
         setStatus("Creating player…");
         player = await Player.create({
-          clientToken: BANUBA_TOKEN,
+          clientToken,
           locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
           logger: console,
         });
