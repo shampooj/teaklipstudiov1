@@ -9,9 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-
-const BANUBA_TOKEN =
-  "Qk5CIC0TofGjwjnEo2vf4j5OtFU087m3QSHlZxbLuWJ9VvpOYui4FvJoe2x/8AqD/uaNvuRLQ22451Kg1GTDxAvG1J1ege5jCQgsbOjgB6koj/TydRQ3eqNL3Y+ljOu8QbwkvP4bEggc2ioFb3RgptrPFPhf1tPZTXyVtfvtJAYhO9spIC39XRyg8UlGabs0pcjDXAnu6cqokBy2KeKDdRgoprsOvJwWOgYiFNdHTDXiSbge2ve1dVD4n3mf/4iDT9xdpZEQXY0HKwFWt4CmYcmuX8YR8yNoxyiggjhuiZINFubaILxrj/NClpukG6JQqtnijqex+ZQRjBHdS4nTE11WS34L2ozhrVmr0xq0Xtf1xkXDKjWfZw68otpP3m6JCntqjJ+4EMs9IXKX2NoULPxC9C3pVfHwdkDzufgrYDW4o/y+OvwDlvBY96bCdH2OHVo1X3QOIimAVUDpL21OW1Fo02U7mSD438wuefrMHoXr4zd6ReDN6P2dC5F/1xyC+cEj9t8qdxZFZrb+Epo5k5M/bu+QJpS5HFmQdcfpu+oopmpQBsgl8++F3uUmU/PwFAZ3ItdsgsMQuOGs8RqGtrpGDAEvA5k/8GWs8trBBdpZ+mi2E4NOIb+odXujoQtMHSnOYqange9QjJreLLGHIlV+e0xFn9LHhOXZeOmIn5FTIUUqfOIxA2pz5sip9onk5pbc+nbUIKeh//PwMc5zoH0S4y2uiE1t406/ECnyDpPJK3VVeMkGezdg720K3NtDTwERXWGjDiMe6dWLpmb/DZMYFUh5D74CvRmafmv1hIze10pQ3ipzyXs1mk1QkGj60zUYe5mzvTIXqZKtG69DmiEl775Vdx2BD00mNwRzaWBGiIeCLGvn379j1+9mcd/DZClUIElOdSH+EFM3GzOTsAdjfwMxgzhNcs1R9nulhEZWjyroI5PqrNEPv6gMa7tva5Kfm16QbqSQTl960tO5OSQlGW9bfz4HRgkTOUvNKvC+DoSr2nSVCd2PbFx6ZcMhhee+EnD1utIVxeke2qsrx/5I6zooavBn5HbfJxRuixr+4OMvFpa10BSuqtG73pAyua3LCoPwCuI7tN0BoGIjGvK8z/x99rrDAAzuIvSuSN/B8jQe7/gq53GFmr9TJIRO2dsKA0dkKIXyxB0+iQegfA7pRQrISEqMztuNzh7cJ8D6B8HJpmcJZ0HVbY91QA==";
+import { supabase } from "@/integrations/supabase/client";
 
 const SDK_BASE = "/banuba";
 const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
@@ -62,6 +60,13 @@ const ShadePreview = () => {
 
     (async () => {
       try {
+        setStatus("Fetching token…");
+        const { data: tokenData, error: tokenErr } = await supabase.functions.invoke("get-banuba-token");
+        if (tokenErr || !tokenData?.token) {
+          throw new Error(tokenErr?.message || "Failed to load Banuba token");
+        }
+        const clientToken = tokenData.token as string;
+
         setStatus("Loading SDK…");
         const sdk: any = await import(
           /* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`
@@ -72,7 +77,7 @@ const ShadePreview = () => {
 
         setStatus("Creating player…");
         player = await Player.create({
-          clientToken: BANUBA_TOKEN,
+          clientToken,
           locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
           logger: console,
         });
