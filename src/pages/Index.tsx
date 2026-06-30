@@ -32,6 +32,17 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
 const lipGreyBrown = lipGreyBrownAsset.url;
+import avatar3Asset from "@/assets/avatar-3.jpg.asset.json";
+import avatar4Asset from "@/assets/avatar-4.jpg.asset.json";
+import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
+import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
+
+const AVATAR_OPTIONS = [
+  { id: "avatar-3", url: avatar3Asset.url },
+  { id: "avatar-4", url: avatar4Asset.url },
+  { id: "avatar-5", url: avatar5Asset.url },
+  { id: "avatar-6", url: avatar6Asset.url },
+] as const;
 
 type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
 
