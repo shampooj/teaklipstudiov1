@@ -22,7 +22,7 @@ import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-medium-brown.webp";
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrownAsset from "@/assets/lip-brick.png.asset.json";
+import lipNeutralBrownAsset from "@/assets/lip-brick-v2.png.asset.json";
 const lipNeutralBrown = lipNeutralBrownAsset.url;
 import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
 import lipMauvePink from "@/assets/lip-mauve-pink.webp";
