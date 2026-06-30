@@ -928,7 +928,8 @@ const Index = () => {
                             p_image_id: imageId,
                             p_skin_tone: skinTone,
                             p_lip_tone: lipTone,
-                            p_email: trimmedEmail
+                            p_email: trimmedEmail,
+                            p_shirt: shirt || null,
                           });
 
                           if (!insertError) {
