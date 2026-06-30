@@ -815,7 +815,7 @@ const Index = () => {
                     <p className="font-display text-xl text-foreground text-center">
                       Choose an avatar
                     </p>
-                    <div className="mt-6 grid grid-cols-4 gap-3">
+                    <div className="mt-6 grid grid-cols-2 gap-4">
                       {AVATAR_OPTIONS.map((avatar) => (
                         <button
                           key={avatar.id}
