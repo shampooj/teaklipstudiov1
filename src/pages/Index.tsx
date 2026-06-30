@@ -808,22 +808,34 @@ const Index = () => {
                     <span className="font-display text-lg text-muted-foreground uppercase tracking-widest">or</span>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true });
-                      setState("uploaded");
-                    }}
-                    className="group relative flex cursor-pointer border border-border bg-background p-8 sm:p-10 text-center transition-all duration-300 hover:border-foreground/40">
-                    <div className="m-auto flex flex-col items-center gap-6">
-                      <ArrowRight className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      <div>
-                        <p className="font-display text-xl text-foreground">
-                          See lipsticks on a model instead
-                        </p>
-                      </div>
+                  <div className="border border-border bg-background p-6 sm:p-8">
+                    <p className="font-display text-xl text-foreground text-center">
+                      Choose an avatar
+                    </p>
+                    <div className="mt-6 grid grid-cols-4 gap-3">
+                      {AVATAR_OPTIONS.map((avatar) => (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          onClick={() => {
+                            setOriginalImage(avatar.url);
+                            setFaceCropImage(avatar.url);
+                            trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
+                            setState("uploaded");
+                          }}
+                          className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
+                        >
+                          <img
+                            src={avatar.url}
+                            alt="Avatar option"
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                        </button>
+                      ))}
                     </div>
-                  </button>
+                  </div>
+
                 </div>
               </> :
 
