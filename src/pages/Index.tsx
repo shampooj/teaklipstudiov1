@@ -644,7 +644,7 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Let's figure out your brown skin's undertone. Which color t-shirt looks better on you?
+                    Which color t-shirt looks better on you?
                   </p>
                   <div className="mt-8 grid grid-cols-3 gap-4 w-full max-w-sm mx-auto">
                     {SHIRT_OPTIONS.map((opt) =>
