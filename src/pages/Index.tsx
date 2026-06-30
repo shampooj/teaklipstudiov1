@@ -54,10 +54,10 @@ const LIP_TONES = [
 { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
 { id: "neutral-brown", label: "Brick", color: "#A0705A", image: lipNeutralBrown },
 { id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E", image: lipTwoTonedBeige },
+{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
 { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
 { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
 { id: "medium-brown", label: "Two-toned Deep Brown", color: "#7A5240", image: lipMediumBrown },
-{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
 { id: "deep-brown", label: "Mostly Brown", color: "#4A2228", image: lipDeepBrown },
 { id: "grey-brown", label: "Grey Brown", color: "#7D6B65", image: lipGreyBrown }] as
 const;
