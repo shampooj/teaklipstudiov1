@@ -412,6 +412,7 @@ const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
   const [skinTone, setSkinTone] = useState<string>("medium-brown");
   const [lipTone, setLipTone] = useState<string>("neutral-brown");
+  const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
   const [croppingFace, setCroppingFace] = useState(false);
