@@ -30,7 +30,8 @@ import lipMauvePink from "@/assets/lip-mauve-pink.webp";
 import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.webp";
 import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrown from "@/assets/lip-grey-brown.webp";
+import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
+const lipGreyBrown = lipGreyBrownAsset.url;
 
 type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
 
