@@ -957,6 +957,7 @@ const Index = () => {
                       p_variant_id: "research-selections",
                       p_skin_tone: skinTone,
                       p_lip_tone: lipTone,
+                      p_shirt: shirt || null,
                     }).then(({ error }: any) => {
                       if (error) console.error("Failed to save research selections:", error);
                     });
