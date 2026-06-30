@@ -114,6 +114,7 @@ export type Database = {
           image_url: string | null
           is_labeled: boolean
           lip_tone: string | null
+          shirt: string | null
           skin_tone: string | null
           variant_id: string
         }
@@ -125,6 +126,7 @@ export type Database = {
           image_url?: string | null
           is_labeled?: boolean
           lip_tone?: string | null
+          shirt?: string | null
           skin_tone?: string | null
           variant_id: string
         }
@@ -136,6 +138,7 @@ export type Database = {
           image_url?: string | null
           is_labeled?: boolean
           lip_tone?: string | null
+          shirt?: string | null
           skin_tone?: string | null
           variant_id?: string
         }
@@ -218,17 +221,30 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      insert_customer_submission: {
-        Args: {
-          p_email?: string
-          p_image_id?: string
-          p_image_url?: string
-          p_lip_tone?: string
-          p_skin_tone?: string
-          p_variant_id: string
-        }
-        Returns: string
-      }
+      insert_customer_submission:
+        | {
+            Args: {
+              p_email?: string
+              p_image_id?: string
+              p_image_url?: string
+              p_lip_tone?: string
+              p_skin_tone?: string
+              p_variant_id: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_email?: string
+              p_image_id?: string
+              p_image_url?: string
+              p_lip_tone?: string
+              p_shirt?: string
+              p_skin_tone?: string
+              p_variant_id: string
+            }
+            Returns: string
+          }
     }
     Enums: {
       [_ in never]: never
