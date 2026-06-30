@@ -30,7 +30,13 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrown from "@/assets/lip-grey-brown.webp";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+
+const SHIRT_OPTIONS = [
+  { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
+  { id: "Cream", label: "Cream", color: "#F5E9D4" },
+  { id: "I'm not sure", label: "I'm not sure", color: null as string | null },
+] as const;
 
 const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
@@ -406,6 +412,7 @@ const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
   const [skinTone, setSkinTone] = useState<string>("medium-brown");
   const [lipTone, setLipTone] = useState<string>("neutral-brown");
+  const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
   const [croppingFace, setCroppingFace] = useState(false);
@@ -614,7 +621,7 @@ const Index = () => {
                    </div>
                   <div className="mt-8">
                     <Button
-                    onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("lip-tone"); }}
+                    onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("shirt"); }}
                     disabled={!skinTone}
                     size="lg"
                     className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
@@ -625,6 +632,61 @@ const Index = () => {
                 </div>
               </motion.div>
             }
+
+            {/* Step 1b: Shirt color */}
+            {state === "shirt" &&
+            <motion.div
+              key="shirt"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+                <div className="text-center w-full">
+                  <p className="font-display text-xl text-foreground">
+                    Which color t-shirt looks better on you?
+                  </p>
+                  <div className="mt-8 grid grid-cols-3 gap-4 w-full max-w-sm mx-auto">
+                    {SHIRT_OPTIONS.map((opt) =>
+                      <button
+                        key={opt.id}
+                        onClick={() => setShirt(opt.id)}
+                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                          shirt === opt.id ? "ring-2 ring-foreground" : ""}`
+                        }>
+                        {opt.color ?
+                          <div
+                            className="w-full aspect-square border border-foreground/10"
+                            style={{ backgroundColor: opt.color }} /> :
+                          <div className="w-full aspect-square bg-foreground/5 flex items-center justify-center">
+                            <span className="font-display text-2xl text-foreground/40">?</span>
+                          </div>
+                        }
+                        <span className="font-sans text-[9px] uppercase text-foreground pb-2 text-center px-1">{opt.label}</span>
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-8 flex gap-3 justify-center">
+                    <Button
+                      onClick={() => setState("skin-tone")}
+                      size="lg"
+                      variant="outline"
+                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                      Back
+                    </Button>
+                    <Button
+                      onClick={() => { trackEvent("shirt_selected", { shirt }); setState("lip-tone"); }}
+                      disabled={!shirt}
+                      size="lg"
+                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
+                      Next
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            }
+
+
 
             {/* Step 2: Lip Tone */}
             {state === "lip-tone" &&
@@ -663,7 +725,7 @@ const Index = () => {
                   </div>
                   <div className="mt-8 flex gap-3 justify-center">
                     <Button
-                    onClick={() => setState("skin-tone")}
+                    onClick={() => setState("shirt")}
                     size="lg"
                     variant="outline"
                     className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
@@ -866,7 +928,8 @@ const Index = () => {
                             p_image_id: imageId,
                             p_skin_tone: skinTone,
                             p_lip_tone: lipTone,
-                            p_email: trimmedEmail
+                            p_email: trimmedEmail,
+                            p_shirt: shirt || null,
                           });
 
                           if (!insertError) {
@@ -894,6 +957,7 @@ const Index = () => {
                       p_variant_id: "research-selections",
                       p_skin_tone: skinTone,
                       p_lip_tone: lipTone,
+                      p_shirt: shirt || null,
                     }).then(({ error }: any) => {
                       if (error) console.error("Failed to save research selections:", error);
                     });
