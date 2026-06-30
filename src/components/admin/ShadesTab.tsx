@@ -16,16 +16,19 @@ import BanubaInlinePreview from "./BanubaInlinePreview";
 import ErrorBoundary from "./ErrorBoundary";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrown from "@/assets/lip-medium-brown.webp";
+import lipMediumBrownAsset from "@/assets/lip-two-toned-deep-brown.png.asset.json";
+const lipMediumBrown = lipMediumBrownAsset.url;
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrown from "@/assets/lip-neutral-brown.webp";
+import lipNeutralBrownAsset from "@/assets/lip-brick-v2.png.asset.json";
+const lipNeutralBrown = lipNeutralBrownAsset.url;
 import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
 import lipMauvePink from "@/assets/lip-mauve-pink.webp";
 import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.webp";
 import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrown from "@/assets/lip-grey-brown.webp";
+import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
+const lipGreyBrown = lipGreyBrownAsset.url;
 
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
