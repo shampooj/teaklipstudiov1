@@ -34,7 +34,7 @@ type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "upl
 
 const SHIRT_OPTIONS = [
   { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
-  { id: "Cream", label: "Cream", color: "#F5E9D4" },
+  { id: "Cream", label: "Cream", color: "#FBF3E2" },
   { id: "I'm not sure", label: "I'm not sure", color: null as string | null },
 ] as const;
 
