@@ -30,7 +30,13 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.webp";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrown from "@/assets/lip-grey-brown.webp";
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+
+const SHIRT_OPTIONS = [
+  { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
+  { id: "Cream", label: "Cream", color: "#F5E9D4" },
+  { id: "I'm not sure", label: "I'm not sure", color: null as string | null },
+] as const;
 
 const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
