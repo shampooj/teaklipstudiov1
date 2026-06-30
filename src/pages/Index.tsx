@@ -34,7 +34,7 @@ type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "upl
 
 const SHIRT_OPTIONS = [
   { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
-  { id: "Cream", label: "Cream", color: "#FBF3E2" },
+  { id: "Cream", label: "Cream", color: "#FAF6EC" },
   { id: "I'm not sure", label: "I'm not sure", color: null as string | null },
 ] as const;
 
@@ -644,7 +644,7 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Which color t-shirt looks better on you?
+                    Let's figure out your brown skin's undertone. Which color t-shirt looks better on you?
                   </p>
                   <div className="mt-8 grid grid-cols-3 gap-4 w-full max-w-sm mx-auto">
                     {SHIRT_OPTIONS.map((opt) =>
