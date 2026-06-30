@@ -781,7 +781,7 @@ const Index = () => {
                 <h2 className="font-display text-xl md:text-2xl text-foreground text-center leading-snug mb-6">
                   Try our recommended lipstick shades on
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] items-stretch gap-4 md:gap-6">
+                <div className="flex flex-col gap-4 md:gap-6">
                   <div className="flex flex-col border border-border bg-background transition-all duration-300 hover:border-foreground/40">
                     <div
                       onDrop={handleDrop}
