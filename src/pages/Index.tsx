@@ -589,7 +589,7 @@ const Index = () => {
               
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Choose your closest skintone
+                    What's your general skintone?
                   </p>
                   <p className="text-sm text-foreground mt-2 font-display">
                     If you're in between, go with the deeper shade.
