@@ -36,10 +36,10 @@ const LIP_TONES = [
   { id: "two-toned-brown", label: "Two-Toned Brown", image: lipTwoTonedBrown },
   { id: "two-toned-grey", label: "Two-Toned Grey", image: lipTwoTonedGrey },
   { id: "two-toned-beige", label: "Two-Toned Beige", image: lipTwoTonedBeige },
-  { id: "neutral-brown", label: "Neutral Brown", image: lipNeutralBrown },
-  { id: "medium-brown", label: "Medium Brown", image: lipMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", image: lipDeepBrown },
-  { id: "grey-brown", label: "Grey Brown", image: lipGreyBrown },
+  { id: "neutral-brown", label: "Brick", image: lipNeutralBrown },
+  { id: "medium-brown", label: "Two-toned Deep Brown", image: lipMediumBrown },
+  { id: "deep-brown", label: "Mostly Brown", image: lipDeepBrown },
+  { id: "grey-brown", label: "Mostly Purple", image: lipGreyBrown },
 ] as const;
 
 const FINISHES = ["matte", "satin", "glossy"] as const;
