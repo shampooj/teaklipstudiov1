@@ -25,7 +25,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         </div>
         <div className="space-y-2">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground">After</p>
-          <div className="relative rounded-xl overflow-hidden border border-border bg-muted aspect-square">
+          <div className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto">
             <img
               src={lipToneImage}
               alt={`${lipToneLabel} after`}
