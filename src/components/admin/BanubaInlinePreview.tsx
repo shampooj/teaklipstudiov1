@@ -12,7 +12,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-6 max-w-3xl">
         <div className="space-y-2">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Before</p>
           <div className="rounded-xl overflow-hidden border border-border bg-muted aspect-square">
