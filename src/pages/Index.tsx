@@ -36,16 +36,20 @@ import avatar3Asset from "@/assets/avatar-3.jpg.asset.json";
 import avatar4Asset from "@/assets/avatar-4.jpg.asset.json";
 import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
 import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
+import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
+import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
+import avatarSkinDeepAsset from "@/assets/avatar-skin-deep-brown.jpg.asset.json";
+import avatarSkinRichAsset from "@/assets/avatar-skin-rich-brown.jpg.asset.json";
 
 const AVATAR_OPTIONS = [
   { id: "avatar-3", url: avatar3Asset.url },
   { id: "avatar-4", url: avatar4Asset.url },
   { id: "avatar-5", url: avatar5Asset.url },
   { id: "avatar-6", url: avatar6Asset.url },
-  { id: "skin-light-brown", url: skinLightBrown },
-  { id: "skin-medium-brown", url: skinMediumBrown },
-  { id: "skin-deep-brown", url: skinDeepBrown },
-  { id: "skin-rich-brown", url: skinRichBrown },
+  { id: "skin-light-brown", url: avatarSkinLightAsset.url },
+  { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
+  { id: "skin-deep-brown", url: avatarSkinDeepAsset.url },
+  { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
 ] as const;
 
 type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
