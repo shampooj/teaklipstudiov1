@@ -42,6 +42,10 @@ const AVATAR_OPTIONS = [
   { id: "avatar-4", url: avatar4Asset.url },
   { id: "avatar-5", url: avatar5Asset.url },
   { id: "avatar-6", url: avatar6Asset.url },
+  { id: "skin-light-brown", url: skinLightBrown },
+  { id: "skin-medium-brown", url: skinMediumBrown },
+  { id: "skin-deep-brown", url: skinDeepBrown },
+  { id: "skin-rich-brown", url: skinRichBrown },
 ] as const;
 
 type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
