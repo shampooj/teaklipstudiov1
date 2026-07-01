@@ -700,7 +700,7 @@ const Index = () => {
                   </div>
                   <div className="mt-8 flex gap-3 justify-center">
                     <Button
-                    onClick={() => setState("shirt")}
+                    onClick={() => setState("skin-tone")}
                     size="lg"
                     variant="outline"
                     className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
