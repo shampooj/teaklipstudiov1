@@ -50,13 +50,22 @@ const LIP_TONES = [
 const FINISHES = ["matte", "satin", "glossy"] as const;
 type Finish = (typeof FINISHES)[number];
 
+const SKIN_TONES = [
+  { id: "light-brown", label: "Light Brown" },
+  { id: "medium-brown", label: "Medium Brown" },
+  { id: "deep-brown", label: "Deep Brown" },
+  { id: "rich-brown", label: "Rich Brown" },
+] as const;
+
 interface Setting {
   variant_name: string;
+  skin_tone: string;
   lip_tone: string;
   hex: string;
   finish: Finish;
   opacity: number;
 }
+
 
 // Shades only (exclude lip sets)
 const SHADES = Object.entries(PRODUCT_DETAILS)
@@ -65,6 +74,7 @@ const SHADES = Object.entries(PRODUCT_DETAILS)
 
 const ShadesTab = () => {
   const [selectedShade, setSelectedShade] = useState<string>(SHADES[0]?.name ?? "");
+  const [selectedSkinTone, setSelectedSkinTone] = useState<string>(SKIN_TONES[0].id);
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -73,8 +83,9 @@ const ShadesTab = () => {
   const fetchSettings = async () => {
     setLoading(true);
     const { data, error } = await (supabase.from as any)("lipstick_shade_settings")
-      .select("variant_name, lip_tone, hex, finish, opacity")
-      .eq("variant_name", selectedShade);
+      .select("variant_name, skin_tone, lip_tone, hex, finish, opacity")
+      .eq("variant_name", selectedShade)
+      .eq("skin_tone", selectedSkinTone);
     if (error) {
       toast.error("Failed to load shade settings");
       setLoading(false);
@@ -86,16 +97,23 @@ const ShadesTab = () => {
       const existing = (data || []).find((r: any) => r.lip_tone === t.id);
       map[t.id] = existing
         ? { ...existing, opacity: Number(existing.opacity) }
-        : { variant_name: selectedShade, lip_tone: t.id, hex: defaultColor, finish: "satin", opacity: 0.8 };
+        : {
+            variant_name: selectedShade,
+            skin_tone: selectedSkinTone,
+            lip_tone: t.id,
+            hex: defaultColor,
+            finish: "satin",
+            opacity: 0.8,
+          };
     });
     setRows(map);
     setLoading(false);
   };
 
   useEffect(() => {
-    if (selectedShade) void fetchSettings();
+    if (selectedShade && selectedSkinTone) void fetchSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedShade]);
+  }, [selectedShade, selectedSkinTone]);
 
   const updateRow = (lipTone: string, patch: Partial<Setting>) => {
     setRows((prev) => ({ ...prev, [lipTone]: { ...prev[lipTone], ...patch } }));
@@ -105,6 +123,7 @@ const ShadesTab = () => {
     setSaving(true);
     const payload = Object.values(rows).map((r) => ({
       variant_name: r.variant_name,
+      skin_tone: r.skin_tone,
       lip_tone: r.lip_tone,
       hex: r.hex,
       finish: r.finish,
@@ -112,7 +131,7 @@ const ShadesTab = () => {
       updated_at: new Date().toISOString(),
     }));
     const { error } = await (supabase.from as any)("lipstick_shade_settings")
-      .upsert(payload, { onConflict: "variant_name,lip_tone" });
+      .upsert(payload, { onConflict: "variant_name,skin_tone,lip_tone" });
     if (error) {
       toast.error("Failed to save settings");
       console.error(error);
@@ -122,36 +141,59 @@ const ShadesTab = () => {
     setSaving(false);
   };
 
+
   const currentShade = useMemo(() => SHADES.find((s) => s.name === selectedShade), [selectedShade]);
 
   return (
     <div className="space-y-5">
       <div className="border border-border rounded-2xl p-5 space-y-4">
-        <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Lipstick Shade</p>
-        <div className="flex items-center gap-3 flex-wrap">
-          <Select value={selectedShade} onValueChange={setSelectedShade}>
-            <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-72">
-              <SelectValue placeholder="Select shade" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl max-h-80">
-              {SHADES.map((s) => (
-                <SelectItem key={s.name} value={s.name} className="text-[10px]">
-                  <span className="inline-flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full border border-border"
-                      style={{ backgroundColor: s.color }}
-                    />
-                    {s.name} — {s.label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {currentShade && (
-            <span className="text-[10px] text-muted-foreground">{currentShade.label}</span>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Lipstick Shade</p>
+            <Select value={selectedShade} onValueChange={setSelectedShade}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-full">
+                <SelectValue placeholder="Select shade" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl max-h-80">
+                {SHADES.map((s) => (
+                  <SelectItem key={s.name} value={s.name} className="text-[10px]">
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full border border-border"
+                        style={{ backgroundColor: s.color }}
+                      />
+                      {s.name} — {s.label}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {currentShade && (
+              <span className="text-[10px] text-muted-foreground block">{currentShade.label}</span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</p>
+            <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-full">
+                <SelectValue placeholder="Select skin tone" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {SKIN_TONES.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="text-[10px]">
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-[10px] text-muted-foreground block">
+              Settings below apply to this skin tone only.
+            </span>
+          </div>
         </div>
       </div>
+
 
       <div className="border border-border rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">

@@ -151,6 +151,7 @@ export type Database = {
           id: string
           lip_tone: string
           opacity: number
+          skin_tone: string
           updated_at: string
           updated_by_user_id: string | null
           variant_name: string
@@ -161,6 +162,7 @@ export type Database = {
           id?: string
           lip_tone: string
           opacity?: number
+          skin_tone: string
           updated_at?: string
           updated_by_user_id?: string | null
           variant_name: string
@@ -171,6 +173,7 @@ export type Database = {
           id?: string
           lip_tone?: string
           opacity?: number
+          skin_tone?: string
           updated_at?: string
           updated_by_user_id?: string | null
           variant_name?: string
