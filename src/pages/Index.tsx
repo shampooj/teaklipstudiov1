@@ -55,7 +55,7 @@ const AVATAR_OPTIONS = [
   { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
 ] as const;
 
-type AppState = "skin-tone" | "shirt" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
 
 const SHIRT_OPTIONS = [
   { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
