@@ -198,7 +198,7 @@ const ShadesTab = () => {
       <div className="border border-border rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-            Banuba render settings per lip tone
+            Banuba render settings per complexion type
           </p>
           <Button
             className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
