@@ -864,18 +864,18 @@ const Dashboard = () => {
                     <SelectValue placeholder="Select lip tone category" />
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
+                    <SelectItem value="beige">Beige</SelectItem>
                     <SelectItem value="bright-pink">Bright Pink</SelectItem>
                     <SelectItem value="brown-pink">Brown Pink</SelectItem>
                     <SelectItem value="mauve-pink">Mauve Pink</SelectItem>
-                    <SelectItem value="beige">Beige</SelectItem>
+                    <SelectItem value="neutral-brown">Brick</SelectItem>
+                    <SelectItem value="two-toned-beige">Two-Toned Beige</SelectItem>
+                    <SelectItem value="two-toned-grey">Two-Toned Grey</SelectItem>
                     <SelectItem value="two-toned-purple">Two-Toned Purple</SelectItem>
                     <SelectItem value="two-toned-brown">Two-Toned Brown</SelectItem>
-                    <SelectItem value="two-toned-grey">Two-Toned Grey</SelectItem>
-                    <SelectItem value="two-toned-beige">Two-Toned Beige</SelectItem>
-                    <SelectItem value="neutral-brown">Neutral Brown</SelectItem>
-                    <SelectItem value="medium-brown">Medium Brown</SelectItem>
-                    <SelectItem value="deep-brown">Deep Brown</SelectItem>
-                    <SelectItem value="grey-brown">Grey Brown</SelectItem>
+                    <SelectItem value="medium-brown">Two-toned Deep Brown</SelectItem>
+                    <SelectItem value="deep-brown">Mostly Brown</SelectItem>
+                    <SelectItem value="grey-brown">Mostly Purple</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
