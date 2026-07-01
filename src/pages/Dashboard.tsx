@@ -475,8 +475,15 @@ const Dashboard = () => {
             >
               Shades
             </button>
+            <button
+              onClick={() => setActiveTab("recommendations")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "recommendations" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Recommendations
+            </button>
           </div>
         </div>
+
 
 
 
