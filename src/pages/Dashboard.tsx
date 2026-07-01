@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import teakLogo from "@/assets/teak-logo.png";
 import ShadesTab from "@/components/admin/ShadesTab";
+import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
@@ -418,7 +419,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades">("labeling");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations">("labeling");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
@@ -474,8 +475,15 @@ const Dashboard = () => {
             >
               Shades
             </button>
+            <button
+              onClick={() => setActiveTab("recommendations")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "recommendations" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Recommendations
+            </button>
           </div>
         </div>
+
 
 
 
@@ -987,6 +995,8 @@ const Dashboard = () => {
         )}
 
         {activeTab === "shades" && <ShadesTab />}
+
+        {activeTab === "recommendations" && <RecommendationsTab />}
 
         {activeTab === "data" && (
           <>

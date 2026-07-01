@@ -10,7 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { getRecommendations, getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { useRecommendations } from "@/hooks/useRecommendations";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
@@ -453,7 +454,7 @@ const Index = () => {
 
   const { trackEvent, sessionId } = useQuizTracking();
 
-  const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
+  const recommendations = useRecommendations(skinTone, lipTone);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];

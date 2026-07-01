@@ -61,136 +61,72 @@ export interface Recommendation {
   color: string;
 }
 
-// Skin tone ID (from app) → CSV skin tone value
-const SKIN_TONE_MAP: Record<string, string> = {
-  "light-brown": "light",
-  "medium-brown": "medium brown",
-  "deep-brown": "deep brown",
-  "rich-brown": "rich brown",
+// App skin tone IDs used throughout the frontend and stored in the DB
+export const SKIN_TONE_IDS = ["light-brown", "medium-brown", "deep-brown", "rich-brown"] as const;
+export type SkinToneId = (typeof SKIN_TONE_IDS)[number];
+
+// App lip tone IDs used throughout the frontend and stored in the DB
+export const LIP_TONE_IDS = [
+  "bright-pink", "brown-pink", "mauve-pink", "beige",
+  "two-toned-purple", "two-toned-brown", "two-toned-grey", "two-toned-beige",
+  "neutral-brown", "medium-brown", "deep-brown", "grey-brown",
+] as const;
+export type LipToneId = (typeof LIP_TONE_IDS)[number];
+
+// Skin tone + lip tone → Complexion Type number (kept in code; not admin-editable)
+const COMPLEXION_TYPE_MAP: Record<string, number> = (() => {
+  const map: Record<string, number> = {};
+  let n = 1;
+  for (const s of SKIN_TONE_IDS) for (const l of LIP_TONE_IDS) map[`${s}|${l}`] = n++;
+  return map;
+})();
+
+export const CATEGORY_ORDER: RecommendationCategory[] = ["MLBB", "RED", "DAY", "EVENING", "LIPSET"];
+
+export const CATEGORY_LABELS: Record<RecommendationCategory, string> = {
+  MLBB: "\"My Lips But Better\"",
+  RED: "A Statement Red",
+  DAY: "An Easy, Everyday",
+  EVENING: "An Evening Look",
+  LIPSET: "A Giftable Lip Set",
 };
 
-// Lip tone ID (from app) → CSV lip tone value
-const LIP_TONE_MAP: Record<string, string> = {
-  "bright-pink": "bright pink",
-  "brown-pink": "brown pink",
-  "mauve-pink": "mauve pink",
-  "beige": "beige",
-  "two-toned-purple": "two-toned purple",
-  "two-toned-brown": "two-toned brown",
-  "two-toned-grey": "two-toned grey",
-  "two-toned-beige": "two-toned beige",
-  "neutral-brown": "neutral brown",
-  "medium-brown": "medium brown",
-  "deep-brown": "deep brown",
-  "grey-brown": "grey brown",
-};
+export interface RecommendationRow {
+  skin_tone: string;
+  lip_tone: string;
+  category: string;
+  variant_name: string;
+}
 
-// Full recommendation lookup: key = "skinTone|lipTone" (CSV values), value = [MLBB, RED, DAY, EVENING, LIPSET]
-const RECOMMENDATIONS: Record<string, [string, string, string, string, string]> = {
-  "light|bright pink": ["Farrah", "Jiya", "Ruchi", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|brown pink": ["Amira", "Jiya", "Farrah", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|mauve pink": ["Amira", "Kiran", "Farrah", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|beige": ["Amira", "Kiran", "Farrah", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|two-toned purple": ["Amira", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|two-toned brown": ["Amira", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|two-toned grey": ["Amira", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|two-toned beige": ["Amira", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|neutral brown": ["Saanvi", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|medium brown": ["Saanvi", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|deep brown": ["Saanvi", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "light|grey brown": ["Saanvi", "Kiran", "Anjali", "Saanvi", "Lip Set for Light Brown Skin"],
-  "medium brown|bright pink": ["Amira", "Jiya", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|brown pink": ["Amira", "Jiya", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|mauve pink": ["Amira", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|beige": ["Amira", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|two-toned purple": ["Saanvi", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|two-toned brown": ["Saanvi", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|two-toned grey": ["Saanvi", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|two-toned beige": ["Saanvi", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|neutral brown": ["Riya", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|medium brown": ["Riya", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|deep brown": ["Riya", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "medium brown|grey brown": ["Riya", "Kiran", "Neha", "Saanvi", "Lip Set for Medium Brown Skin"],
-  "deep brown|bright pink": ["Neha", "Jiya", "Neha", "Saanvi", "Lip Set for Deep Brown Skin"],
-  "deep brown|brown pink": ["Neha", "Jiya", "Neha", "Saanvi", "Lip Set for Deep Brown Skin"],
-  "deep brown|mauve pink": ["Neha", "Kiran", "Neha", "Saanvi", "Lip Set for Deep Brown Skin"],
-  "deep brown|beige": ["Neha", "Jiya", "Neha", "Saanvi", "Lip Set for Deep Brown Skin"],
-  "deep brown|two-toned purple": ["Saanvi", "Kiran", "Riya", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|two-toned brown": ["Saanvi", "Kiran", "Riya", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|two-toned grey": ["Saanvi", "Kiran", "Riya", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|two-toned beige": ["Saanvi", "Kiran", "Neha", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|neutral brown": ["Pooja", "Kiran", "Neha", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|medium brown": ["Pooja", "Kiran", "Neha", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|deep brown": ["Pooja", "Kiran", "Neha", "Riya", "Lip Set for Deep Brown Skin"],
-  "deep brown|grey brown": ["Pooja", "Kiran", "Neha", "Riya", "Lip Set for Deep Brown Skin"],
-  "rich brown|bright pink": ["Neha", "Jiya", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|brown pink": ["Neha", "Jiya", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|mauve pink": ["Neha", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|beige": ["Neha", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|two-toned purple": ["Pooja", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|two-toned brown": ["Pooja", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|two-toned grey": ["Pooja", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|two-toned beige": ["Pooja", "Kiran", "Neha", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|neutral brown": ["Amrit", "Kiran", "Aaliyah", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|medium brown": ["Amrit", "Kiran", "Aaliyah", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|deep brown": ["Amrit", "Kiran", "Aaliyah", "Aaliyah", "Lip Set for Rich Brown Skin"],
-  "rich brown|grey brown": ["Amrit", "Kiran", "Aaliyah", "Amrit", "Lip Set for Rich Brown Skin"],
-};
-
-// Skin tone + lip tone → Complexion Type number
-const COMPLEXION_TYPE_MAP: Record<string, number> = {
-  "light|bright pink": 1, "light|brown pink": 2, "light|mauve pink": 3, "light|beige": 4,
-  "light|two-toned purple": 5, "light|two-toned brown": 6, "light|two-toned grey": 7, "light|two-toned beige": 8,
-  "light|neutral brown": 9, "light|medium brown": 10, "light|deep brown": 11, "light|grey brown": 12,
-  "medium brown|bright pink": 13, "medium brown|brown pink": 14, "medium brown|mauve pink": 15, "medium brown|beige": 16,
-  "medium brown|two-toned purple": 17, "medium brown|two-toned brown": 18, "medium brown|two-toned grey": 19, "medium brown|two-toned beige": 20,
-  "medium brown|neutral brown": 21, "medium brown|medium brown": 22, "medium brown|deep brown": 23, "medium brown|grey brown": 24,
-  "deep brown|bright pink": 25, "deep brown|brown pink": 26, "deep brown|mauve pink": 27, "deep brown|beige": 28,
-  "deep brown|two-toned purple": 29, "deep brown|two-toned brown": 30, "deep brown|two-toned grey": 31, "deep brown|two-toned beige": 32,
-  "deep brown|neutral brown": 33, "deep brown|medium brown": 34, "deep brown|deep brown": 35, "deep brown|grey brown": 36,
-  "rich brown|bright pink": 37, "rich brown|brown pink": 38, "rich brown|mauve pink": 39, "rich brown|beige": 40,
-  "rich brown|two-toned purple": 41, "rich brown|two-toned brown": 42, "rich brown|two-toned grey": 43, "rich brown|two-toned beige": 44,
-  "rich brown|neutral brown": 45, "rich brown|medium brown": 46, "rich brown|deep brown": 47, "rich brown|grey brown": 48,
-};
-
-const CATEGORY_LABELS: Record<number, { key: RecommendationCategory; label: string }> = {
-  0: { key: "MLBB", label: "\"My Lips But Better\"" },
-  1: { key: "RED", label: "A Statement Red" },
-  2: { key: "DAY", label: "An Easy, Everyday" },
-  3: { key: "EVENING", label: "An Evening Look" },
-  4: { key: "LIPSET", label: "A Giftable Lip Set" },
-};
-
-export function getRecommendations(skinToneId: string, lipToneId: string): Recommendation[] {
-  const csvSkin = SKIN_TONE_MAP[skinToneId];
-  const csvLip = LIP_TONE_MAP[lipToneId];
-  if (!csvSkin || !csvLip) return [];
-
-  const key = `${csvSkin}|${csvLip}`;
-  const rec = RECOMMENDATIONS[key];
-  if (!rec) return [];
-
-  return rec.map((variantName, i) => {
-    const trimmed = variantName.trim();
-    const details = PRODUCT_DETAILS[trimmed];
-    const variantId = VARIANT_MAP[trimmed];
-    const cat = CATEGORY_LABELS[i];
-    if (!details || !variantId || !cat) return null;
-    return {
-      category: cat.key,
-      categoryLabel: cat.label,
-      variantName: trimmed,
+// Build the display-ready recommendations for a (skin_tone, lip_tone) from raw DB rows.
+export function buildRecommendations(
+  rows: RecommendationRow[],
+  skinToneId: string,
+  lipToneId: string,
+): Recommendation[] {
+  const filtered = rows.filter((r) => r.skin_tone === skinToneId && r.lip_tone === lipToneId);
+  const byCat = new Map(filtered.map((r) => [r.category, r.variant_name]));
+  const out: Recommendation[] = [];
+  for (const cat of CATEGORY_ORDER) {
+    const variantName = byCat.get(cat)?.trim();
+    if (!variantName) continue;
+    const details = PRODUCT_DETAILS[variantName];
+    const variantId = VARIANT_MAP[variantName];
+    if (!details || !variantId) continue;
+    out.push({
+      category: cat,
+      categoryLabel: CATEGORY_LABELS[cat],
+      variantName,
       variantId,
       label: details.label,
       description: details.description,
       color: details.color,
-    };
-  }).filter(Boolean) as Recommendation[];
+    });
+  }
+  return out;
 }
 
 export function getComplexionType(skinToneId: string, lipToneId: string): number | null {
-  const csvSkin = SKIN_TONE_MAP[skinToneId];
-  const csvLip = LIP_TONE_MAP[lipToneId];
-  if (!csvSkin || !csvLip) return null;
-  return COMPLEXION_TYPE_MAP[`${csvSkin}|${csvLip}`] ?? null;
+  return COMPLEXION_TYPE_MAP[`${skinToneId}|${lipToneId}`] ?? null;
 }
+

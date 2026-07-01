@@ -216,6 +216,33 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendations: {
+        Row: {
+          category: string
+          lip_tone: string
+          skin_tone: string
+          updated_at: string
+          updated_by: string | null
+          variant_name: string
+        }
+        Insert: {
+          category: string
+          lip_tone: string
+          skin_tone: string
+          updated_at?: string
+          updated_by?: string | null
+          variant_name: string
+        }
+        Update: {
+          category?: string
+          lip_tone?: string
+          skin_tone?: string
+          updated_at?: string
+          updated_by?: string | null
+          variant_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
