@@ -147,31 +147,53 @@ const ShadesTab = () => {
   return (
     <div className="space-y-5">
       <div className="border border-border rounded-2xl p-5 space-y-4">
-        <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Lipstick Shade</p>
-        <div className="flex items-center gap-3 flex-wrap">
-          <Select value={selectedShade} onValueChange={setSelectedShade}>
-            <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-72">
-              <SelectValue placeholder="Select shade" />
-            </SelectTrigger>
-            <SelectContent className="rounded-2xl max-h-80">
-              {SHADES.map((s) => (
-                <SelectItem key={s.name} value={s.name} className="text-[10px]">
-                  <span className="inline-flex items-center gap-2">
-                    <span
-                      className="w-3 h-3 rounded-full border border-border"
-                      style={{ backgroundColor: s.color }}
-                    />
-                    {s.name} — {s.label}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {currentShade && (
-            <span className="text-[10px] text-muted-foreground">{currentShade.label}</span>
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Lipstick Shade</p>
+            <Select value={selectedShade} onValueChange={setSelectedShade}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-full">
+                <SelectValue placeholder="Select shade" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl max-h-80">
+                {SHADES.map((s) => (
+                  <SelectItem key={s.name} value={s.name} className="text-[10px]">
+                    <span className="inline-flex items-center gap-2">
+                      <span
+                        className="w-3 h-3 rounded-full border border-border"
+                        style={{ backgroundColor: s.color }}
+                      />
+                      {s.name} — {s.label}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {currentShade && (
+              <span className="text-[10px] text-muted-foreground block">{currentShade.label}</span>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Skin Tone</p>
+            <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>
+              <SelectTrigger className="rounded-full border-foreground/20 text-[10px] w-full">
+                <SelectValue placeholder="Select skin tone" />
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl">
+                {SKIN_TONES.map((s) => (
+                  <SelectItem key={s.id} value={s.id} className="text-[10px]">
+                    {s.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-[10px] text-muted-foreground block">
+              Settings below apply to this skin tone only.
+            </span>
+          </div>
         </div>
       </div>
+
 
       <div className="border border-border rounded-2xl p-5 space-y-4">
         <div className="flex items-center justify-between">
