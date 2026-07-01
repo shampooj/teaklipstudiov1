@@ -658,58 +658,8 @@ const Index = () => {
               </motion.div>
             }
 
-            {/* Step 1b: Shirt color */}
-            {state === "shirt" &&
-            <motion.div
-              key="shirt"
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <div className="text-center w-full">
-                  <p className="font-display text-xl text-foreground">
-                    Which tshirt color tends to look better on you?
-                  </p>
-                  <div className="mt-8 grid grid-cols-3 gap-4 w-full max-w-sm mx-auto">
-                    {SHIRT_OPTIONS.map((opt) =>
-                      <button
-                        key={opt.id}
-                        onClick={() => setShirt(opt.id)}
-                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
-                          shirt === opt.id ? "ring-2 ring-foreground" : ""}`
-                        }>
-                        {opt.color ?
-                          <div
-                            className="w-full aspect-square border border-foreground/10"
-                            style={{ backgroundColor: opt.color }} /> :
-                          <div className="w-full aspect-square bg-foreground/5 flex items-center justify-center">
-                            <span className="font-display text-2xl text-foreground/40">?</span>
-                          </div>
-                        }
-                        <span className="font-sans text-[9px] uppercase text-foreground pb-2 text-center px-1">{opt.label}</span>
-                      </button>
-                    )}
-                  </div>
-                  <div className="mt-8 flex gap-3 justify-center">
-                    <Button
-                      onClick={() => setState("skin-tone")}
-                      size="lg"
-                      variant="outline"
-                      className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                      Back
-                    </Button>
-                    <Button
-                      onClick={() => { trackEvent("shirt_selected", { shirt }); setState("lip-tone"); }}
-                      disabled={!shirt}
-                      size="lg"
-                      className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                      Next
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            }
+
+
 
 
 
