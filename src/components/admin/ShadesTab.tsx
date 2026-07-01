@@ -74,6 +74,7 @@ const SHADES = Object.entries(PRODUCT_DETAILS)
 
 const ShadesTab = () => {
   const [selectedShade, setSelectedShade] = useState<string>(SHADES[0]?.name ?? "");
+  const [selectedSkinTone, setSelectedSkinTone] = useState<string>(SKIN_TONES[0].id);
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -82,8 +83,9 @@ const ShadesTab = () => {
   const fetchSettings = async () => {
     setLoading(true);
     const { data, error } = await (supabase.from as any)("lipstick_shade_settings")
-      .select("variant_name, lip_tone, hex, finish, opacity")
-      .eq("variant_name", selectedShade);
+      .select("variant_name, skin_tone, lip_tone, hex, finish, opacity")
+      .eq("variant_name", selectedShade)
+      .eq("skin_tone", selectedSkinTone);
     if (error) {
       toast.error("Failed to load shade settings");
       setLoading(false);
@@ -95,16 +97,23 @@ const ShadesTab = () => {
       const existing = (data || []).find((r: any) => r.lip_tone === t.id);
       map[t.id] = existing
         ? { ...existing, opacity: Number(existing.opacity) }
-        : { variant_name: selectedShade, lip_tone: t.id, hex: defaultColor, finish: "satin", opacity: 0.8 };
+        : {
+            variant_name: selectedShade,
+            skin_tone: selectedSkinTone,
+            lip_tone: t.id,
+            hex: defaultColor,
+            finish: "satin",
+            opacity: 0.8,
+          };
     });
     setRows(map);
     setLoading(false);
   };
 
   useEffect(() => {
-    if (selectedShade) void fetchSettings();
+    if (selectedShade && selectedSkinTone) void fetchSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedShade]);
+  }, [selectedShade, selectedSkinTone]);
 
   const updateRow = (lipTone: string, patch: Partial<Setting>) => {
     setRows((prev) => ({ ...prev, [lipTone]: { ...prev[lipTone], ...patch } }));
@@ -114,6 +123,7 @@ const ShadesTab = () => {
     setSaving(true);
     const payload = Object.values(rows).map((r) => ({
       variant_name: r.variant_name,
+      skin_tone: r.skin_tone,
       lip_tone: r.lip_tone,
       hex: r.hex,
       finish: r.finish,
@@ -121,7 +131,7 @@ const ShadesTab = () => {
       updated_at: new Date().toISOString(),
     }));
     const { error } = await (supabase.from as any)("lipstick_shade_settings")
-      .upsert(payload, { onConflict: "variant_name,lip_tone" });
+      .upsert(payload, { onConflict: "variant_name,skin_tone,lip_tone" });
     if (error) {
       toast.error("Failed to save settings");
       console.error(error);
@@ -130,6 +140,7 @@ const ShadesTab = () => {
     }
     setSaving(false);
   };
+
 
   const currentShade = useMemo(() => SHADES.find((s) => s.name === selectedShade), [selectedShade]);
 
