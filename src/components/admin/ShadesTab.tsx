@@ -50,13 +50,22 @@ const LIP_TONES = [
 const FINISHES = ["matte", "satin", "glossy"] as const;
 type Finish = (typeof FINISHES)[number];
 
+const SKIN_TONES = [
+  { id: "light-brown", label: "Light Brown" },
+  { id: "medium-brown", label: "Medium Brown" },
+  { id: "deep-brown", label: "Deep Brown" },
+  { id: "rich-brown", label: "Rich Brown" },
+] as const;
+
 interface Setting {
   variant_name: string;
+  skin_tone: string;
   lip_tone: string;
   hex: string;
   finish: Finish;
   opacity: number;
 }
+
 
 // Shades only (exclude lip sets)
 const SHADES = Object.entries(PRODUCT_DETAILS)
