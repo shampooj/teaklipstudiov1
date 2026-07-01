@@ -454,7 +454,7 @@ const Index = () => {
 
   const { trackEvent, sessionId } = useQuizTracking();
 
-  const recommendations = useMemo(() => getRecommendations(skinTone, lipTone), [skinTone, lipTone]);
+  const recommendations = useRecommendations(skinTone, lipTone);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
