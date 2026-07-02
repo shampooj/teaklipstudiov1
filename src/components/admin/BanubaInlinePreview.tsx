@@ -38,18 +38,13 @@ function buildConfig(color: string, finish: string, coverage: number) {
   };
 }
 
-function buildBaseEffectZip() {
-  const baseCfg = {
-    version: "2.0.0",
-    scene: "beauty_demo",
-    camera: {},
-    faces: [{}],
-  };
+function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
-    "config.json": strToU8(JSON.stringify(baseCfg, null, 2)),
+    "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
   });
   return new Blob([archive.buffer as ArrayBuffer], { type: "application/zip" });
 }
+
 
 const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
