@@ -1,3 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+import { zipSync, strToU8 } from "fflate";
+import { supabase } from "@/integrations/supabase/client";
+
 interface Props {
   lipToneLabel: string;
   lipToneImage: string;
@@ -6,9 +10,137 @@ interface Props {
   opacity: number;
 }
 
+const SDK_BASE = "/banuba";
+const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
+
+// Map admin finish values to Banuba finish values
+const FINISH_MAP: Record<string, string> = {
+  matte: "matte_cream",
+  satin: "satin",
+  glossy: "shine",
+};
+
+function buildConfig(color: string, finish: string, coverage: number) {
+  return {
+    version: "2.0.0",
+    scene: "beauty_demo",
+    camera: {},
+    faces: [
+      {
+        makeup_base: { mode: "quality", smooth: "0 0" },
+        makeup_lipstick: {
+          color,
+          finish: FINISH_MAP[finish] ?? "satin",
+          coverage,
+        },
+      },
+    ],
+  };
+}
+
+function buildBaseEffectZip() {
+  const baseCfg = {
+    version: "2.0.0",
+    scene: "beauty_demo",
+    camera: {},
+    faces: [{}],
+  };
+  const archive = zipSync({
+    "config.json": strToU8(JSON.stringify(baseCfg, null, 2)),
+  });
+  return new Blob([archive.buffer as ArrayBuffer], { type: "application/zip" });
+}
+
 const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity }: Props) => {
-  const blend =
-    finish === "matte" ? "multiply" : finish === "glossy" ? "overlay" : "multiply";
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const readyRef = useRef(false);
+  const [status, setStatus] = useState("Initializing Banuba…");
+  const [ready, setReady] = useState(false);
+
+  // Init player + load the lip tone image once
+  useEffect(() => {
+    let cancelled = false;
+    let player: any;
+
+    (async () => {
+      try {
+        setStatus("Fetching token…");
+        const { data: tokenData, error: tokenErr } = await supabase.functions.invoke(
+          "get-banuba-token",
+        );
+        if (tokenErr || !tokenData?.token) {
+          throw new Error(tokenErr?.message || "Failed to load Banuba token");
+        }
+        const clientToken = tokenData.token as string;
+
+        setStatus("Loading SDK…");
+        const sdk: any = await import(/* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`);
+        if (cancelled) return;
+
+        const { Player, Module, Effect, Dom, Image: BanubaImage } = sdk;
+
+        setStatus("Creating player…");
+        player = await Player.create({
+          clientToken,
+          locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
+        });
+        if (cancelled) {
+          await player.destroy();
+          return;
+        }
+        playerRef.current = player;
+
+        setStatus("Loading modules…");
+        await player.addModule(
+          ...MODULE_IDS.map((id: string) => new Module(`${SDK_BASE}/modules/${id}.zip`)),
+        );
+
+        setStatus("Applying effect…");
+        const effectZip = buildBaseEffectZip();
+        await player.applyEffect(new Effect(effectZip));
+
+        if (containerRef.current) Dom.render(player, containerRef.current);
+
+        setStatus("Loading image…");
+        const res = await fetch(lipToneImage);
+        const blob = await res.blob();
+        const file = new File([blob], "lip.png", { type: blob.type || "image/png" });
+        await player.use(new BanubaImage(file));
+        player.play({ pauseOnEmpty: false });
+
+        readyRef.current = true;
+        setReady(true);
+        setStatus("Live preview");
+      } catch (e: any) {
+        console.error(e);
+        setStatus(`Error: ${e?.message || String(e)}`);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      readyRef.current = false;
+      if (playerRef.current) {
+        playerRef.current.destroy().catch(() => {});
+        playerRef.current = null;
+      }
+    };
+  }, [lipToneImage]);
+
+  // Re-apply config when controls change
+  useEffect(() => {
+    const p = playerRef.current;
+    if (!p || !readyRef.current) return;
+    const t = window.setTimeout(() => {
+      try {
+        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
+      } catch (e) {
+        console.error(e);
+      }
+    }, 100);
+    return () => window.clearTimeout(t);
+  }, [hex, finish, opacity, ready]);
 
   return (
     <div className="space-y-3">
@@ -24,36 +156,18 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
           </div>
         </div>
         <div className="space-y-2">
-          <p className="text-[9px] uppercase tracking-widest text-muted-foreground">After</p>
-          <div className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto">
-            <img
-              src={lipToneImage}
-              alt={`${lipToneLabel} after`}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundColor: hex,
-                opacity,
-                mixBlendMode: blend as any,
-              }}
-            />
-            {finish === "glossy" && (
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%)",
-                  mixBlendMode: "screen",
-                }}
-              />
-            )}
-          </div>
+          <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+            After (Banuba)
+          </p>
+          <div
+            ref={containerRef}
+            className="rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto"
+          />
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground">
-        Hex <span className="font-mono">{hex}</span> · Finish {finish} · Opacity {opacity.toFixed(2)}
+        {status} · Hex <span className="font-mono">{hex}</span> · Finish {finish} · Opacity{" "}
+        {opacity.toFixed(2)}
       </p>
     </div>
   );
