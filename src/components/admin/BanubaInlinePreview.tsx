@@ -11,7 +11,7 @@ interface Props {
 }
 
 const SDK_BASE = "/banuba";
-const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
+const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
 const FINISH_MAP: Record<string, string> = {
@@ -27,22 +27,34 @@ function buildConfig(color: string, finish: string, coverage: number) {
     camera: {},
     faces: [
       {
-        makeup_base: { mode: "quality", smooth: "0 0" },
         makeup_lipstick: {
-          color,
+          color: hexToRgbString(color),
           finish: FINISH_MAP[finish] ?? "satin",
-          coverage,
+          coverage: Math.max(0, Math.min(1, coverage)),
         },
       },
     ],
   };
 }
 
+function hexToRgbString(hex: string) {
+  const normalized = hex.trim().replace(/^#/, "");
+  const value = normalized.length === 3
+    ? normalized.split("").map((char) => `${char}${char}`).join("")
+    : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
+
+  const channels = [0, 2, 4].map((start) => parseInt(value.slice(start, start + 2), 16) / 255);
+  return channels.map((channel) => Number(channel.toFixed(4))).join(" ");
+}
+
 function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
     "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
   });
-  return new Blob([archive.buffer as ArrayBuffer], { type: "application/zip" });
+  const bytes = new Uint8Array(archive);
+  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
 }
 
 
@@ -52,6 +64,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
   const sdkRef = useRef<any>(null);
   const imageFileRef = useRef<File | null>(null);
   const readyRef = useRef(false);
+  const updateSeqRef = useRef(0);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
 
@@ -136,17 +149,24 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const file = imageFileRef.current;
     if (!p || !sdk || !file || !readyRef.current) return;
     let cancelled = false;
+    const seq = updateSeqRef.current + 1;
+    updateSeqRef.current = seq;
     const t = window.setTimeout(async () => {
       try {
+        setStatus("Updating preview…");
         const zip = buildEffectZip(hex, finish, opacity);
         p.pause();
+        await p.clearEffect?.();
+        if (cancelled || updateSeqRef.current !== seq) return;
         await p.applyEffect(new sdk.Effect(zip));
-        if (cancelled) return;
+        if (cancelled || updateSeqRef.current !== seq) return;
         // Re-feed the image so the player has a frame to render with the new effect
         await p.use(new sdk.Image(file));
         p.play({ pauseOnEmpty: false });
+        if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
       } catch (e) {
         console.error(e);
+        if (!cancelled) setStatus("Preview update failed");
       }
     }, 150);
     return () => {
