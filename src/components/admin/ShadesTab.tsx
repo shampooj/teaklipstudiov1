@@ -200,7 +200,7 @@ const ShadesTab = () => {
             <table className="w-full text-[10px]">
               <thead>
                 <tr className="text-left text-muted-foreground uppercase tracking-widest text-[9px]">
-                  <th className="py-2 pr-3 font-normal w-20">Preview</th>
+                  <th className="py-2 pr-3 font-normal w-40">Preview</th>
                   <th className="py-2 pr-3 font-normal">Lip Tone</th>
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
@@ -222,7 +222,7 @@ const ShadesTab = () => {
                     <Fragment key={t.id}>
                     <tr className="border-t border-border">
                       <td className="py-2 pr-3">
-                        <div className="relative w-16 h-16 rounded-md overflow-hidden border border-border bg-muted">
+                        <div className="relative w-36 h-36 rounded-lg overflow-hidden border border-border bg-muted">
                           <img
                             src={t.image}
                             alt={t.label}
