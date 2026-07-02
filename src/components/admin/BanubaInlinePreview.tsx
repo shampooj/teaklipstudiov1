@@ -92,8 +92,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         );
 
         setStatus("Applying effect…");
-        const effectZip = buildBaseEffectZip();
+        const effectZip = buildEffectZip(hex, finish, opacity);
         await player.applyEffect(new Effect(effectZip));
+
 
         if (containerRef.current) Dom.render(player, containerRef.current);
 
@@ -123,19 +124,29 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     };
   }, [lipToneImage]);
 
-  // Re-apply config when controls change
+  // Re-apply effect (with fresh config baked in) when controls change
   useEffect(() => {
     const p = playerRef.current;
     if (!p || !readyRef.current) return;
-    const t = window.setTimeout(() => {
+    let cancelled = false;
+    const t = window.setTimeout(async () => {
       try {
-        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
+        const sdk: any = await import(
+          /* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`
+        );
+        if (cancelled) return;
+        const zip = buildEffectZip(hex, finish, opacity);
+        await p.applyEffect(new sdk.Effect(zip));
       } catch (e) {
         console.error(e);
       }
-    }, 100);
-    return () => window.clearTimeout(t);
+    }, 150);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
   }, [hex, finish, opacity, ready]);
+
 
   return (
     <div className="space-y-3">
