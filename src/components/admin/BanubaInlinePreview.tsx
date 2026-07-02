@@ -11,7 +11,7 @@ interface Props {
 }
 
 const SDK_BASE = "/banuba";
-const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
+const MODULE_IDS = ["lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
 const FINISH_MAP: Record<string, string> = {
