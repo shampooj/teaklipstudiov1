@@ -49,9 +49,12 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
 const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
+  const sdkRef = useRef<any>(null);
+  const imageFileRef = useRef<File | null>(null);
   const readyRef = useRef(false);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
+
 
   // Init player + load the lip tone image once
   useEffect(() => {
@@ -72,6 +75,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         setStatus("Loading SDK…");
         const sdk: any = await import(/* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`);
         if (cancelled) return;
+        sdkRef.current = sdk;
 
         const { Player, Module, Effect, Dom, Image: BanubaImage } = sdk;
 
@@ -95,15 +99,16 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         const effectZip = buildEffectZip(hex, finish, opacity);
         await player.applyEffect(new Effect(effectZip));
 
-
         if (containerRef.current) Dom.render(player, containerRef.current);
 
         setStatus("Loading image…");
         const res = await fetch(lipToneImage);
         const blob = await res.blob();
         const file = new File([blob], "lip.png", { type: blob.type || "image/png" });
+        imageFileRef.current = file;
         await player.use(new BanubaImage(file));
         player.play({ pauseOnEmpty: false });
+
 
         readyRef.current = true;
         setReady(true);
@@ -127,16 +132,19 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
   // Re-apply effect (with fresh config baked in) when controls change
   useEffect(() => {
     const p = playerRef.current;
-    if (!p || !readyRef.current) return;
+    const sdk = sdkRef.current;
+    const file = imageFileRef.current;
+    if (!p || !sdk || !file || !readyRef.current) return;
     let cancelled = false;
     const t = window.setTimeout(async () => {
       try {
-        const sdk: any = await import(
-          /* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`
-        );
-        if (cancelled) return;
         const zip = buildEffectZip(hex, finish, opacity);
+        p.pause();
         await p.applyEffect(new sdk.Effect(zip));
+        if (cancelled) return;
+        // Re-feed the image so the player has a frame to render with the new effect
+        await p.use(new sdk.Image(file));
+        p.play({ pauseOnEmpty: false });
       } catch (e) {
         console.error(e);
       }
@@ -146,6 +154,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
       window.clearTimeout(t);
     };
   }, [hex, finish, opacity, ready]);
+
 
 
   return (
