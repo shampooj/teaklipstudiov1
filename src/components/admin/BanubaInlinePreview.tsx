@@ -11,7 +11,7 @@ interface Props {
 }
 
 const SDK_BASE = "/banuba";
-const MODULE_IDS = ["lips", "skin", "makeup"];
+const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
 const FINISH_MAP: Record<string, string> = {
@@ -55,6 +55,11 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
   });
   const bytes = new Uint8Array(archive);
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
+}
+
+function getBlendMode(finish: string) {
+  if (finish === "glossy") return "overlay";
+  return "multiply";
 }
 
 
@@ -190,8 +195,27 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
           </p>
           <div
             ref={containerRef}
-            className="rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto"
-          />
+            className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto [&>canvas]:relative [&>canvas]:z-0 [&>canvas]:w-full [&>canvas]:h-full"
+          >
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                backgroundColor: hex,
+                opacity,
+                mixBlendMode: getBlendMode(finish) as any,
+              }}
+            />
+            {finish === "glossy" && (
+              <div
+                className="absolute inset-0 z-20 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%)",
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground">
