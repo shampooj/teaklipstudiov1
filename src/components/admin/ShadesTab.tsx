@@ -330,7 +330,6 @@ const ShadesTab = () => {
                         <td colSpan={6} className="py-4 px-3">
                           <ErrorBoundary>
                             <BanubaInlinePreview
-                              key={`${t.id}-${row.hex}-${row.finish}-${row.opacity}`}
                               lipToneLabel={t.label}
                               lipToneImage={t.image}
                               hex={row.hex}

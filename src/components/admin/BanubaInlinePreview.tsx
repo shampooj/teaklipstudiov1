@@ -154,14 +154,8 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        const zip = buildEffectZip(hex, finish, opacity);
-        p.pause();
-        await p.clearEffect?.();
+        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
         if (cancelled || updateSeqRef.current !== seq) return;
-        await p.applyEffect(new sdk.Effect(zip));
-        if (cancelled || updateSeqRef.current !== seq) return;
-        // Re-feed the image so the player has a frame to render with the new effect
-        await p.use(new sdk.Image(file));
         p.play({ pauseOnEmpty: false });
         if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
       } catch (e) {
