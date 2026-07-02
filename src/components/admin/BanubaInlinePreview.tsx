@@ -11,7 +11,7 @@ interface Props {
 }
 
 const SDK_BASE = "/banuba";
-const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
+const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
 const FINISH_MAP: Record<string, string> = {
@@ -27,22 +27,39 @@ function buildConfig(color: string, finish: string, coverage: number) {
     camera: {},
     faces: [
       {
-        makeup_base: { mode: "quality", smooth: "0 0" },
         makeup_lipstick: {
-          color,
+          color: hexToRgbString(color),
           finish: FINISH_MAP[finish] ?? "satin",
-          coverage,
+          coverage: Math.max(0, Math.min(1, coverage)),
         },
       },
     ],
   };
 }
 
+function hexToRgbString(hex: string) {
+  const normalized = hex.trim().replace(/^#/, "");
+  const value = normalized.length === 3
+    ? normalized.split("").map((char) => `${char}${char}`).join("")
+    : normalized;
+
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
+
+  const channels = [0, 2, 4].map((start) => parseInt(value.slice(start, start + 2), 16) / 255);
+  return channels.map((channel) => Number(channel.toFixed(4))).join(" ");
+}
+
 function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
     "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
   });
-  return new Blob([archive.buffer as ArrayBuffer], { type: "application/zip" });
+  const bytes = new Uint8Array(archive);
+  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
+}
+
+function getBlendMode(finish: string) {
+  if (finish === "glossy") return "overlay";
+  return "multiply";
 }
 
 
@@ -52,6 +69,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
   const sdkRef = useRef<any>(null);
   const imageFileRef = useRef<File | null>(null);
   const readyRef = useRef(false);
+  const updateSeqRef = useRef(0);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
 
@@ -136,17 +154,18 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const file = imageFileRef.current;
     if (!p || !sdk || !file || !readyRef.current) return;
     let cancelled = false;
+    const seq = updateSeqRef.current + 1;
+    updateSeqRef.current = seq;
     const t = window.setTimeout(async () => {
       try {
-        const zip = buildEffectZip(hex, finish, opacity);
-        p.pause();
-        await p.applyEffect(new sdk.Effect(zip));
-        if (cancelled) return;
-        // Re-feed the image so the player has a frame to render with the new effect
-        await p.use(new sdk.Image(file));
+        setStatus("Updating preview…");
+        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
+        if (cancelled || updateSeqRef.current !== seq) return;
         p.play({ pauseOnEmpty: false });
+        if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
       } catch (e) {
         console.error(e);
+        if (!cancelled) setStatus("Preview update failed");
       }
     }, 150);
     return () => {
@@ -176,8 +195,27 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
           </p>
           <div
             ref={containerRef}
-            className="rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto"
-          />
+            className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto [&>canvas]:relative [&>canvas]:z-0 [&>canvas]:w-full [&>canvas]:h-full"
+          >
+            <div
+              className="absolute inset-0 z-10 pointer-events-none"
+              style={{
+                backgroundColor: hex,
+                opacity,
+                mixBlendMode: getBlendMode(finish) as any,
+              }}
+            />
+            {finish === "glossy" && (
+              <div
+                className="absolute inset-0 z-20 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%)",
+                  mixBlendMode: "screen",
+                }}
+              />
+            )}
+          </div>
         </div>
       </div>
       <p className="text-[10px] text-muted-foreground">
