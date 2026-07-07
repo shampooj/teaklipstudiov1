@@ -38,8 +38,7 @@ import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
 import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
 import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
 import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
-import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
-import avatarMauveModelAsset from "@/assets/avatar-mauve-model.png.asset.json";
+import avatarSkinRichBrownAsset from "@/assets/avatar-skin-rich-brown.jpg.asset.json";
 
 const AVATAR_IMAGES = [
   avatar3Asset.url,
