@@ -73,16 +73,12 @@ const;
 const LIP_TONES = [
 { id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
 { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
-{ id: "brown-pink", label: "Brown Pink", color: "#C4787A", image: lipBrownPink },
 { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
 { id: "neutral-brown", label: "Brick", color: "#A0705A", image: lipNeutralBrown },
-{ id: "two-toned-beige", label: "Two-Toned Beige", color: "#C9A68E", image: lipTwoTonedBeige },
-{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
 { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
 { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
 { id: "medium-brown", label: "Two-toned Deep Brown", color: "#7A5240", image: lipMediumBrown },
-{ id: "deep-brown", label: "Mostly Brown", color: "#4A2228", image: lipDeepBrown },
-{ id: "grey-brown", label: "Mostly Purple", color: "#7D6B65", image: lipGreyBrown }] as
+{ id: "deep-brown", label: "Mostly Brown", color: "#4A2228", image: lipDeepBrown }] as
 const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
