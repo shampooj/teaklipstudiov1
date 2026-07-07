@@ -79,7 +79,7 @@ const ShadePreview = () => {
         setStatus("Creating player…");
         player = await Player.create({
           clientToken,
-          locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
+          locateFile: locateBanubaFile,
           logger: console,
         });
         if (cancelled) {
