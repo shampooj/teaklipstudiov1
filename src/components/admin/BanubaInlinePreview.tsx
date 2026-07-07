@@ -9,6 +9,7 @@ interface Props {
   hex: string;
   finish: string;
   opacity: number;
+  scale?: number;
 }
 
 const SDK_BASE = BANUBA_SDK_BASE;
@@ -61,7 +62,7 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
 
 
 
-const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity }: Props) => {
+const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity, scale = 1 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const sdkRef = useRef<any>(null);
