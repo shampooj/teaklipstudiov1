@@ -59,6 +59,45 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
 }
 
+async function cropImageFile(file: File, scale: number): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error("Canvas context not available"));
+        return;
+      }
+      const cropWidth = img.width / scale;
+      const cropHeight = img.height / scale;
+      const sx = (img.width - cropWidth) / 2;
+      const sy = (img.height - cropHeight) / 2;
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      ctx.drawImage(img, sx, sy, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Canvas toBlob failed"));
+            return;
+          }
+          resolve(new File([blob], file.name, { type: file.type || "image/png" }));
+        },
+        file.type || "image/png",
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image for crop"));
+    };
+    img.src = url;
+  });
+}
+
 
 
 
@@ -72,8 +111,10 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
   const updateSeqRef = useRef(0);
   const faceDetectedRef = useRef(false);
   const frameCountRef = useRef(0);
+  const croppedUrlRef = useRef<string | null>(null);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
+  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
 
 
   // Init player + load the lip tone image once
@@ -136,8 +177,13 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
         const res = await fetch(lipToneImage);
         const blob = await res.blob();
         const file = new File([blob], "lip.png", { type: blob.type || "image/png" });
-        imageFileRef.current = file;
-        await player.use(new BanubaImage(file));
+        const processedFile = scale > 1 ? await cropImageFile(file, scale) : file;
+        const processedUrl = URL.createObjectURL(processedFile);
+        if (croppedUrlRef.current) URL.revokeObjectURL(croppedUrlRef.current);
+        croppedUrlRef.current = processedUrl;
+        setCroppedImageUrl(processedUrl);
+        imageFileRef.current = processedFile;
+        await player.use(new BanubaImage(processedFile));
         player.play({ pauseOnEmpty: false });
 
 
@@ -153,12 +199,16 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
     return () => {
       cancelled = true;
       readyRef.current = false;
+      if (croppedUrlRef.current) {
+        URL.revokeObjectURL(croppedUrlRef.current);
+        croppedUrlRef.current = null;
+      }
       if (playerRef.current) {
         playerRef.current.destroy().catch(() => {});
         playerRef.current = null;
       }
     };
-  }, [lipToneImage]);
+  }, [lipToneImage, scale]);
 
   // Re-apply a freshly built Banuba effect when controls change.
   // SDK 1.18.x does not expose a public reloadConfig API on the player/effect manager,
@@ -204,10 +254,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Before</p>
           <div className="rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto">
             <img
-              src={lipToneImage}
+              src={croppedImageUrl ?? lipToneImage}
               alt={`${lipToneLabel} before`}
               className="w-full h-full object-cover"
-              style={scale !== 1 ? { transform: `scale(${scale})` } : undefined}
             />
           </div>
         </div>
@@ -218,7 +267,6 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
           <div
             ref={containerRef}
             className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto [&>canvas]:relative [&>canvas]:z-0 [&>canvas]:w-full [&>canvas]:h-full"
-            style={scale !== 1 ? { transform: `scale(${scale})` } : undefined}
           />
         </div>
       </div>
