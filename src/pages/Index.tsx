@@ -1049,14 +1049,6 @@ const Index = () => {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
               
-                {(() => {
-                  const complexionNum = getComplexionType(skinTone, lipTone);
-                  return complexionNum ? (
-                     <p className="font-display text-lg text-foreground text-center">
-                      You Are <span style={{ color: "#A0522D" }}>Complexion Type {complexionNum}</span>
-                    </p>
-                  ) : null;
-                })()}
                 {(faceCropImage || originalImage) && (
                 <div className="flex items-start justify-center gap-4">
                   <div className="w-64 h-64 overflow-hidden flex-shrink-0">
@@ -1092,13 +1084,22 @@ const Index = () => {
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
                               {canRenderBanuba ? (
-                                <BanubaProductPreview
-                                  imageUrl={userFace!}
-                                  hex={setting!.hex}
-                                  finish={setting!.finish}
-                                  opacity={setting!.opacity}
-                                  alt={`${rec.label} on your photo`}
-                                />
+                                <>
+                                  <img
+                                    src={userFace!}
+                                    alt="Your photo"
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0">
+                                    <BanubaProductPreview
+                                      imageUrl={userFace!}
+                                      hex={setting!.hex}
+                                      finish={setting!.finish}
+                                      opacity={setting!.opacity}
+                                      alt={`${rec.label} on your photo`}
+                                    />
+                                  </div>
+                                </>
                               ) : img?.imageUrl ? (
                                 <>
                                   <img
