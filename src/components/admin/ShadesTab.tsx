@@ -94,7 +94,7 @@ const ShadesTab = () => {
   const [selectedShade, setSelectedShade] = useState<string>(SHADES[0]?.name ?? "");
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingRow, setSavingRow] = useState<string | null>(null);
   const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
 
   const fetchSettings = async () => {
@@ -147,8 +147,6 @@ const ShadesTab = () => {
       updated_at: new Date().toISOString(),
     }));
 
-  const [savingRow, setSavingRow] = useState<string | null>(null);
-
   const handleSaveRow = async (lipTone: string) => {
     const r = rows[lipTone];
     if (!r) return;
@@ -162,20 +160,6 @@ const ShadesTab = () => {
       toast.success(`${r.lip_tone} saved`);
     }
     setSavingRow(null);
-  };
-
-  const handleSaveAll = async () => {
-    setSaving(true);
-    const payload = Object.values(rows).flatMap(buildPayload);
-    const { error } = await (supabase.from as any)("lipstick_shade_settings")
-      .upsert(payload, { onConflict: "variant_name,skin_tone,lip_tone" });
-    if (error) {
-      toast.error(`Failed to save settings: ${error.message}`);
-      console.error(error);
-    } else {
-      toast.success("All shade settings saved");
-    }
-    setSaving(false);
   };
 
 
@@ -213,18 +197,10 @@ const ShadesTab = () => {
 
 
       <div className="border border-border rounded-2xl p-5 space-y-4">
-        <div className="flex items-center justify-between">
-          <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
-            Banuba render settings per complexion type
-          </p>
-          <Button
-            className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
-            onClick={handleSaveAll}
-            disabled={saving || loading}
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </Button>
-        </div>
+        <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
+          Banuba render settings per complexion type
+        </p>
+
 
         {loading ? (
           <p className="text-muted-foreground text-xs text-center py-8">Loading…</p>
@@ -329,7 +305,7 @@ const ShadesTab = () => {
                         <Button
                           type="button"
                           onClick={() => handleSaveRow(t.id)}
-                          disabled={savingRow === t.id || saving}
+                          disabled={savingRow === t.id}
                           className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
                         >
                           {savingRow === t.id ? "Saving…" : "Save"}
