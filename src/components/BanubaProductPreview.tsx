@@ -79,24 +79,24 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
     // Poll the canvas until it has rendered a visible frame.
     const checkCanvas = () => {
       const canvas = containerRef.current?.querySelector("canvas");
-      if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
-        try {
-          const ctx = canvas.getContext("2d", { willReadFrequently: true });
-          if (ctx) {
-            const imageData = ctx.getImageData(
-              Math.floor(canvas.width / 2),
-              Math.floor(canvas.height / 2),
-              1,
-              1,
-            ).data;
-            if (imageData[3] > 0) {
-              setRendered(true);
-              return;
+          if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
+            try {
+              const ctx = canvas.getContext("2d", { willReadFrequently: true });
+              if (ctx) {
+                const imageData = ctx.getImageData(
+                  Math.floor(canvas.width / 2),
+                  Math.floor(canvas.height / 2),
+                  1,
+                  1,
+                ).data;
+                if (imageData[3] > 0) {
+                  if (!cancelled) setRendered(true);
+                  return;
+                }
+              }
+            } catch {
+              // ignore canvas read errors
             }
-          }
-        } catch {
-          // ignore canvas read errors
-        }
 
         // Fallback for WebGL canvases: sample via toDataURL.
         try {
