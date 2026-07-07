@@ -177,8 +177,13 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
         const res = await fetch(lipToneImage);
         const blob = await res.blob();
         const file = new File([blob], "lip.png", { type: blob.type || "image/png" });
-        imageFileRef.current = file;
-        await player.use(new BanubaImage(file));
+        const processedFile = scale > 1 ? await cropImageFile(file, scale) : file;
+        const processedUrl = URL.createObjectURL(processedFile);
+        if (croppedUrlRef.current) URL.revokeObjectURL(croppedUrlRef.current);
+        croppedUrlRef.current = processedUrl;
+        setCroppedImageUrl(processedUrl);
+        imageFileRef.current = processedFile;
+        await player.use(new BanubaImage(processedFile));
         player.play({ pauseOnEmpty: false });
 
 
