@@ -147,8 +147,6 @@ const ShadesTab = () => {
       updated_at: new Date().toISOString(),
     }));
 
-  const [savingRow, setSavingRow] = useState<string | null>(null);
-
   const handleSaveRow = async (lipTone: string) => {
     const r = rows[lipTone];
     if (!r) return;
@@ -162,20 +160,6 @@ const ShadesTab = () => {
       toast.success(`${r.lip_tone} saved`);
     }
     setSavingRow(null);
-  };
-
-  const handleSaveAll = async () => {
-    setSaving(true);
-    const payload = Object.values(rows).flatMap(buildPayload);
-    const { error } = await (supabase.from as any)("lipstick_shade_settings")
-      .upsert(payload, { onConflict: "variant_name,skin_tone,lip_tone" });
-    if (error) {
-      toast.error(`Failed to save settings: ${error.message}`);
-      console.error(error);
-    } else {
-      toast.success("All shade settings saved");
-    }
-    setSaving(false);
   };
 
 
