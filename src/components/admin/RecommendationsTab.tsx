@@ -25,18 +25,27 @@ const SKIN_TONE_LABELS: Record<string, string> = {
 
 const LIP_TONE_LABELS: Record<string, string> = {
   "bright-pink": "Bright Pink",
-  "brown-pink": "Brown Pink",
-  "mauve-pink": "Mauve Pink",
   "beige": "Beige",
+  "mauve-pink": "Mauve",
+  "neutral-brown": "Chestnut",
+  "two-toned-grey": "Two-Toned Grey",
   "two-toned-purple": "Two-Toned Purple",
   "two-toned-brown": "Two-Toned Brown",
-  "two-toned-grey": "Two-Toned Grey",
-  "two-toned-beige": "Two-Toned Beige",
-  "neutral-brown": "Brick",
   "medium-brown": "Two-toned Deep Brown",
   "deep-brown": "Mostly Brown",
-  "grey-brown": "Mostly Purple",
 };
+
+const FRONTEND_LIP_TONE_IDS = [
+  "bright-pink",
+  "beige",
+  "mauve-pink",
+  "neutral-brown",
+  "two-toned-grey",
+  "two-toned-purple",
+  "two-toned-brown",
+  "medium-brown",
+  "deep-brown",
+];
 
 interface Row {
   skin_tone: string;
@@ -48,7 +57,7 @@ interface Row {
 export default function RecommendationsTab() {
   const qc = useQueryClient();
   const [skinTone, setSkinTone] = useState<string>(SKIN_TONE_IDS[0]);
-  const [lipTone, setLipTone] = useState<string>(LIP_TONE_IDS[0]);
+  const [lipTone, setLipTone] = useState<string>(FRONTEND_LIP_TONE_IDS[0]);
   const [slots, setSlots] = useState<Record<RecommendationCategory, string>>({
     MLBB: "", RED: "", DAY: "", EVENING: "",
   });
@@ -142,7 +151,7 @@ export default function RecommendationsTab() {
           <Select value={lipTone} onValueChange={setLipTone}>
             <SelectTrigger className="w-56 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {LIP_TONE_IDS.map((id) => (
+              {FRONTEND_LIP_TONE_IDS.map((id) => (
                 <SelectItem key={id} value={id} className="text-xs">{LIP_TONE_LABELS[id]}</SelectItem>
               ))}
             </SelectContent>
