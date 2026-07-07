@@ -30,7 +30,7 @@ function buildConfig(color: string, finish: string, opacity: number) {
         makeup_lipstick: {
           color: hexToRgbString(color),
           finish: FINISH_MAP[finish] ?? "satin",
-          coverage: opacityToCoverage(opacity),
+          coverage: opacity,
         },
       },
     ],
@@ -38,10 +38,9 @@ function buildConfig(color: string, finish: string, opacity: number) {
 }
 
 function opacityToCoverage(opacity: number) {
-  if (opacity < 0.34) return "low";
-  if (opacity < 0.67) return "mid";
-  return "high";
+  return Math.max(0, Math.min(1, opacity));
 }
+
 
 function hexToRgbString(hex: string) {
   const normalized = hex.trim().replace(/^#/, "");
