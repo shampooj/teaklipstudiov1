@@ -119,16 +119,16 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
                 1,
                 1,
               );
-              const pixel = offCtx.getImageData(0, 0, 1, 1).data;
-              if (pixel[3] > 0) {
-                setRendered(true);
-              } else if (!cancelled) {
-                timeoutId = window.setTimeout(checkCanvas, 100);
-              }
-            };
-            img.onerror = () => {
-              if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
-            };
+                  const pixel = offCtx.getImageData(0, 0, 1, 1).data;
+                  if (pixel[3] > 0) {
+                    if (!cancelled) setRendered(true);
+                  } else if (!cancelled) {
+                    timeoutId = window.setTimeout(checkCanvas, 100);
+                  }
+                };
+                img.onerror = () => {
+                  if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
+                };
             img.src = dataUrl;
             return;
           }
