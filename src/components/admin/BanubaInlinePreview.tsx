@@ -199,12 +199,16 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
     return () => {
       cancelled = true;
       readyRef.current = false;
+      if (croppedUrlRef.current) {
+        URL.revokeObjectURL(croppedUrlRef.current);
+        croppedUrlRef.current = null;
+      }
       if (playerRef.current) {
         playerRef.current.destroy().catch(() => {});
         playerRef.current = null;
       }
     };
-  }, [lipToneImage]);
+  }, [lipToneImage, scale]);
 
   // Re-apply a freshly built Banuba effect when controls change.
   // SDK 1.18.x does not expose a public reloadConfig API on the player/effect manager,
