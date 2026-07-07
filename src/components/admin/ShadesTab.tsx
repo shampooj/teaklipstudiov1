@@ -245,25 +245,8 @@ const ShadesTab = () => {
                             alt={t.label}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
-                          <div
-                            className="absolute inset-0"
-                            style={{
-                              backgroundColor: row.hex,
-                              opacity: row.opacity,
-                              mixBlendMode: blend as any,
-                            }}
-                          />
-                          {row.finish === "glossy" && (
-                            <div
-                              className="absolute inset-0 pointer-events-none"
-                              style={{
-                                background:
-                                  "linear-gradient(120deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 45%)",
-                                mixBlendMode: "screen",
-                              }}
-                            />
-                          )}
                         </div>
+
                       </td>
                       <td className="py-2 pr-3 font-medium">{t.label}</td>
                       <td className="py-2 pr-3">
