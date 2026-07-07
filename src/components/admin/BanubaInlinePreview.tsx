@@ -14,44 +14,50 @@ interface Props {
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
-const METHOD_BY_FINISH: Record<string, string> = {
-  matte: "matt",
-  satin: "matt",
+const FINISH_MAP: Record<string, string> = {
+  matte: "matte_cream",
+  satin: "satin",
   glossy: "shine",
 };
 
-function getLipstickScript(color: string, finish: string, coverage: number) {
-  const method = METHOD_BY_FINISH[finish] ?? "matt";
-  return `Lips.${method}("${hexToRgbaString(color, coverage)}")`;
+function buildConfig(color: string, finish: string, opacity: number) {
+  return {
+    scene: "teak-lipstick-preview",
+    version: "2.0.0",
+    camera: {},
+    faces: [
+      {
+        makeup_lipstick: {
+          color: hexToRgbString(color),
+          finish: FINISH_MAP[finish] ?? "satin",
+          coverage: opacityToCoverage(opacity),
+        },
+      },
+    ],
+  };
 }
 
-function hexToRgbaString(hex: string, alpha: number) {
+function opacityToCoverage(opacity: number) {
+  if (opacity < 0.34) return "low";
+  if (opacity < 0.67) return "mid";
+  return "high";
+}
+
+function hexToRgbString(hex: string) {
   const normalized = hex.trim().replace(/^#/, "");
   const value = normalized.length === 3
     ? normalized.split("").map((char) => `${char}${char}`).join("")
     : normalized;
 
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0 0";
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
 
   const channels = [0, 2, 4].map((start) => parseInt(value.slice(start, start + 2), 16) / 255);
-  const opacity = Math.max(0, Math.min(1, alpha));
-  return [...channels, opacity].map((channel) => Number(channel.toFixed(4))).join(" ");
+  return channels.map((channel) => Number(channel.toFixed(4))).join(" ");
 }
 
 function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
-    "config.json": strToU8(
-      JSON.stringify(
-        {
-          scene: "teak-lipstick-preview",
-          version: "2.0.0",
-          camera: {},
-        },
-        null,
-        2,
-      ),
-    ),
-    "config.js": strToU8(getLipstickScript(color, finish, coverage)),
+    "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
   });
   const bytes = new Uint8Array(archive);
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
