@@ -58,10 +58,7 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
 }
 
-function getBlendMode(finish: string) {
-  if (finish === "glossy") return "overlay";
-  return "multiply";
-}
+
 
 
 const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity }: Props) => {
