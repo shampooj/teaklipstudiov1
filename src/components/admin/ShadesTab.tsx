@@ -229,8 +229,6 @@ const ShadesTab = () => {
                   const row = rows[t.id];
                   if (!row) return null;
                   const avatarImg = avatarFor(t.id, tIdx);
-                  const row = rows[t.id];
-                  if (!row) return null;
                   const blend =
                     row.finish === "matte"
                       ? "multiply"
