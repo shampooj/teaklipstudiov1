@@ -50,7 +50,7 @@ export default function RecommendationsTab() {
   const [skinTone, setSkinTone] = useState<string>(SKIN_TONE_IDS[0]);
   const [lipTone, setLipTone] = useState<string>(LIP_TONE_IDS[0]);
   const [slots, setSlots] = useState<Record<RecommendationCategory, string>>({
-    MLBB: "", RED: "", DAY: "", EVENING: "", LIPSET: "",
+    MLBB: "", RED: "", DAY: "", EVENING: "",
   });
   const [saving, setSaving] = useState(false);
 
@@ -69,7 +69,7 @@ export default function RecommendationsTab() {
   useEffect(() => {
     if (!rows) return;
     const next: Record<RecommendationCategory, string> = {
-      MLBB: "", RED: "", DAY: "", EVENING: "", LIPSET: "",
+      MLBB: "", RED: "", DAY: "", EVENING: "",
     };
     for (const r of rows) {
       if (r.skin_tone === skinTone && r.lip_tone === lipTone) {
