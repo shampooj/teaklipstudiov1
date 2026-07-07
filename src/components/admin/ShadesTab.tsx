@@ -94,7 +94,7 @@ const ShadesTab = () => {
   const [selectedShade, setSelectedShade] = useState<string>(SHADES[0]?.name ?? "");
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [savingRow, setSavingRow] = useState<string | null>(null);
   const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
 
   const fetchSettings = async () => {
