@@ -75,6 +75,7 @@ const LIP_TONES = [
 { id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
 { id: "mauve-pink", label: "Mauve Pink", color: "#B5838D", image: lipMauvePink },
 { id: "neutral-brown", label: "Brick", color: "#A0705A", image: lipNeutralBrown },
+{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
 { id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
 { id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
 { id: "medium-brown", label: "Two-toned Deep Brown", color: "#7A5240", image: lipMediumBrown },
