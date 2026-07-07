@@ -1204,6 +1204,10 @@ const Index = () => {
                       userFace={(faceCropImage || originalImage)!}
                       skinTone={skinTone}
                       lipTone={lipTone}
+                      sessionId={sessionId}
+                      cartStates={cartStates}
+                      setCartStates={setCartStates}
+                      trackEvent={trackEvent}
                     />
                   )}
 
