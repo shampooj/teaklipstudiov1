@@ -136,27 +136,44 @@ const ShadesTab = () => {
     setRows((prev) => ({ ...prev, [lipTone]: { ...prev[lipTone], ...patch } }));
   };
 
+  const buildPayload = (r: Setting) =>
+    SKIN_TONES.map((st) => ({
+      variant_name: r.variant_name,
+      skin_tone: st.id,
+      lip_tone: r.lip_tone,
+      hex: r.hex,
+      finish: r.finish,
+      opacity: r.opacity,
+      updated_at: new Date().toISOString(),
+    }));
+
+  const [savingRow, setSavingRow] = useState<string | null>(null);
+
+  const handleSaveRow = async (lipTone: string) => {
+    const r = rows[lipTone];
+    if (!r) return;
+    setSavingRow(lipTone);
+    const { error } = await (supabase.from as any)("lipstick_shade_settings")
+      .upsert(buildPayload(r), { onConflict: "variant_name,skin_tone,lip_tone" });
+    if (error) {
+      toast.error(`Failed to save: ${error.message}`);
+      console.error(error);
+    } else {
+      toast.success(`${r.lip_tone} saved`);
+    }
+    setSavingRow(null);
+  };
+
   const handleSaveAll = async () => {
     setSaving(true);
-    const now = new Date().toISOString();
-    const payload = Object.values(rows).flatMap((r) =>
-      SKIN_TONES.map((st) => ({
-        variant_name: r.variant_name,
-        skin_tone: st.id,
-        lip_tone: r.lip_tone,
-        hex: r.hex,
-        finish: r.finish,
-        opacity: r.opacity,
-        updated_at: now,
-      })),
-    );
+    const payload = Object.values(rows).flatMap(buildPayload);
     const { error } = await (supabase.from as any)("lipstick_shade_settings")
       .upsert(payload, { onConflict: "variant_name,skin_tone,lip_tone" });
     if (error) {
-      toast.error("Failed to save settings");
+      toast.error(`Failed to save settings: ${error.message}`);
       console.error(error);
     } else {
-      toast.success("Shade settings saved");
+      toast.success("All shade settings saved");
     }
     setSaving(false);
   };
@@ -221,6 +238,7 @@ const ShadesTab = () => {
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
                   <th className="py-2 pr-3 font-normal w-44">Opacity</th>
+                  <th className="py-2 pr-3 font-normal w-24"></th>
                   <th className="py-2 pr-3 font-normal w-12"></th>
                 </tr>
               </thead>
@@ -308,6 +326,16 @@ const ShadesTab = () => {
                         </div>
                       </td>
                       <td className="py-2 pr-3">
+                        <Button
+                          type="button"
+                          onClick={() => handleSaveRow(t.id)}
+                          disabled={savingRow === t.id || saving}
+                          className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
+                        >
+                          {savingRow === t.id ? "Saving…" : "Save"}
+                        </Button>
+                      </td>
+                      <td className="py-2 pr-3">
                         <button
                           type="button"
                           onClick={() =>
@@ -327,7 +355,7 @@ const ShadesTab = () => {
                     </tr>
                     {previewTone?.id === t.id && (
                       <tr key={`${t.id}-preview`} className="bg-muted/30">
-                        <td colSpan={6} className="py-4 px-3">
+                        <td colSpan={7} className="py-4 px-3">
                           <ErrorBoundary>
                             <BanubaInlinePreview
                               lipToneLabel={t.label}
