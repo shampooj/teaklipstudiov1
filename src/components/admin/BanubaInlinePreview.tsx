@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { zipSync, strToU8 } from "fflate";
 import { supabase } from "@/integrations/supabase/client";
+import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
 
 interface Props {
   lipToneLabel: string;
