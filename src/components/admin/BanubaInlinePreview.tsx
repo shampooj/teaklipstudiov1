@@ -207,6 +207,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
               src={lipToneImage}
               alt={`${lipToneLabel} before`}
               className="w-full h-full object-cover"
+              style={scale !== 1 ? { transform: `scale(${scale})` } : undefined}
             />
           </div>
         </div>
@@ -217,6 +218,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
           <div
             ref={containerRef}
             className="relative rounded-xl overflow-hidden border border-border bg-muted w-full max-w-[560px] aspect-square mx-auto [&>canvas]:relative [&>canvas]:z-0 [&>canvas]:w-full [&>canvas]:h-full"
+            style={scale !== 1 ? { transform: `scale(${scale})` } : undefined}
           />
         </div>
       </div>
