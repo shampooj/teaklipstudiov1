@@ -305,7 +305,7 @@ const ShadesTab = () => {
                         <Button
                           type="button"
                           onClick={() => handleSaveRow(t.id)}
-                          disabled={savingRow === t.id || saving}
+                          disabled={savingRow === t.id}
                           className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
                         >
                           {savingRow === t.id ? "Saving…" : "Save"}
