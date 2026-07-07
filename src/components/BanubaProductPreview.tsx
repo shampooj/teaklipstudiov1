@@ -98,43 +98,31 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
               // ignore canvas read errors
             }
 
-        // Fallback for WebGL canvases: sample via toDataURL.
-        try {
-          const dataUrl = canvas.toDataURL("image/png");
-          const offscreen = document.createElement("canvas");
-          offscreen.width = 1;
-          offscreen.height = 1;
-          const offCtx = offscreen.getContext("2d");
-          if (offCtx) {
-            const img = new Image();
-            img.onload = () => {
-              offCtx.drawImage(
-                img,
-                Math.floor(canvas.width / 2),
-                Math.floor(canvas.height / 2),
-                1,
-                1,
-                0,
-                0,
-                1,
-                1,
-              );
-                  const pixel = offCtx.getImageData(0, 0, 1, 1).data;
-                  if (pixel[3] > 0) {
-                    if (!cancelled) setRendered(true);
-                  } else if (!cancelled) {
-                    timeoutId = window.setTimeout(checkCanvas, 100);
-                  }
-                };
-                img.onerror = () => {
-                  if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
-                };
-            img.src = dataUrl;
-            return;
-          }
-        } catch {
-          // ignore toDataURL errors
-        }
+            // Fallback for WebGL canvases: read the center pixel directly.
+            try {
+              const gl =
+                canvas.getContext("webgl2") ||
+                canvas.getContext("webgl") ||
+                canvas.getContext("experimental-webgl");
+              if (gl) {
+                const pixels = new Uint8Array(4);
+                gl.readPixels(
+                  Math.floor(canvas.width / 2),
+                  canvas.height - 1 - Math.floor(canvas.height / 2),
+                  1,
+                  1,
+                  gl.RGBA,
+                  gl.UNSIGNED_BYTE,
+                  pixels,
+                );
+                if (pixels[3] > 0) {
+                  if (!cancelled) setRendered(true);
+                  return;
+                }
+              }
+            } catch {
+              // ignore WebGL read errors
+            }
       }
       if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
     };
