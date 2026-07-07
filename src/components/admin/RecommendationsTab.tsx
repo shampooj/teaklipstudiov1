@@ -57,7 +57,7 @@ interface Row {
 export default function RecommendationsTab() {
   const qc = useQueryClient();
   const [skinTone, setSkinTone] = useState<string>(SKIN_TONE_IDS[0]);
-  const [lipTone, setLipTone] = useState<string>(LIP_TONE_IDS[0]);
+  const [lipTone, setLipTone] = useState<string>(FRONTEND_LIP_TONE_IDS[0]);
   const [slots, setSlots] = useState<Record<RecommendationCategory, string>>({
     MLBB: "", RED: "", DAY: "", EVENING: "",
   });
@@ -151,7 +151,7 @@ export default function RecommendationsTab() {
           <Select value={lipTone} onValueChange={setLipTone}>
             <SelectTrigger className="w-56 text-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {LIP_TONE_IDS.map((id) => (
+              {FRONTEND_LIP_TONE_IDS.map((id) => (
                 <SelectItem key={id} value={id} className="text-xs">{LIP_TONE_LABELS[id]}</SelectItem>
               ))}
             </SelectContent>
