@@ -101,7 +101,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         setStatus("Creating player…");
         player = await Player.create({
           clientToken,
-          locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
+          locateFile: locateBanubaFile,
         });
         if (cancelled) {
           await player.destroy();
