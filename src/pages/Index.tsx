@@ -1130,7 +1130,12 @@ const Index = () => {
                               )}
                             </div>
                           </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
+                            <span
+                              className="w-3 h-3 rounded-full border border-foreground/20 shrink-0"
+                              style={{ backgroundColor: rec.color }}
+                              aria-hidden="true"
+                            />
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
