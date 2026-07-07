@@ -37,10 +37,6 @@ function buildConfig(color: string, finish: string, opacity: number) {
   };
 }
 
-function opacityToCoverage(opacity: number) {
-  return Math.max(0, Math.min(1, opacity));
-}
-
 
 function hexToRgbString(hex: string) {
   const normalized = hex.trim().replace(/^#/, "");
