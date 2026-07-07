@@ -225,7 +225,10 @@ const ShadesTab = () => {
                 </tr>
               </thead>
               <tbody>
-                {LIP_TONES.map((t) => {
+                {LIP_TONES.map((t, tIdx) => {
+                  const row = rows[t.id];
+                  if (!row) return null;
+                  const avatarImg = avatarFor(t.id, tIdx);
                   const row = rows[t.id];
                   if (!row) return null;
                   const blend =
