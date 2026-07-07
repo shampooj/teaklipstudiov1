@@ -59,6 +59,45 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
 }
 
+async function cropImageFile(file: File, scale: number): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(url);
+        reject(new Error("Canvas context not available"));
+        return;
+      }
+      const cropWidth = img.width / scale;
+      const cropHeight = img.height / scale;
+      const sx = (img.width - cropWidth) / 2;
+      const sy = (img.height - cropHeight) / 2;
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
+      ctx.drawImage(img, sx, sy, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Canvas toBlob failed"));
+            return;
+          }
+          resolve(new File([blob], file.name, { type: file.type || "image/png" }));
+        },
+        file.type || "image/png",
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("Failed to load image for crop"));
+    };
+    img.src = url;
+  });
+}
+
 
 
 
