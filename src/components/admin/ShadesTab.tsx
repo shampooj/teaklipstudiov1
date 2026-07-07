@@ -357,6 +357,7 @@ const ShadesTab = () => {
                               hex={row.hex}
                               finish={row.finish}
                               opacity={row.opacity}
+                              scale={t.id === "two-toned-grey" || t.id === "bright-pink" ? 1.5 : 1}
                             />
                           </ErrorBoundary>
                         </td>
