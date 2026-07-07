@@ -1,0 +1,169 @@
+import { useEffect, useRef, useState } from "react";
+import { zipSync, strToU8 } from "fflate";
+import { supabase } from "@/integrations/supabase/client";
+import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
+
+interface Props {
+  imageUrl: string;
+  hex: string;
+  finish: string;
+  opacity: number;
+  alt?: string;
+  className?: string;
+}
+
+const SDK_BASE = BANUBA_SDK_BASE;
+const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
+
+const FINISH_MAP: Record<string, string> = {
+  matte: "matte_cream",
+  satin: "satin",
+  glossy: "shine",
+};
+
+function hexToRgbString(hex: string) {
+  const normalized = hex.trim().replace(/^#/, "");
+  const value = normalized.length === 3
+    ? normalized.split("").map((c) => `${c}${c}`).join("")
+    : normalized;
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
+  const channels = [0, 2, 4].map((s) => parseInt(value.slice(s, s + 2), 16) / 255);
+  return channels.map((c) => Number(c.toFixed(4))).join(" ");
+}
+
+function buildEffectZip(color: string, finish: string, coverage: number) {
+  const config = {
+    scene: "teak-lipstick-preview",
+    version: "2.0.0",
+    camera: {},
+    faces: [
+      {
+        makeup_lipstick: {
+          color: hexToRgbString(color),
+          finish: FINISH_MAP[finish] ?? "satin",
+          coverage,
+        },
+      },
+    ],
+  };
+  const archive = zipSync({ "config.json": strToU8(JSON.stringify(config)) });
+  const bytes = new Uint8Array(archive);
+  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
+}
+
+const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<any>(null);
+  const sdkRef = useRef<any>(null);
+  const imageFileRef = useRef<File | null>(null);
+  const readyRef = useRef(false);
+  const updateSeqRef = useRef(0);
+  const [ready, setReady] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    let player: any;
+
+    (async () => {
+      try {
+        const { data: tokenData, error: tokenErr } = await supabase.functions.invoke(
+          "get-banuba-token",
+        );
+        if (tokenErr || !tokenData?.token) throw new Error("token");
+
+        const sdk: any = await import(/* @vite-ignore */ `${SDK_BASE}/BanubaSDK.browser.esm.js`);
+        if (cancelled) return;
+        sdkRef.current = sdk;
+
+        const { Player, Module, Effect, Dom, Image: BanubaImage } = sdk;
+        player = await Player.create({
+          clientToken: tokenData.token,
+          locateFile: locateBanubaFile,
+        });
+        if (cancelled) {
+          await player.destroy();
+          return;
+        }
+        playerRef.current = player;
+
+        await player.addModule(
+          ...MODULE_IDS.map((id: string) => new Module(`${SDK_BASE}/modules/${id}.zip`)),
+        );
+
+        const effect = new Effect(buildEffectZip(hex, finish, opacity));
+        await player.applyEffect(effect);
+
+        if (containerRef.current) Dom.render(player, containerRef.current);
+
+        const res = await fetch(imageUrl);
+        const blob = await res.blob();
+        const file = new File([blob], "face.png", { type: blob.type || "image/png" });
+        imageFileRef.current = file;
+        await player.use(new BanubaImage(file));
+        player.play({ pauseOnEmpty: false });
+
+        readyRef.current = true;
+        setReady(true);
+      } catch (e) {
+        console.error("BanubaProductPreview init failed", e);
+        if (!cancelled) setFailed(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      readyRef.current = false;
+      if (playerRef.current) {
+        playerRef.current.destroy().catch(() => {});
+        playerRef.current = null;
+      }
+    };
+  }, [imageUrl]);
+
+  useEffect(() => {
+    const p = playerRef.current;
+    const sdk = sdkRef.current;
+    const file = imageFileRef.current;
+    if (!p || !sdk || !file || !readyRef.current) return;
+    let cancelled = false;
+    const seq = updateSeqRef.current + 1;
+    updateSeqRef.current = seq;
+    const t = window.setTimeout(async () => {
+      try {
+        const nextEffect = new sdk.Effect(buildEffectZip(hex, finish, opacity));
+        await p.applyEffect(nextEffect);
+        if (cancelled || updateSeqRef.current !== seq) return;
+        await p.use(new sdk.Image(file));
+        if (cancelled || updateSeqRef.current !== seq) return;
+        p.play({ pauseOnEmpty: false });
+      } catch (e) {
+        console.error(e);
+      }
+    }, 100);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+  }, [hex, finish, opacity, ready]);
+
+  if (failed) {
+    return (
+      <img
+        src={imageUrl}
+        alt={alt}
+        className={className ?? "w-full h-full object-cover"}
+      />
+    );
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={`relative w-full h-full [&>canvas]:relative [&>canvas]:z-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover ${className ?? ""}`}
+      aria-label={alt}
+    />
+  );
+};
+
+export default BanubaProductPreview;
