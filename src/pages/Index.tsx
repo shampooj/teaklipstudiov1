@@ -452,6 +452,7 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
+  const [banubaReady, setBanubaReady] = useState<Record<number, boolean>>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -1079,7 +1080,7 @@ const Index = () => {
                                   <img
                                     src={userFace!}
                                     alt="Your photo"
-                                    className="absolute inset-0 w-full h-full object-cover"
+                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${banubaReady[i] ? 'opacity-100' : 'opacity-0'}`}
                                   />
                                   <div className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0">
                                     <BanubaProductPreview
@@ -1088,6 +1089,7 @@ const Index = () => {
                                       finish={setting!.finish}
                                       opacity={setting!.opacity}
                                       alt={`${rec.label} on your photo`}
+                                      onReady={() => setBanubaReady((prev) => ({ ...prev, [i]: true }))}
                                     />
                                   </div>
                                 </>
