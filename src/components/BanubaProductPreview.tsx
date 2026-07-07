@@ -74,6 +74,70 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
   useEffect(() => {
     let cancelled = false;
     let player: any;
+    let timeoutId: number | null = null;
+
+    // Poll the canvas until it has rendered a visible frame.
+    const checkCanvas = () => {
+      const canvas = containerRef.current?.querySelector("canvas");
+      if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
+        try {
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          if (ctx) {
+            const imageData = ctx.getImageData(
+              Math.floor(canvas.width / 2),
+              Math.floor(canvas.height / 2),
+              1,
+              1,
+            ).data;
+            if (imageData[3] > 0) {
+              setRendered(true);
+              return;
+            }
+          }
+        } catch {
+          // ignore canvas read errors
+        }
+
+        // Fallback for WebGL canvases: sample via toDataURL.
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const offscreen = document.createElement("canvas");
+          offscreen.width = 1;
+          offscreen.height = 1;
+          const offCtx = offscreen.getContext("2d");
+          if (offCtx) {
+            const img = new Image();
+            img.onload = () => {
+              offCtx.drawImage(
+                img,
+                Math.floor(canvas.width / 2),
+                Math.floor(canvas.height / 2),
+                1,
+                1,
+                0,
+                0,
+                1,
+                1,
+              );
+              const pixel = offCtx.getImageData(0, 0, 1, 1).data;
+              if (pixel[3] > 0) {
+                setRendered(true);
+              } else if (!cancelled) {
+                timeoutId = window.setTimeout(checkCanvas, 100);
+              }
+            };
+            img.onerror = () => {
+              if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
+            };
+            img.src = dataUrl;
+            return;
+          }
+        } catch {
+          // ignore toDataURL errors
+        }
+      }
+      if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
+    };
 
     (async () => {
       try {
@@ -115,75 +179,7 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
 
         readyRef.current = true;
         setReady(true);
-
-        // Wait until the Banuba canvas actually draws a frame before signalling render complete.
-        let timeoutId: number | null = null;
-        const checkCanvas = () => {
-          const canvas = containerRef.current?.querySelector("canvas");
-          if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
-            try {
-              const ctx = canvas.getContext("2d", { willReadFrequently: true });
-              if (ctx) {
-                const imageData = ctx.getImageData(
-                  Math.floor(canvas.width / 2),
-                  Math.floor(canvas.height / 2),
-                  1,
-                  1,
-                ).data;
-                if (imageData[3] > 0) {
-                  setRendered(true);
-                  return;
-                }
-              }
-            } catch {
-              // ignore canvas read errors
-            }
-
-            // Fallback for WebGL canvases: sample via toDataURL.
-            try {
-              const dataUrl = canvas.toDataURL("image/png");
-              const offscreen = document.createElement("canvas");
-              offscreen.width = 1;
-              offscreen.height = 1;
-              const offCtx = offscreen.getContext("2d");
-              if (offCtx) {
-                const img = new Image();
-                img.onload = () => {
-                  offCtx.drawImage(
-                    img,
-                    Math.floor(canvas.width / 2),
-                    Math.floor(canvas.height / 2),
-                    1,
-                    1,
-                    0,
-                    0,
-                    1,
-                    1,
-                  );
-                  const pixel = offCtx.getImageData(0, 0, 1, 1).data;
-                  if (pixel[3] > 0) {
-                    setRendered(true);
-                  } else if (!cancelled) {
-                    timeoutId = window.setTimeout(checkCanvas, 100);
-                  }
-                };
-                img.onerror = () => {
-                  if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
-                };
-                img.src = dataUrl;
-                return;
-              }
-            } catch {
-              // ignore toDataURL errors
-            }
-          }
-          if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
-        };
         timeoutId = window.setTimeout(checkCanvas, 100);
-        return () => {
-          cancelled = true;
-          if (timeoutId !== null) window.clearTimeout(timeoutId);
-        };
       } catch (e) {
         console.error("BanubaProductPreview init failed", e);
         if (!cancelled) setFailed(true);
@@ -193,6 +189,7 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
     return () => {
       cancelled = true;
       readyRef.current = false;
+      if (timeoutId !== null) window.clearTimeout(timeoutId);
       if (playerRef.current) {
         playerRef.current.destroy().catch(() => {});
         playerRef.current = null;
