@@ -14,45 +14,33 @@ interface Props {
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
-// Map admin finish values to Banuba finish values
-const FINISH_MAP: Record<string, string> = {
-  matte: "matte_cream",
-  satin: "satin",
+const METHOD_BY_FINISH: Record<string, string> = {
+  matte: "matt",
+  satin: "matt",
   glossy: "shine",
 };
 
-function buildConfig(color: string, finish: string, coverage: number) {
-  return {
-    version: "2.0.0",
-    scene: "beauty_demo",
-    camera: {},
-    faces: [
-      {
-        makeup_lipstick: {
-          color: hexToRgbString(color),
-          finish: FINISH_MAP[finish] ?? "satin",
-          coverage: Math.max(0, Math.min(1, coverage)),
-        },
-      },
-    ],
-  };
+function getLipstickScript(color: string, finish: string, coverage: number) {
+  const method = METHOD_BY_FINISH[finish] ?? "matt";
+  return `Lips.${method}("${hexToRgbaString(color, coverage)}")`;
 }
 
-function hexToRgbString(hex: string) {
+function hexToRgbaString(hex: string, alpha: number) {
   const normalized = hex.trim().replace(/^#/, "");
   const value = normalized.length === 3
     ? normalized.split("").map((char) => `${char}${char}`).join("")
     : normalized;
 
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0 0";
 
   const channels = [0, 2, 4].map((start) => parseInt(value.slice(start, start + 2), 16) / 255);
-  return channels.map((channel) => Number(channel.toFixed(4))).join(" ");
+  const opacity = Math.max(0, Math.min(1, alpha));
+  return [...channels, opacity].map((channel) => Number(channel.toFixed(4))).join(" ");
 }
 
 function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
-    "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
+    "config.js": strToU8(getLipstickScript(color, finish, coverage)),
   });
   const bytes = new Uint8Array(archive);
   return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
