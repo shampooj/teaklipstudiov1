@@ -32,6 +32,24 @@ import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
 const lipGreyBrown = lipGreyBrownAsset.url;
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
+import avatar3Asset from "@/assets/avatar-3.jpg.asset.json";
+import avatar4Asset from "@/assets/avatar-4.jpg.asset.json";
+import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
+import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
+import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
+import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
+import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
+
+const AVATAR_IMAGES = [
+  avatar3Asset.url,
+  avatar4Asset.url,
+  avatar5Asset.url,
+  avatar6Asset.url,
+  avatarSkinLightAsset.url,
+  avatarSkinMediumAsset.url,
+  avatarNupooraAsset.url,
+];
+const avatarFor = (id: string, idx: number) => AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
 
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
