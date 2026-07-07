@@ -38,6 +38,7 @@ import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
 import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
 import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
 import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
+import avatarSkinRichBrownAsset from "@/assets/avatar-skin-rich-brown.jpg.asset.json";
 import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
 import avatarMauveModelAsset from "@/assets/avatar-mauve-model.png.asset.json";
 
@@ -54,6 +55,11 @@ const LIP_TONE_AVATARS: Record<string, string> = {
   "mauve-pink": avatarMauveModelAsset.url,
   "medium-brown": avatar6Asset.url,
   "neutral-brown": avatar5Asset.url,
+  "two-toned-purple": avatar3Asset.url,
+  "two-toned-brown": avatar4Asset.url,
+  "two-toned-grey": avatarNupooraAsset.url,
+  "bright-pink": avatarSkinLightAsset.url,
+  "deep-brown": avatarSkinRichBrownAsset.url,
 };
 const avatarFor = (id: string, idx: number) =>
   LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
