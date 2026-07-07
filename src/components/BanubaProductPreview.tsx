@@ -77,54 +77,60 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
     let timeoutId: number | null = null;
 
     // Poll the canvas until it has rendered a visible frame.
+    const startTime = Date.now();
+    const RENDER_TIMEOUT_MS = 20_000;
+    const POLL_INTERVAL_MS = 250;
     const checkCanvas = () => {
-      const canvas = containerRef.current?.querySelector("canvas");
-          if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
-            try {
-              const ctx = canvas.getContext("2d", { willReadFrequently: true });
-              if (ctx) {
-                const imageData = ctx.getImageData(
-                  Math.floor(canvas.width / 2),
-                  Math.floor(canvas.height / 2),
-                  1,
-                  1,
-                ).data;
-                if (imageData[3] > 0) {
-                  if (!cancelled) setRendered(true);
-                  return;
-                }
-              }
-            } catch {
-              // ignore canvas read errors
-            }
+      const elapsed = Date.now() - startTime;
+      if (elapsed > RENDER_TIMEOUT_MS) return;
 
-            // Fallback for WebGL canvases: read the center pixel directly.
-            try {
-              const gl =
-                (canvas.getContext("webgl2") as WebGL2RenderingContext | null) ||
-                (canvas.getContext("webgl") as WebGLRenderingContext | null) ||
-                (canvas.getContext("experimental-webgl") as WebGLRenderingContext | null);
-              if (gl) {
-                const pixels = new Uint8Array(4);
-                gl.readPixels(
-                  Math.floor(canvas.width / 2),
-                  canvas.height - 1 - Math.floor(canvas.height / 2),
-                  1,
-                  1,
-                  gl.RGBA,
-                  gl.UNSIGNED_BYTE,
-                  pixels,
-                );
-                if (pixels[3] > 0) {
-                  if (!cancelled) setRendered(true);
-                  return;
-                }
-              }
-            } catch {
-              // ignore WebGL read errors
+      const canvas = containerRef.current?.querySelector("canvas");
+      if (canvas instanceof HTMLCanvasElement && canvas.width > 0 && canvas.height > 0) {
+        try {
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          if (ctx) {
+            const imageData = ctx.getImageData(
+              Math.floor(canvas.width / 2),
+              Math.floor(canvas.height / 2),
+              1,
+              1,
+            ).data;
+            if (imageData[3] > 0) {
+              if (!cancelled) setRendered(true);
+              return;
             }
+          }
+        } catch {
+          // ignore canvas read errors
+        }
+
+        // Fallback for WebGL canvases: read the center pixel directly.
+        try {
+          const gl =
+            (canvas.getContext("webgl2") as WebGL2RenderingContext | null) ||
+            (canvas.getContext("webgl") as WebGLRenderingContext | null) ||
+            (canvas.getContext("experimental-webgl") as WebGLRenderingContext | null);
+          if (gl) {
+            const pixels = new Uint8Array(4);
+            gl.readPixels(
+              Math.floor(canvas.width / 2),
+              canvas.height - 1 - Math.floor(canvas.height / 2),
+              1,
+              1,
+              gl.RGBA,
+              gl.UNSIGNED_BYTE,
+              pixels,
+            );
+            if (pixels[3] > 0) {
+              if (!cancelled) setRendered(true);
+              return;
+            }
+          }
+        } catch {
+          // ignore WebGL read errors
+        }
       }
-      if (!cancelled) timeoutId = window.setTimeout(checkCanvas, 100);
+      if (!cancelled) timeoutId = window.setTimeout(checkCanvas, POLL_INTERVAL_MS);
     };
 
     (async () => {
