@@ -1049,14 +1049,6 @@ const Index = () => {
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
               
-                {(() => {
-                  const complexionNum = getComplexionType(skinTone, lipTone);
-                  return complexionNum ? (
-                     <p className="font-display text-lg text-foreground text-center">
-                      You Are <span style={{ color: "#A0522D" }}>Complexion Type {complexionNum}</span>
-                    </p>
-                  ) : null;
-                })()}
                 {(faceCropImage || originalImage) && (
                 <div className="flex items-start justify-center gap-4">
                   <div className="w-64 h-64 overflow-hidden flex-shrink-0">
