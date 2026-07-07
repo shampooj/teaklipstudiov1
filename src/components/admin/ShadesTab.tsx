@@ -251,7 +251,11 @@ const ShadesTab = () => {
                           <img
                             src={avatarImg}
                             alt={t.label}
-                            className={`absolute inset-0 w-full h-full object-cover ${t.id === "two-toned-grey" ? "scale-150" : ""}`}
+                            className={`absolute inset-0 w-full h-full object-cover ${
+                              t.id === "two-toned-grey" || t.id === "bright-pink"
+                                ? "scale-150"
+                                : ""
+                            }`}
                           />
                         </div>
 
