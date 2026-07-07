@@ -1199,6 +1199,16 @@ const Index = () => {
                   <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
 
+                  {(faceCropImage || originalImage) && (
+                    <TryOnOtherShades
+                      userFace={(faceCropImage || originalImage)!}
+                      skinTone={skinTone}
+                      lipTone={lipTone}
+                    />
+                  )}
+
+
+
                   {discountCode && (
                     <div className="flex gap-3">
                       <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
