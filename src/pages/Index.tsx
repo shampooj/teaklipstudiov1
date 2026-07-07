@@ -1078,6 +1078,9 @@ const Index = () => {
                       const isSelected = selectedRecIndex === i;
                       const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
                       const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
+                      const setting = shadeSettings?.[rec.variantName];
+                      const userFace = faceCropImage || originalImage;
+                      const canRenderBanuba = Boolean(setting && userFace);
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
@@ -1088,7 +1091,15 @@ const Index = () => {
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
-                              {img?.imageUrl ? (
+                              {canRenderBanuba ? (
+                                <BanubaProductPreview
+                                  imageUrl={userFace!}
+                                  hex={setting!.hex}
+                                  finish={setting!.finish}
+                                  opacity={setting!.opacity}
+                                  alt={`${rec.label} on your photo`}
+                                />
+                              ) : img?.imageUrl ? (
                                 <>
                                   <img
                                     src={shopifyImg(img.imageUrl, 400)}
