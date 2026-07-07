@@ -31,6 +31,7 @@ const lipTwoTonedBeige = lipTwoTonedBeigeAsset.url;
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
 const lipGreyBrown = lipGreyBrownAsset.url;
+import skinLightBrown from "@/assets/skin-light-brown.jpg";
 
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
@@ -331,7 +332,7 @@ const ShadesTab = () => {
                           <ErrorBoundary>
                             <BanubaInlinePreview
                               lipToneLabel={t.label}
-                              lipToneImage={t.image}
+                              lipToneImage={skinLightBrown}
                               hex={row.hex}
                               finish={row.finish}
                               opacity={row.opacity}

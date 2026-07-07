@@ -9,5 +9,9 @@ const OVERRIDES: Record<string, string> = {
 };
 
 export function locateBanubaFile(fileName: string): string {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost" && fileName in OVERRIDES) {
+    return `/node_modules/@banuba/webar/dist/${fileName}`;
+  }
+
   return OVERRIDES[fileName] ?? `${BANUBA_SDK_BASE}/${fileName}`;
 }

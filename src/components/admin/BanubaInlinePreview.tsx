@@ -14,28 +14,33 @@ interface Props {
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
-// Map admin finish values to Banuba finish values
 const FINISH_MAP: Record<string, string> = {
   matte: "matte_cream",
   satin: "satin",
   glossy: "shine",
 };
 
-function buildConfig(color: string, finish: string, coverage: number) {
+function buildConfig(color: string, finish: string, opacity: number) {
   return {
+    scene: "teak-lipstick-preview",
     version: "2.0.0",
-    scene: "beauty_demo",
     camera: {},
     faces: [
       {
         makeup_lipstick: {
           color: hexToRgbString(color),
           finish: FINISH_MAP[finish] ?? "satin",
-          coverage: Math.max(0, Math.min(1, coverage)),
+          coverage: opacityToCoverage(opacity),
         },
       },
     ],
   };
+}
+
+function opacityToCoverage(opacity: number) {
+  if (opacity < 0.34) return "low";
+  if (opacity < 0.67) return "mid";
+  return "high";
 }
 
 function hexToRgbString(hex: string) {
@@ -66,8 +71,11 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
   const playerRef = useRef<any>(null);
   const sdkRef = useRef<any>(null);
   const imageFileRef = useRef<File | null>(null);
+  const activeEffectRef = useRef<any>(null);
   const readyRef = useRef(false);
   const updateSeqRef = useRef(0);
+  const faceDetectedRef = useRef(false);
+  const frameCountRef = useRef(0);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
 
@@ -113,7 +121,18 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
 
         setStatus("Applying effect…");
         const effectZip = buildEffectZip(hex, finish, opacity);
-        await player.applyEffect(new Effect(effectZip));
+        const initialEffect = new Effect(effectZip);
+        await player.applyEffect(initialEffect);
+        activeEffectRef.current = initialEffect;
+
+        player.addEventListener(Player.FRAME_DATA_EVENT, ({ detail: frameData }: any) => {
+          frameCountRef.current += 1;
+          const hasFace = Boolean(frameData?.get?.("frxRecognitionResult.faces.0.hasFace"));
+          faceDetectedRef.current = hasFace;
+          if (!hasFace && frameCountRef.current === 12) {
+            setStatus("Live preview · No lips detected in this crop");
+          }
+        });
 
         if (containerRef.current) Dom.render(player, containerRef.current);
 
@@ -128,7 +147,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
 
         readyRef.current = true;
         setReady(true);
-        setStatus("Live preview");
+        setStatus(faceDetectedRef.current ? "Live preview" : "Live preview · Detecting lips…");
       } catch (e: any) {
         console.error(e);
         setStatus(`Error: ${e?.message || String(e)}`);
@@ -145,7 +164,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     };
   }, [lipToneImage]);
 
-  // Re-apply effect (with fresh config baked in) when controls change
+  // Re-apply a freshly built Banuba effect when controls change.
+  // SDK 1.18.x does not expose a public reloadConfig API on the player/effect manager,
+  // so mutating the private manager was a no-op. Applying a new Effect is the stable path.
   useEffect(() => {
     const p = playerRef.current;
     const sdk = sdkRef.current;
@@ -157,10 +178,16 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
+        const nextEffect = new sdk.Effect(buildEffectZip(hex, finish, opacity));
+        await p.applyEffect(nextEffect);
+        activeEffectRef.current = nextEffect;
+        if (cancelled || updateSeqRef.current !== seq) return;
+        await p.use(new sdk.Image(file));
         if (cancelled || updateSeqRef.current !== seq) return;
         p.play({ pauseOnEmpty: false });
-        if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
+        if (!cancelled && updateSeqRef.current === seq) {
+          setStatus(faceDetectedRef.current ? "Live preview" : "Live preview · No lips detected in this crop");
+        }
       } catch (e) {
         console.error(e);
         if (!cancelled) setStatus("Preview update failed");
