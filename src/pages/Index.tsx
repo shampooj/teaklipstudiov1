@@ -1084,13 +1084,22 @@ const Index = () => {
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
                               {canRenderBanuba ? (
-                                <BanubaProductPreview
-                                  imageUrl={userFace!}
-                                  hex={setting!.hex}
-                                  finish={setting!.finish}
-                                  opacity={setting!.opacity}
-                                  alt={`${rec.label} on your photo`}
-                                />
+                                <>
+                                  <img
+                                    src={userFace!}
+                                    alt="Your photo"
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                  />
+                                  <div className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0">
+                                    <BanubaProductPreview
+                                      imageUrl={userFace!}
+                                      hex={setting!.hex}
+                                      finish={setting!.finish}
+                                      opacity={setting!.opacity}
+                                      alt={`${rec.label} on your photo`}
+                                    />
+                                  </div>
+                                </>
                               ) : img?.imageUrl ? (
                                 <>
                                   <img
