@@ -145,7 +145,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     };
   }, [lipToneImage]);
 
-  // Re-apply effect (with fresh config baked in) when controls change
+  // Re-apply a freshly built Banuba effect when controls change.
+  // SDK 1.18.x does not expose a public reloadConfig API on the player/effect manager,
+  // so mutating the private manager was a no-op. Applying a new Effect is the stable path.
   useEffect(() => {
     const p = playerRef.current;
     const sdk = sdkRef.current;
@@ -157,7 +159,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        p._effectManager?.reloadConfig(JSON.stringify(buildConfig(hex, finish, opacity)));
+        await p.applyEffect(new sdk.Effect(buildEffectZip(hex, finish, opacity)));
+        if (cancelled || updateSeqRef.current !== seq) return;
+        await p.use(new sdk.Image(file));
         if (cancelled || updateSeqRef.current !== seq) return;
         p.play({ pauseOnEmpty: false });
         if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
