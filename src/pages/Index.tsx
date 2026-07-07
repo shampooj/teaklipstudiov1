@@ -458,7 +458,9 @@ const Index = () => {
 
   const recommendations = useRecommendations(skinTone, lipTone);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
+  const recVariantNames = useMemo(() => recommendations.map((r) => r.variantName), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
+  const { data: shadeSettings } = useShadeSettings(recVariantNames, skinTone, lipTone);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
 
   // Track quiz_started once on mount
