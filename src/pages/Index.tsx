@@ -44,6 +44,7 @@ import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.j
 import avatarSkinDeepAsset from "@/assets/avatar-skin-deep-brown.jpg.asset.json";
 import avatarSkinRichAsset from "@/assets/avatar-skin-rich-brown.jpg.asset.json";
 import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
+import avatarMauveModelAsset from "@/assets/avatar-mauve-model.png.asset.json";
 
 const AVATAR_OPTIONS = [
   { id: "avatar-3", url: avatar3Asset.url },
@@ -53,6 +54,7 @@ const AVATAR_OPTIONS = [
   { id: "skin-light-brown", url: avatarSkinLightAsset.url },
   { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
   { id: "avatar-nupoora", url: avatarNupooraAsset.url },
+  { id: "avatar-mauve-model", url: avatarMauveModelAsset.url },
   { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
 ] as const;
 

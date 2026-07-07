@@ -39,6 +39,7 @@ import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
 import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
 import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
 import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
+import avatarMauveModelAsset from "@/assets/avatar-mauve-model.png.asset.json";
 
 const AVATAR_IMAGES = [
   avatar3Asset.url,
@@ -49,7 +50,11 @@ const AVATAR_IMAGES = [
   avatarSkinMediumAsset.url,
   avatarNupooraAsset.url,
 ];
-const avatarFor = (id: string, idx: number) => AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
+const LIP_TONE_AVATARS: Record<string, string> = {
+  "mauve-pink": avatarMauveModelAsset.url,
+};
+const avatarFor = (id: string, idx: number) =>
+  LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
 
 const LIP_TONES = [
   { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
