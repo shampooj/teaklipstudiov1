@@ -11,7 +11,7 @@ interface Props {
   opacity: number;
 }
 
-const SDK_BASE = "/banuba";
+const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
