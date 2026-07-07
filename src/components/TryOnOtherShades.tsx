@@ -159,15 +159,6 @@ const TryOnOtherShades = ({
               <>Add to Cart</>
             )}
           </Button>
-          <a
-            href={productUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-sans text-[10px] uppercase tracking-wider text-muted-foreground hover:text-foreground underline mt-1"
-            onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades_link", product_handle: activeImg?.productHandle })}
-          >
-            View product page
-          </a>
         </div>
       )}
 
