@@ -40,6 +40,17 @@ function hexToRgbaString(hex: string, alpha: number) {
 
 function buildEffectZip(color: string, finish: string, coverage: number) {
   const archive = zipSync({
+    "config.json": strToU8(
+      JSON.stringify(
+        {
+          scene: "teak-lipstick-preview",
+          version: "2.0.0",
+          camera: {},
+        },
+        null,
+        2,
+      ),
+    ),
     "config.js": strToU8(getLipstickScript(color, finish, coverage)),
   });
   const bytes = new Uint8Array(archive);
