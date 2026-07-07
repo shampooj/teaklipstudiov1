@@ -12,6 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { useRecommendations } from "@/hooks/useRecommendations";
+import { useShadeSettings } from "@/hooks/useShadeSettings";
+import BanubaProductPreview from "@/components/BanubaProductPreview";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
@@ -456,7 +458,9 @@ const Index = () => {
 
   const recommendations = useRecommendations(skinTone, lipTone);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
+  const recVariantNames = useMemo(() => recommendations.map((r) => r.variantName), [recommendations]);
   const variantImages = useVariantImages(recVariantIds);
+  const { data: shadeSettings } = useShadeSettings(recVariantNames, skinTone, lipTone);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
 
   // Track quiz_started once on mount
@@ -1074,6 +1078,9 @@ const Index = () => {
                       const isSelected = selectedRecIndex === i;
                       const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
                       const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
+                      const setting = shadeSettings?.[rec.variantName];
+                      const userFace = faceCropImage || originalImage;
+                      const canRenderBanuba = Boolean(setting && userFace);
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
@@ -1084,7 +1091,15 @@ const Index = () => {
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
-                              {img?.imageUrl ? (
+                              {canRenderBanuba ? (
+                                <BanubaProductPreview
+                                  imageUrl={userFace!}
+                                  hex={setting!.hex}
+                                  finish={setting!.finish}
+                                  opacity={setting!.opacity}
+                                  alt={`${rec.label} on your photo`}
+                                />
+                              ) : img?.imageUrl ? (
                                 <>
                                   <img
                                     src={shopifyImg(img.imageUrl, 400)}
