@@ -3,21 +3,16 @@ export const VARIANT_MAP: Record<string, string> = {
   "Riya": "45733638275225",
   "Saanvi": "45733638242457",
   "Neha": "45733508546713",
-  "Lip Set for Medium Brown Skin": "45763189047449",
-  "Lip Set for Deep Brown Skin": "45763189571737",
   "Amira": "45733638209689",
   "Kiran": "45733638406297",
-  "Reds Lip Set for All Brown Skin": "45763188981913",
   "Priya": "45707281727641",
   "Anjali": "45733508513945",
   "Sejal": "45733508481177",
   "Jiya": "45733638373529",
-  "Lip Set for Light Brown Skin": "45763189014681",
   "Shivani": "45733424201881",
   "Farrah": "45733502779545",
   "Ruchi": "45733502746777",
   "Amrit": "45733638340761",
-  "Lip Set for Rich Brown Skin": "45763189604505",
   "Nyla": "45707281760409",
   "Karina": "45733638537369",
   "Pooja": "45820766159001",
@@ -43,13 +38,9 @@ export const PRODUCT_DETAILS: Record<string, { label: string; description: strin
   "Shivani": { label: "Color Study Demi-Satin in Shivani", description: "Muted mauve with earthy undertones", color: "#8a6070" },
   "Nyla": { label: "Color Study Demi-Satin in Nyla", description: "Warm cinnamon-brown with a smooth satin finish", color: "#8b5a3a" },
   "Karina": { label: "Color Study Demi-Satin in Karina", description: "Cool-toned berry with a sophisticated edge", color: "#7a3050" },
-  "Lip Set for Light Brown Skin": { label: "Lip Set for Light Brown Skin", description: "Curated set of shades for light brown complexions", color: "#C68642" },
-  "Lip Set for Medium Brown Skin": { label: "Lip Set for Medium Brown Skin", description: "Curated set of shades for medium brown complexions", color: "#8D5524" },
-  "Lip Set for Deep Brown Skin": { label: "Lip Set for Deep Brown Skin", description: "Curated set of shades for deep brown complexions", color: "#5C3317" },
-  "Lip Set for Rich Brown Skin": { label: "Lip Set for Rich Brown Skin", description: "Curated set of shades for rich brown complexions", color: "#3B1E08" },
 };
 
-export type RecommendationCategory = "MLBB" | "RED" | "DAY" | "EVENING" | "LIPSET";
+export type RecommendationCategory = "MLBB" | "RED" | "DAY" | "EVENING";
 
 export interface Recommendation {
   category: RecommendationCategory;
@@ -81,14 +72,13 @@ const COMPLEXION_TYPE_MAP: Record<string, number> = (() => {
   return map;
 })();
 
-export const CATEGORY_ORDER: RecommendationCategory[] = ["MLBB", "RED", "DAY", "EVENING", "LIPSET"];
+export const CATEGORY_ORDER: RecommendationCategory[] = ["MLBB", "RED", "DAY", "EVENING"];
 
 export const CATEGORY_LABELS: Record<RecommendationCategory, string> = {
   MLBB: "\"My Lips But Better\"",
   RED: "A Statement Red",
   DAY: "An Easy, Everyday",
   EVENING: "An Evening Look",
-  LIPSET: "A Giftable Lip Set",
 };
 
 export interface RecommendationRow {
