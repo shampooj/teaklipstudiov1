@@ -14,6 +14,7 @@ import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from 
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import BanubaProductPreview from "@/components/BanubaProductPreview";
+import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
@@ -1197,6 +1198,16 @@ const Index = () => {
                   ) : (
                   <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
+
+                  {(faceCropImage || originalImage) && (
+                    <TryOnOtherShades
+                      userFace={(faceCropImage || originalImage)!}
+                      skinTone={skinTone}
+                      lipTone={lipTone}
+                    />
+                  )}
+
+
 
                   {discountCode && (
                     <div className="flex gap-3">
