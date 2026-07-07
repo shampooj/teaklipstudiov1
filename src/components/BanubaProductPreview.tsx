@@ -101,9 +101,9 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
             // Fallback for WebGL canvases: read the center pixel directly.
             try {
               const gl =
-                canvas.getContext("webgl2") ||
-                canvas.getContext("webgl") ||
-                canvas.getContext("experimental-webgl");
+                (canvas.getContext("webgl2") as WebGL2RenderingContext | null) ||
+                (canvas.getContext("webgl") as WebGLRenderingContext | null) ||
+                (canvas.getContext("experimental-webgl") as WebGLRenderingContext | null);
               if (gl) {
                 const pixels = new Uint8Array(4);
                 gl.readPixels(
