@@ -241,7 +241,7 @@ const ShadesTab = () => {
                       <td className="py-2 pr-3">
                         <div className="relative w-36 h-36 rounded-lg overflow-hidden border border-border bg-muted">
                           <img
-                            src={t.image}
+                            src={avatarImg}
                             alt={t.label}
                             className="absolute inset-0 w-full h-full object-cover"
                           />
