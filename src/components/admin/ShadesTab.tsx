@@ -348,7 +348,7 @@ const ShadesTab = () => {
                           <ErrorBoundary>
                             <BanubaInlinePreview
                               lipToneLabel={t.label}
-                              lipToneImage={skinLightBrown}
+                              lipToneImage={avatarImg}
                               hex={row.hex}
                               finish={row.finish}
                               opacity={row.opacity}
