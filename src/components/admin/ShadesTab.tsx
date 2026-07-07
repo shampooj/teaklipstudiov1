@@ -326,6 +326,16 @@ const ShadesTab = () => {
                         </div>
                       </td>
                       <td className="py-2 pr-3">
+                        <Button
+                          type="button"
+                          onClick={() => handleSaveRow(t.id)}
+                          disabled={savingRow === t.id || saving}
+                          className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
+                        >
+                          {savingRow === t.id ? "Saving…" : "Save"}
+                        </Button>
+                      </td>
+                      <td className="py-2 pr-3">
                         <button
                           type="button"
                           onClick={() =>
