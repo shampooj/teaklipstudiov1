@@ -52,6 +52,7 @@ const AVATAR_IMAGES = [
 ];
 const LIP_TONE_AVATARS: Record<string, string> = {
   "mauve-pink": avatarMauveModelAsset.url,
+  "medium-brown": avatar6Asset.url,
 };
 const avatarFor = (id: string, idx: number) =>
   LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
