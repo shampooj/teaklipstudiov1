@@ -71,8 +71,11 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
   const playerRef = useRef<any>(null);
   const sdkRef = useRef<any>(null);
   const imageFileRef = useRef<File | null>(null);
+  const activeEffectRef = useRef<any>(null);
   const readyRef = useRef(false);
   const updateSeqRef = useRef(0);
+  const faceDetectedRef = useRef(false);
+  const frameCountRef = useRef(0);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
 
@@ -118,7 +121,18 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
 
         setStatus("Applying effect…");
         const effectZip = buildEffectZip(hex, finish, opacity);
-        await player.applyEffect(new Effect(effectZip));
+        const initialEffect = new Effect(effectZip);
+        await player.applyEffect(initialEffect);
+        activeEffectRef.current = initialEffect;
+
+        player.addEventListener(Player.FRAME_DATA_EVENT, ({ detail: frameData }: any) => {
+          frameCountRef.current += 1;
+          const hasFace = Boolean(frameData?.get?.("frxRecognitionResult.faces.0.hasFace"));
+          faceDetectedRef.current = hasFace;
+          if (!hasFace && frameCountRef.current === 12) {
+            setStatus("Live preview · No lips detected in this crop");
+          }
+        });
 
         if (containerRef.current) Dom.render(player, containerRef.current);
 
@@ -133,7 +147,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
 
         readyRef.current = true;
         setReady(true);
-        setStatus("Live preview");
+        setStatus(faceDetectedRef.current ? "Live preview" : "Live preview · Detecting lips…");
       } catch (e: any) {
         console.error(e);
         setStatus(`Error: ${e?.message || String(e)}`);
@@ -164,12 +178,16 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        await p.applyEffect(new sdk.Effect(buildEffectZip(hex, finish, opacity)));
+        const nextEffect = new sdk.Effect(buildEffectZip(hex, finish, opacity));
+        await p.applyEffect(nextEffect);
+        activeEffectRef.current = nextEffect;
         if (cancelled || updateSeqRef.current !== seq) return;
         await p.use(new sdk.Image(file));
         if (cancelled || updateSeqRef.current !== seq) return;
         p.play({ pauseOnEmpty: false });
-        if (!cancelled && updateSeqRef.current === seq) setStatus("Live preview");
+        if (!cancelled && updateSeqRef.current === seq) {
+          setStatus(faceDetectedRef.current ? "Live preview" : "Live preview · No lips detected in this crop");
+        }
       } catch (e) {
         console.error(e);
         if (!cancelled) setStatus("Preview update failed");
