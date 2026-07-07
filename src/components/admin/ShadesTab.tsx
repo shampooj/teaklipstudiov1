@@ -60,6 +60,7 @@ const LIP_TONE_AVATARS: Record<string, string> = {
   "two-toned-grey": avatarNupooraAsset.url,
   "bright-pink": avatarSkinLightAsset.url,
   "deep-brown": avatarSkinRichBrownAsset.url,
+  "beige": avatarSkinMediumAsset.url,
 };
 const avatarFor = (id: string, idx: number) =>
   LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
