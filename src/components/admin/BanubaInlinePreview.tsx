@@ -111,8 +111,10 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
   const updateSeqRef = useRef(0);
   const faceDetectedRef = useRef(false);
   const frameCountRef = useRef(0);
+  const croppedUrlRef = useRef<string | null>(null);
   const [status, setStatus] = useState("Initializing Banuba…");
   const [ready, setReady] = useState(false);
+  const [croppedImageUrl, setCroppedImageUrl] = useState<string | null>(null);
 
 
   // Init player + load the lip tone image once
