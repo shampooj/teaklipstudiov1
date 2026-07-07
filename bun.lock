@@ -5,7 +5,7 @@
     "": {
       "name": "vite_react_shadcn_ts",
       "dependencies": {
-        "@banuba/webar": "1.17.5",
+        "@banuba/webar": "1.18.3",
         "@hookform/resolvers": "^3.10.0",
         "@lovable.dev/cloud-auth-js": "^1.0.0",
         "@radix-ui/react-accordion": "^1.2.11",
@@ -93,7 +93,7 @@
 
     "@babel/runtime": ["@babel/runtime@7.28.2", "", {}, "sha512-KHp2IflsnGywDjBWDkR9iEqiWSpc8GIi0lgTT3mOElT0PP1tG26P4tmFI2YvAdzgq9RGyoHZQEIEdZy6Ec5xCA=="],
 
-    "@banuba/webar": ["@banuba/webar@1.17.5", "https://europe-west1-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@banuba/webar/-/webar-1.17.5.tgz", { "dependencies": { "comlink": "^4.3.1", "fflate": "^0.7.1", "nanoid": "^3.1.28", "readable-stream": "^4.4.2", "wasm-feature-detect": "^1.2.11" } }, "sha512-FtUrrhYbb5LsRYqGxOybLE3cryfKK/XGRRfqHfzo1ImOt4YA6+WLz/XfrVZ0ayWkCL6VnFAYimLPMBqUrWzhTQ=="],
+    "@banuba/webar": ["@banuba/webar@1.18.3", "https://europe-west4-npm.pkg.dev/lovable-core-prod/sandbox-npm-cache/@banuba/webar/-/webar-1.18.3.tgz", { "dependencies": { "comlink": "^4.3.1", "fflate": "^0.7.1", "nanoid": "^3.1.28", "readable-stream": "^4.4.2", "wasm-feature-detect": "^1.2.11" } }, "sha512-6OB05Z7cYXWQnkl5cggnevavocD+flE5d8h6i4jLZm/c0cvwKyQ2maBLsi0qeDYm50XCHve4doThulhl08+bNg=="],
 
     "@esbuild/aix-ppc64": ["@esbuild/aix-ppc64@0.25.0", "", { "os": "aix", "cpu": "ppc64" }, "sha512-O7vun9Sf8DFjH2UtqK8Ku3LkquL9SZL8OLY1T5NZkA34+wG3OQF7cl4Ql8vdNzM6fzBbYfLaiRLIOZ+2FOCgBQ=="],
 

@@ -10,8 +10,9 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
+import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
 
-const SDK_BASE = "/banuba";
+const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
 
 type Finish = "matte_cream" | "satin" | "shine" | "balm" | "shimmer";
@@ -78,7 +79,7 @@ const ShadePreview = () => {
         setStatus("Creating player…");
         player = await Player.create({
           clientToken,
-          locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
+          locateFile: locateBanubaFile,
           logger: console,
         });
         if (cancelled) {

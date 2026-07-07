@@ -33,6 +33,8 @@ exports = new class Background extends prefabs.Base {
     const composer = proceduralTexture.asCameraComposer()
 
     this._background = composer
+
+    this.useFilter(true)
   }
 
   /**
@@ -134,14 +136,6 @@ exports = new class Background extends prefabs.Base {
   }
 
   /**
-   * Sets the Bokeh blur radius
-   * @param {number} radius - Bokeh blur radius
-   */
-  bokeh(radius = 1) {
-    throw new Error("Background.bokeh() in not implemented yet")
-  }
-
-  /**
    * Access to underlying video object 
    */
   getBackgroundVideo() {
@@ -190,7 +184,6 @@ exports = new class Background extends prefabs.Base {
     this.cameraVideoScale("1 1")
     this.cameraVideoOrigin("0 0")
     this.useFilter(true)
-    // this.bokeh(0)
   }
 }
 require("./global")
@@ -1017,6 +1010,345 @@ exports = {
         ]
     }
 }{
+    "apply_order": 35,
+    "assets": {
+        "attachments": {
+            "bokeh_bg_masked": {
+                "clear": [0, 0, 0, 0],
+                "load_state": "dont_care",
+                "store_state": "save",
+                "type": "color"
+            },
+            "bokeh_result": {
+                "clear": [0, 0, 0, 0],
+                "load_state": "dont_care",
+                "store_state": "save",
+                "type": "color"
+            }
+        },
+        "images": {
+            "background": {
+                "active": true,
+                "recognizer_feature_name": "background",
+                "type": "segmentation_mask"
+            }
+        },
+        "materials": {
+            "bokeh/shaders/bg_mask": {
+                "path": "/bnb_prefabs/bokeh/shaders/bg_mask",
+                "samplers": [
+                    {
+                        "image": "background",
+                        "name": "glfx_BG_MASK"
+                    },
+                    {
+                        "image": "base_main_color",
+                        "name": "glfx_BACKGROUND"
+                    }
+                ],
+                "state": {
+                    "backfaces": true,
+                    "blend": "off",
+                    "colorwrite": true,
+                    "ztest": false,
+                    "zwrite": false
+                }
+            },
+            "bokeh/shaders/bokeh_v": {
+                "path": "/bnb_prefabs/bokeh/shaders/bokeh_v",
+                "samplers": [
+                    {
+                        "image": "bokeh_bg_masked",
+                        "name": "bg_masked"
+                    }
+                ],
+                "parameters":
+                {
+                    "bokeh_samples": {
+                        "type": "vec4",
+                        "value": [16, 0, 0, 0]
+                    }
+                },
+                "state": {
+                    "backfaces": true,
+                    "blend": "off",
+                    "colorwrite": true,
+                    "ztest": false,
+                    "zwrite": false
+                }
+            },
+            "bokeh/shaders/combine": {
+                "path": "/bnb_prefabs/bokeh/shaders/combine",
+                "samplers": [
+                    {
+                        "image": "bokeh_result",
+                        "name": "bokeh"
+                    }
+                ],
+                "state": {
+                    "backfaces": true,
+                    "blend": "alpha",
+                    "colorwrite": true,
+                    "ztest": false,
+                    "zwrite": false
+                }
+            }
+        },
+        "meshes": {
+            "fs_tri": "$builtin$meshes/fs_tri"
+        }
+    },
+    "components": {
+        "bokeh_bg_mask_cmp": {
+            "materials": [
+                "bokeh/shaders/bg_mask"
+            ],
+            "mesh": "fs_tri",
+            "type": "mesh_instance"
+        },
+        "bokeh_v_cmp": {
+            "materials": [
+                "bokeh/shaders/bokeh_v"
+            ],
+            "mesh": "fs_tri",
+            "type": "mesh_instance"
+        },
+        "bokeh_combine_cmp": {
+            "materials": [
+                "bokeh/shaders/combine"
+            ],
+            "mesh": "fs_tri",
+            "type": "mesh_instance"
+        }
+    },
+    "entities": {
+        "bokeh_bg_mask_ent": {
+            "components": [
+                "bokeh_bg_mask_cmp"
+            ],
+            "layer": "bokeh_bg_mask_layer"
+        },
+        "bokeh_v_ent": {
+            "components": [
+                "bokeh_v_cmp"
+            ],
+            "layer": "bokeh_v_layer"
+        },
+        "bokeh_combine_ent": {
+            "components": [
+                "bokeh_combine_cmp"
+            ],
+            "layers": [
+                "bokeh_combine_layer"
+            ]
+        }
+    },
+    "hierarchy": {
+        "root": [
+            "bokeh_bg_mask_ent",
+            "bokeh_v_ent",
+            "bokeh_combine_ent"
+        ]
+    },
+    "render_list": {
+        "default": [
+            {
+                "layer": "bokeh_bg_mask_layer",
+                "render_target": "bokeh_bg_mask_rt"
+            },
+            {
+                "layer": "bokeh_v_layer",
+                "render_target": "bokeh_v_rt"
+            },
+            {
+                "layer": "bokeh_combine_layer",
+                "render_target": "base_rt"
+            }
+        ]
+    },
+    "render_targets": {
+        "bokeh_bg_mask_rt": {
+            "attachments": ["bokeh_bg_masked"],
+            "height": 640,
+            "scale": 1,
+            "width": 0
+        },
+        "bokeh_v_rt": {
+            "attachments": ["bokeh_result"],
+            "height": 640,
+            "scale": 1,
+            "width": 0
+        }
+    },
+    "script": "/bnb_prefabs/bokeh/index.js"
+}
+'use strict';
+
+const prefabs = require("bnb_js/prefabs");
+
+const bokeh_default_samples = 16;
+
+class Bokeh extends prefabs.Base {
+    constructor() {
+        super();
+
+        const bokeh_mat = bnb.scene.getAssetManager().findMaterial("bokeh/shaders/bokeh_v");
+        this.bokeh_samples_param = bokeh_mat.findParameter("bokeh_samples");
+    }
+
+    samples(samples_count) {
+        const clamped_samples = Math.min(Math.max(samples_count, 8), 24);
+        this.bokeh_samples_param.setVector4(new bnb.Vec4(clamped_samples, 0, 0, 0));
+    }
+
+    clear() {
+        this.samples(bokeh_default_samples);
+    }
+}
+
+exports = {
+    Bokeh
+}
+{
+    "type": "object",
+    "description": "Enable bokeh effect for background.",
+    "properties": {
+        "samples": {
+            "type": "number",
+            "maximum": 24,
+            "minimum": 8,
+            "description": "Samples amount in the range [8, 24]. Higher value - stronger bokeh."
+        }
+    }
+}
+#include <bnb/glsl.frag>
+
+BNB_IN(0)
+vec4 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, glfx_BG_MASK);
+BNB_DECLARE_SAMPLER_2D(2, 3, glfx_BACKGROUND);
+
+void main()
+{
+    float mask = BNB_TEXTURE_2D(BNB_SAMPLER_2D(glfx_BG_MASK), var_uv.zw).x;
+    bnb_FragColor = vec4(BNB_TEXTURE_2D(BNB_SAMPLER_2D(glfx_BACKGROUND), var_uv.xy).xyz * mask, mask);
+}
+#include <bnb/glsl.vert>
+
+BNB_LAYOUT_LOCATION(0)
+BNB_IN vec3 attrib_pos;
+
+BNB_OUT(0)
+vec4 var_uv;
+
+void main()
+{
+    vec2 v = attrib_pos.xy;
+    gl_Position = vec4(v, 0.f, 1.f);
+    var_uv.xy = v * 0.5f + 0.5f;
+
+#ifdef BNB_VK_1
+    var_uv.y = 1.f - var_uv.y;
+#endif
+
+    mat3 basis = mat3(background_nn_transform);
+    var_uv.zw = vec2(vec3(v, 1.f) * basis);
+    var_uv.w += 0.5f / 256.f;
+}
+#include <bnb/glsl.frag>
+
+BNB_IN(0)
+vec2 var_uv;
+BNB_IN(1)
+vec2 ps;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, bg_masked);
+
+void main()
+{
+    const float hdr_curve = 8.f;
+    int samples = int(bokeh_samples.x);
+    int angle_samples = 3 * samples;
+    float angle_inc = 6.28318530717958647693 / float(angle_samples);
+    float dcos = cos(angle_inc);
+    float dsin = sin(angle_inc);
+    int offset_samples = samples;
+
+    float alpha = BNB_TEXTURE_2D(BNB_SAMPLER_2D(bg_masked), var_uv).w;
+
+    vec3 col = vec3(0.f);
+    float accum = 0.f;
+    vec2 r = vec2(1.f, 0.f);
+
+    for (int a = 0; a < angle_samples; ++a) {
+        vec2 rps = ps * r;
+        r = vec2(r.x * dcos - r.y * dsin, r.x * dsin + r.y * dcos);
+
+        for (int o = 1; o < offset_samples; ++o) {
+            vec4 s = BNB_TEXTURE_2D(BNB_SAMPLER_2D(bg_masked), var_uv + rps * float(o));
+            s.w *= float(o * o);
+            col += pow(s.xyz, vec3(hdr_curve)) * s.w;
+            accum += s.w;
+        }
+    }
+
+    // if( accum != 0. )
+    col /= accum;
+    bnb_FragColor = vec4(pow(col, vec3(1.f / hdr_curve)), alpha);
+}
+#include <bnb/glsl.vert>
+
+BNB_LAYOUT_LOCATION(0)
+BNB_IN vec3 attrib_pos;
+
+BNB_OUT(0)
+vec2 var_uv;
+BNB_OUT(1)
+vec2 ps;
+
+void main()
+{
+    vec2 v = attrib_pos.xy;
+    gl_Position = vec4(v, 0.f, 1.f);
+    var_uv = v * 0.5f + 0.5f;
+
+#ifdef BNB_VK_1
+    var_uv.y = 1.f - var_uv.y;
+#endif
+
+    ps = vec2(bnb_SCREEN.y * bnb_SCREEN.z * (1.f / 640.f), 1.f / 640.f);
+}
+#include <bnb/glsl.frag>
+
+BNB_IN(0)
+vec2 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, bokeh);
+
+void main()
+{
+    bnb_FragColor = BNB_TEXTURE_2D(BNB_SAMPLER_2D(bokeh), var_uv);
+}
+#include <bnb/glsl.vert>
+
+BNB_LAYOUT_LOCATION(0)
+BNB_IN vec3 attrib_pos;
+
+BNB_OUT(0)
+vec2 var_uv;
+
+void main()
+{
+    vec2 v = attrib_pos.xy;
+    gl_Position = vec4(v, 0.f, 1.f);
+    var_uv = v * 0.5f + 0.5f;
+
+#ifdef BNB_VK_1
+    var_uv.y = 1.f - var_uv.y;
+#endif
+}
+{
     "apply_order": 30,
 
     "assets": {
@@ -2202,9 +2534,611 @@ sÜé¢sn;Êr¹1r£™JsKŽz;õezfAÎzOzz Ë-z&×QzDnz8ïez5ëaz)Ñ1z áy÷Ës±z¯z
 £	z¥:sTªrµ9r$   ¥zwÕ!s2®{Ú&²uês?ÿyz«Âkqs	Ÿ	z’R{Ã}rÀÈ‘|Ûçžs€Eêj¯wûn$¿Arëõæk¸£zk#&Œ“Û}°7G†éè9„Ä°„Ý…w^WÇV7£Ü}§5rµAryMòr–s:k»•6kQ²rEí‘j}#žj1ß}rKÃ’…¿~~/“¾…@7¦kÄÞ=|ÃÚv©=rýYûlë%k„]s_#ÂrÆë|©z¹!zÒåžs(ÓAz«z™s   ¥zw’R{#&Œ§5rKÃ’…„]s{
     "type": "object",
     "description": "Render camera feed on the screen."
+}{
+    "apply_order": 193,
+    "assets": {
+        "attachments": {
+            "earrings_main_color": {
+                "type": "color"
+            }
+        },
+        "faces": {
+            "face:@face_idx": {
+                "index": @face_idx,
+                "mesh" : "face_stream:@face_idx"
+            }
+        },
+        "materials": {
+            "earrings_copy_color": {
+                "path": "/bnb_shaders/bnb/lib/copy_pixels",
+                "samplers": [ 
+                    { 
+                        "name": "input_color",
+                        "image": "base_main_color"
+                    } 
+                ],
+                "state": {
+                    "backfaces": false,
+                    "blend": "off",
+                    "colorwrite": true,
+                    "ztest": false,
+                    "zwrite": false
+                }
+            },
+            "earrings_mat_cut": {
+                "path": "/bnb_prefabs/earrings/shaders/mat_cut",
+                "built_in_samplers": [
+                    "bnb_BONES",
+                    "bnb_UVMORPH_FISHEYE",
+                    "bnb_MORPH"
+                ],
+                "samplers": [
+                    {
+                        "name": "bnb_BONES"
+                    }
+                ],
+                "state": {
+                    "backfaces": false,
+                    "blend": "off",
+                    "colorwrite": false,
+                    "ztest": true,
+                    "zwrite": true
+                }
+            },
+            "earrings_copy_result": {
+                "path": "/bnb_shaders/bnb/lib/copy_pixels",
+                "samplers": [ 
+                    { 
+                        "name": "input_color",
+                        "image": "earrings_main_color" 
+                    } 
+                ],
+                "state": {
+                    "backfaces": false,
+                    "blend": "off",
+                    "colorwrite": true,
+                    "ztest": false,
+                    "zwrite": false
+                }
+            }
+        },
+        "meshes": {
+            "face_stream:@face_idx": "$builtin$meshes/face.stream:@face_idx",
+            "cut": "/bnb_prefabs/gltf_base/meshes/cut.bsm2",
+            "fs_tri": "$builtin$meshes/fs_tri"
+        }
+    },
+    "components": {
+        "face_tracker:@face_idx": {
+            "face": "face:@face_idx",
+            "type": "face_tracker"
+        }
+    },    
+    "entities": {
+        "face_tracker:@face_idx": {
+            "components": ["face_tracker:@face_idx"]
+        },
+        "earrings_copy_color_ent": {
+            "components": {
+                "mesh_instance" : {
+                    "mesh": "fs_tri",
+                    "materials": ["earrings_copy_color"]
+                }
+            },
+            "layer": "earrings_copy_color_layer"
+        },
+        "left": {
+            "components": {
+                "mesh_instance": {
+                    "@mesh_left": "",
+                    "@use_physics": true
+                },
+                "transformation_3d": {
+                    "@rotation": [0.0, 0.0, 0.0],
+                    "@scale": [1.0, 1.0, 1.0],
+                    "@translation": [0.0, 0.0, 0.0]
+                }
+            },
+            "layer": "left"
+        },
+        "right": {
+            "components": {
+                "mesh_instance": {
+                    "@mesh_right": "",
+                    "@use_physics": true
+                },
+                "transformation_3d": {
+                    "@rotation": [0.0, 0.0, 0.0],
+                    "@scale": [1.0, 1.0, 1.0],
+                    "@translation": [0.0, 0.0, 0.0]
+                }
+            },
+           "layer": "right"
+        },
+        "earrings_cut:@face_idx": {
+            "components": {
+                "mesh_instance": {
+                    "mesh": "cut",
+                    "use_physics": false,
+                    "materials": ["earrings_mat_cut"]
+                }
+            },
+            "layer": "earrings_cut:@face_idx"
+        },
+        "earrings_copy_result_ent": {
+            "components": {
+                "mesh_instance" : {
+                    "mesh": "fs_tri",
+                    "materials": ["earrings_copy_result"]
+                }
+            },
+            "layer": "earrings_copy_result_layer"
+        }
+    },
+    "hierarchy": {
+        "face_tracker:@face_idx": [
+            "right",
+            "left",
+            "earrings_cut:@face_idx"
+        ],
+        "root": [
+            "face_tracker:@face_idx",
+            "earrings_copy_color_ent",
+            "earrings_copy_result_ent"
+        ]
+    },
+    "render_list": {
+        "default": [
+            {
+                "layer": "earrings_copy_color_layer",
+                "render_target": "earrings_rt"
+            },
+            {
+                "layer": "earrings_cut:@face_idx",
+                "render_target": "earrings_rt"
+            },
+            {
+                "layer": "left",
+                "render_target": "earrings_rt"
+            },
+            {
+                "layer": "right",
+                "render_target": "earrings_rt"
+            },
+            {
+                "layer": "earrings_copy_result_layer",
+                "render_target": "base_rt"
+            }
+        ]
+    },
+    "render_targets": {
+        "earrings_rt": {
+            "attachments": [
+                "earrings_main_color",
+                "base_main_z"
+            ],
+            "@samples_count": 4
+        }
+    },
+    "script": "/bnb_prefabs/earrings/script/config.js"
+}
+{
+    "type": "object",
+    "description": "Place two 3D models of earring in GLTF format on the each ear.",
+    "required": [
+        "@mesh_left",
+        "@mesh_right"
+    ],
+    "properties": {
+        "@mesh_left": {
+            "type": "string",
+            "description": "Path to the GLTF model of left earring. Note the leading `@` in the parameter, it is mandatory. Supported formats: `.glb`, `.gltf`. Note that all included files, such as GLTF model, shaders, textures, sounds (if there are any), must be located in one folder."
+        },
+        "@mesh_right": {
+            "type": "string",
+            "description": "Path to the GLTF model of right earring. Note the leading `@` in the parameter, it is mandatory. Supported formats: `.glb`, `.gltf`. Note that all included files, such as GLTF model, shaders, textures, sounds (if there are any), must be located in one folder."
+        },
+        "@use_physics": {
+            "type": "boolean",
+            "default": false,
+            "description": "Load GLTF models with physics simulation. Note the leading `@` in the parameter, it is mandatory."
+        },
+        "left": {
+            "type": "object",
+            "description": "Container with states of the left earring.",
+            "properties": {
+                "scale": {
+                    "type": "object",
+                    "description": "Sets scale along _X_, _Y_, _Z_ axes for the left earring."
+                },
+                "translation": {
+                    "type": "string",
+                    "default": "0 0 0",
+                    "description": "Translate the model of the left earring along _X_, _Y_, _Z_ axes (in millimetres)."
+                },
+                "rotation": {
+                    "type": "string",
+                    "default": "-90 0 0",
+                    "description": "Rotation angles (in degrees) of the left earring over _X_, _Y_, _Z_ axes. Note the default value."
+                },
+                "gravity": {
+                    "type": "object",
+                    "default": "0 0 0",
+                    "description": "Sets gravitation vector along _X_, _Y_, _Z_ axes for the left earring."
+                },
+                "dumping": {
+                    "type": "object",
+                    "default": 0.99,
+                    "description": "Damping parameter for physics simulation of the left earring, good values usually are in [0.9-1.0] range."
+                },
+                "bones": {
+                    "type": "object",
+                    "description": "It sets the bones' inverse mass for the left earring. The object, where the key is the bone's name and the parameter is the inverse mass."
+                },
+                "animation": {
+                    "type": "object",
+                    "description": "Play animation from GLTF file of the left earring.",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "default": "",
+                            "description": "Animation to play from GLTF file."
+                        },
+                        "mode": {
+                            "type": "string",
+                            "enum": [
+                                "off",
+                                "loop",
+                                "once",
+                                "once_reversed",
+                                "fixed"
+                            ],
+                            "dafault": "loop",
+                            "description": "How to play animation selected by 'name'"
+                        },
+                        "seek_position": {
+                            "type": "integer",
+                            "default": 0,
+                            "description": "Where to start animation relatively from the start position (in ms)"
+                        }
+                    }
+                }
+            }
+        },
+        "right": {
+            "type": "object",
+            "description": "Container with states for the right earring",
+            "properties": {
+                "scale": {
+                    "type": "object",
+                    "description": "Sets scale along _X_, _Y_, _Z_ axes for the right earring."
+                },
+                "translation": {
+                    "type": "string",
+                    "default": "0 0 0",
+                    "description": "Translate the model of the right earring along _X_, _Y_, _Z_ axes (in millimetres)."
+                },
+                "rotation": {
+                    "type": "string",
+                    "default": "-90 0 0",
+                    "description": "Rotation angles (in degrees) of the right earring over _X_, _Y_, _Z_ axes. Note the default value."
+                },
+                "gravity": {
+                    "type": "object",
+                    "default": "0 0 0",
+                    "description": "Sets gravitation vector along _X_, _Y_, _Z_ axes for the right earring."
+                },
+                "dumping": {
+                    "type": "object",
+                    "default": 0.99,
+                    "description": "Damping parameter for physics simulation of the right earring, good values usually are in [0.9-1.0] range."
+                },
+                "bones": {
+                    "type": "object",
+                    "description": "It sets the bones' inverse mass for the right earring. The object, where the key is the bone's name and the parameter is the inverse mass."
+                },
+                "animation": {
+                    "type": "object",
+                    "description": "Play animation from GLTF file of right earring.",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "default": "",
+                            "description": "Animation to play from GLTF file."
+                        },
+                        "mode": {
+                            "type": "string",
+                            "enum": [
+                                "off",
+                                "loop",
+                                "once",
+                                "once_reversed",
+                                "fixed"
+                            ],
+                            "dafault": "loop",
+                            "description": "How to play animation selected by 'name'"
+                        },
+                        "seek_position": {
+                            "type": "integer",
+                            "default": 0,
+                            "description": "Where to start animation relatively from the start position (in ms)"
+                        }
+                    }
+                }
+            }
+        },
+        "bones_in_mv_space": {
+            "type": "boolean",
+            "default": false,
+            "description": "Sets bones in MV space."
+        }
+    }
 }'use strict';
 
 const prefabs = require("bnb_js/prefabs");
+
+bnb.scene.enableRecognizerFeature(bnb.FeatureID.EARS);
+
+class Earrings extends prefabs.Base {
+    constructor(faceIndex=0) {
+        super();
+
+        const FT = bnb.scene.getRoot().findChildByName(`face_tracker:${faceIndex}`);
+        
+        const leftEarring = FT.findChildByName("left");
+        this._leftEarringTransform = leftEarring.getComponent(bnb.ComponentType.TRANSFORMATION).asTransformation();
+        this._meshInstanceLeft = leftEarring.getComponent(bnb.ComponentType.MESH_INSTANCE).asMeshInstance();
+        this._physicsLeft = this._meshInstanceLeft.getPhysicsSimulator();
+
+        const rightEarring = FT.findChildByName("right");
+        this._rightEarringTransform = rightEarring.getComponent(bnb.ComponentType.TRANSFORMATION).asTransformation();
+        this._meshInstanceRight = rightEarring.getComponent(bnb.ComponentType.MESH_INSTANCE).asMeshInstance();
+        this._physicsRight = this._meshInstanceRight.getPhysicsSimulator();
+
+        this._leftTranslation = new bnb.Vec3(0.0, 0.0, 0.0);
+        this._rightTranslation = new bnb.Vec3(0.0, 0.0, 0.0);
+
+        bnb.eventListener.on("onFRXUpdate", () => {
+            const [left, right] = FT.getComponent(bnb.ComponentType.FACE_TRACKER).asFaceTracker().getEars();
+            
+            if (left) {
+                leftEarring.setActive(left.visible);
+                const translate = new bnb.Vec3(
+                    left.translate.x + this._leftTranslation.x,
+                    left.translate.y + this._leftTranslation.y,
+                    left.translate.z + this._leftTranslation.z
+                );
+                this._leftEarringTransform.setTranslation(translate);
+            }
+            if (right) {
+                rightEarring.setActive(right.visible);
+                const translate = new bnb.Vec3(
+                    right.translate.x + this._rightTranslation.x,
+                    right.translate.y + this._rightTranslation.y,
+                    right.translate.z + this._rightTranslation.z
+                );
+                this._rightEarringTransform.setTranslation(translate);
+            }
+        });
+    }
+
+    _meshLeft() {}
+    _meshRight() {}
+    _usePhysics() {}
+
+    setPrefabSettings(state) {
+        this.clear();
+
+        if (typeof state.left === "object" && state.left !== null) {
+            const left = state.left;
+            if (left.scale) {
+                this.scale(left.scale, true);
+            }
+            if (left.rotation) {
+                this.rotation(left.rotation, true);
+            }
+            if (left.translation) {
+                this.translation(left.translation, true);
+            }
+            if (left.gravity) {
+                this.gravity(left.gravity, true);
+            }
+            if (left.damping) {
+                this.damping(left.damping, true);
+            }
+            if (left.bones) {
+                this.bones(left.bones, true);
+            }
+            if (left.animation) {
+                this.animation(left.animation, true);
+            }
+        }
+        if (typeof state.right === "object" && state.right !== null) {
+            const right = state.right;
+            if (right.scale) {
+                this.scale(right.scale, false);
+            }
+            if (right.rotation) {
+                this.rotation(right.rotation, false);
+            }
+            if (right.translation) {
+                this.translation(right.translation, false);
+            }
+            if (right.gravity) {
+                this.gravity(right.gravity, false);
+            }
+            if (right.damping) {
+                this.damping(right.damping, false);
+            }
+            if (right.bones) {
+                this.bones(right.bones, false);
+            }
+            if (right.animation) {
+                this.animation(right.animation, false);
+            }
+        }
+        if (typeof state.bonesInMvSpace === "string" && state.bonesInMvSpace) {
+            this.bonesInMvSpace(state.bonesInMvSpace);
+        }
+    }
+    
+    scale(scale, isLeft) {
+        const [x, y, z] = scale.split(" ").map((c) => parseFloat(c));
+        if (isLeft) {
+            this._leftEarringTransform.setScale(new bnb.Vec3(x, y, z));
+        } else {
+            this._rightEarringTransform.setScale(new bnb.Vec3(x, y, z));
+        }
+        
+        return this;
+    }
+    
+    rotation(rot, isLeft) {
+        const [x, y, z] = rot.split(" ").map((c) => parseFloat(c) * (Math.PI / 180));
+        if (isLeft) {
+            this._leftEarringTransform.setRotation(new bnb.Vec3(x, y, z));
+        } else {
+            this._rightEarringTransform.setRotation(new bnb.Vec3(x, y, z));
+        }
+
+        return this;
+    }
+
+    translation(tr, isLeft) {
+        const [x, y, z] = tr.split(" ").map((c) => parseFloat(c));
+        if (isLeft) {
+            this._leftTranslation = new bnb.Vec3(x, y, z);
+        } else {
+            this._rightTranslation = new bnb.Vec3(x, y, z);
+        }
+
+        return this;
+    }
+
+    gravity(vector, isLeft) {
+        const [x, y, z] = vector.split(" ").map((c) => parseFloat(c));
+        if (isLeft) {
+            this._physicsLeft?.setGravity(new bnb.Vec3(x, y, z));
+        } else {
+            this._physicsRight?.setGravity(new bnb.Vec3(x, y, z));
+        }
+
+        return this;
+    }
+
+    damping(value, isLeft) {
+        if (isLeft) {
+            this._physicsLeft?.setDamping(parseFloat(value));
+        } else {
+            this._physicsRight?.setDamping(parseFloat(value));
+        }
+
+        return this;
+    }
+
+    bones(obj, isLeft) {
+        for(const [bone, weight] of Object.entries(obj)) {
+            if (isLeft) {
+                this._physicsLeft?.setInvMass(bone, parseFloat(weight));
+            } else {
+                this._physicsRight?.setInvMass(bone, parseFloat(weight));
+            }
+        }
+
+        return this;
+    }
+
+    animation(animation, isLeft) {
+        const {
+            name: name,
+            mode: mode = "loop",
+            seek_position: seek_position = 0
+        } = animation ?? {};
+
+        if (isLeft) {
+            if (name !== undefined) {
+                const bnbMode = bnb.AnimationMode[mode.toUpperCase()];
+                this._meshInstanceLeft.animationChange(name, bnbMode);
+            }
+
+            // ms to ns:
+            this._meshInstanceLeft.animationSeek(seek_position * 1000);
+            this._meshInstanceLeft.animationPlay();
+        } else {
+            if (name !== undefined) {
+                const bnbMode = bnb.AnimationMode[mode.toUpperCase()];
+                this._meshInstanceRight.animationChange(name, bnbMode);
+            }
+    
+            // ms to ns:
+            this._meshInstanceRight.animationSeek(seek_position * 1000);
+            this._meshInstanceRight.animationPlay();
+        }
+
+        return this;
+    }
+
+    bonesInMvSpace(param) {
+        this._physicsLeft?.setBonesInMvSpace(param);
+        this._physicsRight?.setBonesInMvSpace(param);
+    }
+
+    clear() {
+        this.translation("0 0 0", false);
+        this.translation("0 0 0", true);
+        this.scale("1 1 1", false);
+        this.scale("1 1 1", true);
+        this.rotation("0 0 0", false);
+        this.rotation("0 0 0", true);
+        this._physicsLeft?.reset();
+        this._physicsRight?.reset();
+    }
+}
+
+exports = {
+    Earrings
+}
+#include <bnb/glsl.frag>
+
+void main()
+{
+    bnb_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+}#include <bnb/glsl.vert>
+#include <bnb/decode_int1010102.glsl>
+
+BNB_LAYOUT_LOCATION(0)
+BNB_IN vec3 attrib_pos;
+BNB_LAYOUT_LOCATION(3)
+BNB_IN vec2 attrib_uv;
+BNB_LAYOUT_LOCATION(4)
+BNB_IN uvec4 attrib_bones;
+
+#ifndef BNB_1_BONE
+BNB_LAYOUT_LOCATION(5)
+BNB_IN vec4 attrib_weights;
+#endif
+
+BNB_DECLARE_SAMPLER_2D(0, 1, bnb_BONES);
+
+#include <bnb/morph_transform.glsl>
+#include <bnb/get_bone.glsl>
+#include <bnb/anim_transform.glsl>
+
+void main()
+{
+    mat4 m = bnb_get_transform();
+    vec3 vpos = attrib_pos;
+    vpos = vec3(vec4(vpos, 1.) * m);
+    gl_Position = bnb_MVP * vec4(vpos, 1.);
+}'use strict';
+
+const prefabs = require("bnb_js/prefabs");
+
+const ContentMode = {
+  SCALE_TO_FILL: 0,
+  FILL: 1,
+  FIT: 2,
+}
 
 class Foreground extends prefabs.Base {
     constructor() {
@@ -2219,7 +3153,9 @@ class Foreground extends prefabs.Base {
         this._foreground_texture = assets.findImage("foreground_texture")?.asTexture();
         this._foreground_video = assets.findImage("foreground_video")?.asVideo();
         this._foreground_input_mask = this._material.findParameter("foreground_input_mask");
-        this._foreground_rotation = this._material.findParameter("foreground_rotation");
+        this._foreground_rotation_mode = this._material.findParameter("foreground_rotation_mode");
+        
+        this.foreground_rotation_mode = new bnb.Vec4(0.0, ContentMode.SCALE_TO_FILL, 0.0, 0.0);
     }
 
     /** Set foreground texture */
@@ -2253,13 +3189,24 @@ class Foreground extends prefabs.Base {
     }
 
     rotation(angle) {
-        this._foreground_rotation.setVector4(new bnb.Vec4(angle, 0.0, 0.0, 0.0));
+        this.foreground_rotation_mode.x = angle;
+        this._foreground_rotation_mode.setVector4(this.foreground_rotation_mode);
+    }
+
+    /**
+     * Sets the texture content mode
+     * @param {"scale_to_fill" | "fill" | "fit"} mode - content mode
+     */
+    contentMode(mode) {
+        this.foreground_rotation_mode.y = ContentMode[mode.toUpperCase()];
+        this._foreground_rotation_mode.setVector4(this.foreground_rotation_mode);
     }
 
     /** Resets any settings applied */
     clear() {
         this.filename("");
         this.rotation(0.0);
+        this.contentMode("scale_to_fill");
         this._foreground_input_mask.setVector4(new bnb.Vec4(0.0, 0.0, 0.0, 0.0));
     }
 }
@@ -2271,7 +3218,8 @@ exports = {
 function is_video(filename)
 {
     var extension = filename.split('.').pop();
-    return (['mp4', 'avi', 'flv', 'mkv', 'mov', 'mts', 'webm', 'wmv', 'gif'].indexOf(extension) > -1);
+    return (['mp4', 'avi', 'flv', 'mkv', 'mov', 'mts', 'webm', 'wmv', 'gif'].indexOf(extension) > -1)
+        || (['MP4', 'AVI', 'FLV', 'MKV', 'MOV', 'MTS', 'WEBM', 'WMV', 'GIF'].indexOf(extension) > -1);
 }
 {
     "apply_order": 220,
@@ -2292,7 +3240,7 @@ function is_video(filename)
                     { "name": "vid_foreground", "image": "foreground_video" }
                 ],
                 "parameters": {
-                    "foreground_rotation":      { "type": "vec4", "value": [ 0.0, 0.0, 0.0, 0.0 ] },
+                    "foreground_rotation_mode": { "type": "vec4", "value": [ 0.0, 0.0, 0.0, 0.0 ] },
                     "foreground_input_mask":    { "type": "vec4", "value": [ 0.0, 0.0, 0.0, 0.0 ] }
                 },
                 "state": { "@blend": "alpha", "backfaces": true, "colorwrite": true, "ztest": false, "zwrite": false }
@@ -2324,6 +3272,7 @@ function is_video(filename)
     "script": "/bnb_prefabs/foreground/config.js"
 }
 #include <bnb/glsl.frag>
+#include <bnb/transform_uv.glsl>
 
 BNB_IN(0)
 vec2 var_uv;
@@ -2337,7 +3286,7 @@ void main()
     vec4 video_color = BNB_TEXTURE_2D(BNB_SAMPLER_2D(vid_foreground), var_uv);
     vec4 out_color = texture_color * foreground_input_mask.x + video_color * foreground_input_mask.y;
 
-    bnb_FragColor = out_color;
+    bnb_FragColor = out_color * bnb_get_uv_frame_alpha(var_uv);
 }
 #include <bnb/glsl.vert>
 #include <bnb/transform_uv.glsl>
@@ -2347,6 +3296,9 @@ BNB_IN vec2 attrib_pos;
 
 BNB_OUT(0)
 vec2 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, tex_foreground);
+BNB_DECLARE_SAMPLER_2D(2, 3, vid_foreground);
 
 #ifdef BNB_VK_1
 const float degrees_to_radians = 0.017453292f;
@@ -2364,7 +3316,14 @@ void main()
 
     gl_Position = vec4(attrib_pos, 0., 1.);
 
-    var_uv = bnb_rotate_uv(var_uv, degrees_to_radians * foreground_rotation.x);
+    vec2 fg_texture_size = foreground_input_mask.x * vec2(textureSize(BNB_SAMPLER_2D(tex_foreground), 0)) + foreground_input_mask.x * vec2(textureSize(BNB_SAMPLER_2D(vid_foreground), 0));
+
+    if (fg_texture_size.x < 1.0 || fg_texture_size.y < 1.0) {
+        fg_texture_size = bnb_SCREEN.xy;
+    }
+
+    var_uv = bnb_rotate_uv(var_uv, degrees_to_radians * foreground_rotation_mode.x);
+    var_uv = bnb_contain_uv(var_uv, fg_texture_size, foreground_rotation_mode.y, foreground_rotation_mode.x);
 
 #ifndef BNB_VK_1
     var_uv.y = 1. - var_uv.y;
@@ -2400,6 +3359,15 @@ void main()
                 "multiply", 
                 "min", 
                 "max" 
+            ]
+        },
+        "content_mode": {
+            "type": "string",
+            "description": "Fits the foreground texture inside frame.",
+            "enum": [
+                "scale_to_fill",
+                "fill",
+                "fit"
             ]
         }
     }
@@ -8822,13 +9790,13 @@ huwxyz                    €?  €?      ðÿ @ÿÿ      ÿ     €¿  €?     
         },
         "size": {
             "type": "string",
-            "default": "100 100",
-            "description": "Size of the text area X, Y."
+            "default": "30 10",
+            "description": "Size (in percents of screen size) of the text area X, Y."
         },
         "translation": {
             "type": "string",
-            "default": "0 0 ",
-            "description": "Translate the center of hint relativly the center of screen along X, Y axes."
+            "default": "0 0",
+            "description": "Translate the center of hint relativly the center of screen along X, Y axes in percents of screen size."
         },
         "rotation": {
             "type": "string",
@@ -8842,6 +9810,8 @@ huwxyz                    €?  €?      ðÿ @ÿÿ      ÿ     €¿  €?     
 const prefabs = require("bnb_js/prefabs");
 
 let defaultFont;
+
+const clamp = (x, min, max) => Math.max(min, Math.min(x, max));
 
 class Hint extends prefabs.Base {
     constructor(spriteIdx=0) {
@@ -8865,23 +9835,14 @@ class Hint extends prefabs.Base {
         this._entity = bnb.scene.getRoot().findChildByName(`hint_surface:${spriteIdx}`);
         this._transform = this._entity.getComponent(bnb.ComponentType.TRANSFORMATION).asTransformation();
 
-        this._translation = new bnb.Vec3(0, 0, 0);
+        this._relTrans = new bnb.Vec3(0, 0, 0);
+
+        this._relW = 30;
+        this._relH = 10;
         
         bnb.eventListener.on("onUpdate", () => {
-            let w = this._text_texture.getWidth();
-            let h = this._text_texture.getHeight();
-        
-            let surfWidth = bnb.scene.getSurfaceWidth();
-            let surfHeight = bnb.scene.getSurfaceHeight();
-
-            this._transform.setScale(new bnb.Vec3(w / surfWidth, h / surfHeight, 1));
-            this._transform.setTranslation(
-                new bnb.Vec3(
-                    this._translation.x / surfWidth * 2, 
-                    this._translation.y / surfHeight * 2, 
-                    1
-                )
-            );
+            this._updateTextSize();
+            this._updateTranslation();
         })
     }
 
@@ -8895,13 +9856,9 @@ class Hint extends prefabs.Base {
     }
 
     size(sz){
-        let surfWidth = bnb.scene.getSurfaceWidth();
-        let surfHeight = bnb.scene.getSurfaceHeight();
+        [this._relW, this._relH] = sz.split(" ").map((c) => parseFloat(c));
 
-        const [w, h] = sz.split(" ").map((c) => parseFloat(c));
-        this._text_texture.setWidth(w);
-        this._text_texture.setHeight(h);
-        this._transform.setScale(new bnb.Vec3(w / surfWidth , h / surfHeight, 1));
+        this._updateTextSize();
         return this;
     }
 
@@ -8911,17 +9868,8 @@ class Hint extends prefabs.Base {
     }
 
     translation(tr){
-        let surfWidth = bnb.scene.getSurfaceWidth();
-        let surfHeight =  bnb.scene.getSurfaceHeight();
-
-        [this._translation.x, this._translation.y] = tr.split(" ").map((c) => parseFloat(c));
-        this._transform.setTranslation(
-            new bnb.Vec3(
-                this._translation.x / surfWidth * 2, 
-                this._translation.y / surfHeight * 2, 
-                1
-            )
-        );
+        [this._relTrans.x, this._relTrans.y] = tr.split(" ").map((c) => parseFloat(c));
+        this._updateTranslation();
         return this;
     }
 
@@ -8931,10 +9879,37 @@ class Hint extends prefabs.Base {
         return this;
     }
 
+    _updateTextSize() {
+        let surfWidth = bnb.scene.getSurfaceWidth();
+        let surfHeight = bnb.scene.getSurfaceHeight();
+
+        // geometric mean
+        const relUnit = Math.sqrt(surfWidth * surfHeight) / 100;
+
+        this._relW = clamp(this._relW, 0, 150);
+        this._relH = clamp(this._relH, 0, 150);
+        
+        let w = this._relW * relUnit;
+        let h = this._relH * relUnit;
+        this._text_texture.setWidth(w);
+        this._text_texture.setHeight(h);
+        this._transform.setScale(new bnb.Vec3(w / surfWidth , h / surfHeight, 1));
+    }
+
+    _updateTranslation() {
+        this._transform.setTranslation(
+            new bnb.Vec3(
+                this._relTrans.x / 100 * 2, 
+                this._relTrans.y / 100 * 2, 
+                1
+            )
+        );
+    }
+
     clear(){
         this.font(defaultFont);
         this.color("1 1 1 1");
-        this.size('100 100');
+        this.size("30 10");
         this.text("");
         this.translation("0 0");
         this.rotation("0 0 0");
@@ -9277,97 +10252,122 @@ class VideoTexture extends prefabs.Base {
         this._transform = entity.getComponent(bnb.ComponentType.TRANSFORMATION).asTransformation();
 
         this._alpha_param = 0.;
-        this._video_name = "";
 
-        this._layer = bnb.scene.getLayer(`video_texture:${faceIndex}`);
-        this._layer.setActive(false);
-
-        this.counter = 0;
-
-        bnb.eventListener.on("onActivate", () => {
-            if (this._alpha_param != 0)
-                this._alpha.setVector4(new bnb.Vec4(this._alpha_param, 0., 0., 1.));
-
-            if (this._video_name != "")
-            {
-                this._video_texture.load(this._video_name, (success) => {
-                    if (success) {
-                        this._video_texture.asMedia().setLooped(true);
-                        this._video_texture.asMedia().play();
-                        if (this._alpha_param == AlphaMode.SEPARATE) {
-                            this._alpha_texture.asMedia().setLooped(true);
-                            this._alpha_texture.asMedia().play();
-                        }
-                    }
-                });
-            }
-        })
-
-        bnb.eventListener.on("onLateUpdate", () => {
-            if (this.counter > 2 && !this._layer.isActive()) {
-                this._layer.setActive(true);
-            } else if (this.counter < 3) {
-                this.counter += 1;
-            }
-        });
+        this._video_loaded = false;
+        this._alpha_loaded = false;
     }
 
     _mesh() {}
 
     video(filename) {
-        this._video_name = filename;
-        return this;
-    }
-    
-    alpha(filename) {
-        this._alpha_texture.load(filename, (success) => {
+        this._video_loaded = false;
+
+        this._video_texture.load(filename, (success) => {
             if (success) {
+                this._video_loaded = true;
+                
+                if (this._alpha_param == 0.)
+                    return //still undefined. wait for useSeparateAlpha()
+
+                if (this._alpha_param == AlphaMode.COMBINED) {
+                    this._video_texture.asMedia().setLooped(true);
+                    this._video_texture.asMedia().play();
+                    return;
+                }
+
+                if (this._alpha_param == AlphaMode.SEPARATE && this._alpha_loaded == false)
+                    return; //wait for _alpha_texture
+                                
+                this._video_texture.asMedia().setLooped(true);
                 this._alpha_texture.asMedia().setLooped(true);
+                this._video_texture.asMedia().play();
                 this._alpha_texture.asMedia().play();
             }
         });
-        return this;
+    }
+
+    alpha(filename) {
+        this._alpha_loaded = false;
+            
+        this._alpha_texture.load(filename, (success) => {
+            if (success) {
+                this._alpha_loaded = true;
+                
+                if (this._alpha_param == 0.)
+                    return //still undefined. wait for useSeparateAlpha()
+                            
+                if (this._video_loaded == false)
+                    return;
+                    
+                this._video_texture.asMedia().setLooped(true);
+                this._alpha_texture.asMedia().setLooped(true);
+                this._video_texture.asMedia().play();
+                this._alpha_texture.asMedia().play();
+            }
+        });
     }
 
     useSeparateAlpha(use) {
-        if (use)
+        if (use) {
             this._alpha_param = AlphaMode.SEPARATE;
-        else
+            this._alpha.setVector4(new bnb.Vec4(this._alpha_param, 0., 0., 1.));
+
+            if (this._video_loaded && this._alpha_loaded) {
+                this._video_texture.asMedia().setLooped(true);
+                this._alpha_texture.asMedia().setLooped(true);
+                this._video_texture.asMedia().play();
+                this._alpha_texture.asMedia().play();
+            }
+        } else {
             this._alpha_param = AlphaMode.COMBINED;
-        return this;
+            this._alpha.setVector4(new bnb.Vec4(this._alpha_param, 0., 0., 1.));
+            
+            if (this._video_loaded) {
+                this._video_texture.asMedia().setLooped(true);
+                this._video_texture.asMedia().play();
+            }
+        }
     }
 
     translation(tr) {
         const [x, y, z] = tr.split(" ").map((c) => parseFloat(c));
         this._transform.setTranslation(new bnb.Vec3(x, y, z));
-        return this;
     }
 
     scale(scale) {
         const [x, y, z] = scale.split(" ").map((c) => parseFloat(c));
         this._transform.setScale(new bnb.Vec3(x, y, z));
-        return this;
     }
 
     rotation(rot) {
         const [x, y, z] = rot.split(" ").map((c) => parseFloat(c) * (Math.PI / 180));
         this._transform.setRotation(new bnb.Vec3(x, y, z));
-        return this;
     }
 
     /** Resets any settings applied */
     clear() {
-        this.counter = 0;
-        this._layer.setActive(false);
         this.translation("0 0 0");
         this.scale("1 1 1");
         this.rotation("0 0 0");
+
+        this._video_loaded = false;
+        this._alpha_loaded = false;
+
+        if (this._alpha_param == AlphaMode.COMBINED) {
+            this._video_texture.asMedia().stop();
+            this._alpha_texture.asMedia().stop();
+        } else if (this._alpha_param == AlphaMode.SEPARATE) {
+            this._video_texture.asMedia().stop();
+        }
+
+        this._alpha_param = 0.;
     }
 }
 
 exports = {
     VideoTexture
-}{
+}
+{
     "apply_order": 185,
     "assets": {
         "faces": {
@@ -9584,6 +10584,58 @@ void main()
 #include <bnb/get_transform.glsl>
 
 #endif // BNB_ANIM_TRANSFORM_GLSL
+#ifndef BNB_BLUR_HV_GLSL
+#define BNB_BLUR_HV_GLSL
+
+// two-pass rgb blur with radius 12
+vec3 bnb_blur_hv_rgb_r12(BNB_DECLARE_SAMPLER_2D_ARGUMENT(s_img), ivec2 iuv, ivec2 axis /* (1, 0) then (0, 1) */)
+{
+    ivec2 image_size = textureSize(BNB_SAMPLER_2D(s_img), 0) - 1;
+    vec3 blurred = texelFetch(BNB_SAMPLER_2D(s_img), iuv, 0).rgb;
+    float mult_sum = 1.;
+
+    int radius = 12;
+    // float sigma = (float(radius) * 2. - 1.) / 4.;
+    // float sigma_mult = 1. / (2. * sigma * sigma);
+    float coeffs[13] = float[13](1.f, 0.98499f, 0.94130f, 0.87275f, 0.78508f, 0.68518f, 0.58017f, 0.47662f, 0.37989f, 0.29377f, 0.22040f, 0.16043f, 0.11330f);
+
+    for (int x = 1; x <= radius; x++) {
+        // coeffs[x] = exp(-sigma_mult * (x * x + y * y));
+        ivec2 coord0 = clamp(iuv + ivec2(x, x) * axis, ivec2(0), image_size);
+        ivec2 coord1 = clamp(iuv - ivec2(x, x) * axis, ivec2(0), image_size);
+        blurred += coeffs[x] * (texelFetch(BNB_SAMPLER_2D(s_img), coord0, 0).rgb + texelFetch(BNB_SAMPLER_2D(s_img), coord1, 0).rgb);
+        mult_sum += 2.f * coeffs[x];
+    }
+
+    blurred *= 1.f / mult_sum;
+    return blurred;
+}
+
+// two-pass one-channel blur with radius 7
+float bnb_blur_hv_r7(BNB_DECLARE_SAMPLER_2D_ARGUMENT(s_img), ivec2 iuv, ivec2 axis /* (1, 0) then (0, 1) */, int channel /* [0...3] */)
+{
+    ivec2 image_size = textureSize(BNB_SAMPLER_2D(s_img), 0) - 1;
+    float blurred = texelFetch(BNB_SAMPLER_2D(s_img), iuv, 0)[channel];
+    float mult_sum = 1.;
+
+    int radius = 7;
+    // float sigma = (float(radius) * 2. - 1.) / 4.;
+    // float sigma_mult = 1. / (2. * sigma * sigma);
+    float coeffs[8] = float[8](1.f, 0.95376f, 0.82749f, 0.65309f, 0.46888f, 0.30622f, 0.18192f, 0.09832f);
+
+    for (int x = 1; x <= radius; x++) {
+        // coeffs[x] = exp(-sigma_mult * (x * x + y * y));
+        ivec2 coord0 = clamp(iuv + ivec2(x, x) * axis, ivec2(0), image_size);
+        ivec2 coord1 = clamp(iuv - ivec2(x, x) * axis, ivec2(0), image_size);
+        blurred += coeffs[x] * (texelFetch(BNB_SAMPLER_2D(s_img), coord0, 0)[channel] + texelFetch(BNB_SAMPLER_2D(s_img), coord1, 0)[channel]);
+        mult_sum += 2.f * coeffs[x];
+    }
+
+    blurred *= 1.f / mult_sum;
+    return blurred;
+}
+
+#endif // BNB_BLUR_HV_GLSL
 // https://github.com/tobspr/GLSL-Color-Spaces/blob/master/ColorSpaces.inc.glsl
 // https://github.com/graypegg/chromatism
 
@@ -9821,6 +10873,47 @@ vec3 bnb_Luv_to_rgb(vec3 luv)
     return bnb_linear_to_sRGB(bnb_XYZ_to_rgb(bnb_Luv_to_XYZ(luv)));
 }
 
+
+/* RGB to VSC, to VS and VSC to RGB. Used for makeup prefabs */
+
+vec2 rgb_to_vs(vec3 rgb)
+{
+    float v = max(max(rgb.x, rgb.y), rgb.z);
+    float m = min(min(rgb.x, rgb.y), rgb.z);
+
+    float v_ = v > 0.0001f ? v : 1.f;
+    float d = v - m;
+    float s = d / v_;
+
+    return vec2(v, s);
+}
+
+struct vec5
+{
+    float r, g, b, a, f;
+};
+
+vec5 rgb_to_vsc(vec3 rgb)
+{
+    float v = max(max(rgb.x, rgb.y), rgb.z);
+    float m = min(min(rgb.x, rgb.y), rgb.z);
+
+    float v_ = v > 0.0001f ? v : 1.f;
+    float d = v - m;
+    float s = d / v_;
+    float d_ = d > 0.0001f ? d : v_;
+
+    vec3 c = (rgb - m) / d_;
+
+    return vec5(v, s, c.r, c.g, c.b);
+}
+
+vec3 vsc_to_rgb(vec5 vsc)
+{
+    vec3 data = vec3(vsc.b, vsc.a, vsc.f);
+    return (data * vsc.g + vec3(1.f) - vec3(vsc.g)) * vsc.r;
+}
+
 #endif // BNB_COLOR_SPACES_GLSL
 #ifndef BNB_DECODE_INT1010102_GLSL
 #define BNB_DECODE_INT1010102_GLSL
@@ -9942,124 +11035,247 @@ out gl_PerVertex
     #define gl_InstanceID gl_InstanceIndex
 #endif
 
-#endif // BNB_VERTEX_SHADER#ifndef BNB_GUIDED_FILTER_GLSL
-#define BNB_GUIDED_FILTER_GLSL
+#endif // BNB_VERTEX_SHADER#include <bnb/glsl.frag>
+#include <bnb/guided_filter/common.glsl>
 
-precision highp float;
-precision highp int;
+BNB_IN(0)
+vec2 var_uv;
 
-#include <bnb/textures_lookup.glsl>
+BNB_DECLARE_SAMPLER_2D(0, 1, s_src_texture);
 
-float smooth_binarize(float x, float threshold, float c)
+// bnb_FragColor                    // sum_I, sum_p
+layout(location = 1) out vec4 out1; // sum_Ip.rgb, 1.f
+layout(location = 2) out vec4 out2; // rr, rg, rb, gg
+layout(location = 3) out vec4 out3; // gb, bb, 1.f, 1.f
+
+void main()
 {
-    return pow(max(0.f, x - threshold), c);
+    int radius = bnb_radius;
+    float kernel_scaler = bnb_kernel_area;
+    if (bnb_SCREEN.x < 1280.f) {
+        radius = max(1, int(float(radius) * bnb_SCREEN.x / 1280.f));
+        kernel_scaler = float(2 * radius + 1);
+    }
+    kernel_scaler = 1.f / kernel_scaler;
+
+    vec3 sum_I = vec3(0.f);
+    float sum_p = 0.f;
+    vec3 sum_Ip = vec3(0.f);
+
+    float sum_rr = 0.f, sum_rg = 0.f, sum_rb = 0.f;
+    float sum_gg = 0.f, sum_gb = 0.f, sum_bb = 0.f;
+
+    ivec2 tex_size = textureSize(BNB_SAMPLER_2D(s_src_texture), 0);
+    ivec2 coord = ivec2(var_uv * vec2(tex_size));
+
+    for (int x = -radius; x <= radius; ++x) {
+        vec4 tex = texelFetch(BNB_SAMPLER_2D(s_src_texture), clamp(coord + ivec2(x, 0), ivec2(0), tex_size - ivec2(1)), 0);
+        vec3 I_val = tex.rgb;
+        float p_val = bnb_smooth_binarize(tex.a, 0.2, 0.005);
+
+        sum_I += I_val;
+        sum_p += p_val;
+        sum_Ip += I_val * p_val;
+
+        sum_rr += I_val.r * I_val.r;
+        sum_rg += I_val.r * I_val.g;
+        sum_rb += I_val.r * I_val.b;
+        sum_gg += I_val.g * I_val.g;
+        sum_gb += I_val.g * I_val.b;
+        sum_bb += I_val.b * I_val.b;
+    }
+
+    bnb_FragColor = vec4(sum_I * kernel_scaler, sum_p * kernel_scaler);
+    out1 = vec4(sum_Ip * kernel_scaler, 1.f);
+    out2 = vec4(sum_rr * kernel_scaler, sum_rg * kernel_scaler, sum_rb * kernel_scaler, sum_gg * kernel_scaler);
+    out3 = vec4(sum_gb * kernel_scaler, sum_bb * kernel_scaler, 1.f, 1.f);
 }
+#include <bnb/glsl.frag>
+#include <bnb/guided_filter/common.glsl>
 
-float cut_and_rescale(float x, float cut, float p)
+BNB_IN(0)
+vec2 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, s_horiz_sums0);
+BNB_DECLARE_SAMPLER_2D(2, 3, s_horiz_sums1);
+BNB_DECLARE_SAMPLER_2D(4, 5, s_horiz_sums2);
+BNB_DECLARE_SAMPLER_2D(6, 7, s_horiz_sums3);
+
+void main()
 {
-    float cutted = max(0.f, x - cut) / (1.f - cut);
-    return pow(cutted, p);
-}
-
-int roi_approx(BNB_DECLARE_SAMPLER_2D_ARGUMENT(tex), vec2 uv, int radius, vec2 step_size, int step)
-{
-    float eps = 1e-1;
-    float mask_sum = 0.f;
-    float points = 0.f;
-    for (int y = -1; y <= 1; y += step) {
-        for (int x = -1; x <= 1; x += step) {
-            vec2 offset = vec2(float(x * radius), float(y * radius)) * step_size;
-            vec2 sample_uv = uv + offset;
-            float mask = textureLod(BNB_SAMPLER_2D(tex), sample_uv, 0.f).a;
-            mask = smooth_binarize(mask, 0.6, 0.005);
-
-            mask_sum += mask;
-            points += 1.f;
-        }
+    int radius = bnb_radius;
+    float kernel_scaler = bnb_kernel_area;
+    if (bnb_SCREEN.x < 1280.f) {
+        radius = max(1, int(float(radius) * bnb_SCREEN.x / 1280.f));
+        kernel_scaler = float(2 * radius + 1);
     }
+    kernel_scaler = 1.f / kernel_scaler;
 
-    if ((1.f / points + eps < mask_sum) && (mask_sum < points - eps)) {
-        return 0;
-    }
+    vec3 sum_I = vec3(0.f);
+    float sum_p = 0.f;
+    vec3 sum_Ip = vec3(0.f);
 
-    if (1.f / points + eps < mask_sum) {
-        return 1;
-    }
-    // if (mask_sum < points - eps)
-    return 2;
-}
+    float sum_rr = 0.f, sum_rg = 0.f, sum_rb = 0.f;
+    float sum_gg = 0.f, sum_gb = 0.f, sum_bb = 0.f;
 
-// For more info (base realisation, ...) see pr: https://bitbucket.org/BanubaLimited/banuba_sdk/pull-requests/6503/overview
-vec4 bnb_guided_filter(BNB_DECLARE_SAMPLER_2D_ARGUMENT(tex), vec2 uv, int radius, float eps)
-{
-    vec2 tex_size = vec2(textureSize(BNB_SAMPLER_2D(tex), 0));
-    float stride = 1.5f * max(tex_size.x, tex_size.y) / 1280.f;
-    vec2 step_size = vec2(stride) / tex_size;
-    int roi_result = roi_approx(BNB_PASS_SAMPLER_ARGUMENT(tex), uv, radius, step_size, 1);
-    if (roi_result == 1) {
-        return vec4(0.f, 0.f, 0.f, 1.f);
-    }
+    ivec2 tex_size0 = textureSize(BNB_SAMPLER_2D(s_horiz_sums0), 0);
+    ivec2 tex_size1 = textureSize(BNB_SAMPLER_2D(s_horiz_sums1), 0);
+    ivec2 tex_size2 = textureSize(BNB_SAMPLER_2D(s_horiz_sums2), 0);
+    ivec2 tex_size3 = textureSize(BNB_SAMPLER_2D(s_horiz_sums3), 0);
 
-    if (roi_result == 2) {
-        return vec4(0.f, 0.f, 0.f, 0.f);
-    }
-
-    vec3 sum_I = vec3(0.0);
-    float sum_p = 0.0;
-    vec3 sum_Ip = vec3(0.0);
-
-    float sum_rr = 0.0, sum_rg = 0.0, sum_rb = 0.0;
-    float sum_gg = 0.0, sum_gb = 0.0, sum_bb = 0.0;
-
-    int kernel_size = 2 * radius + 1;
-    float kernel_area = float(kernel_size * kernel_size);
-    vec2 texel_size = vec2(stride) / tex_size;
+    ivec2 coord0 = ivec2(var_uv * vec2(tex_size0));
+    ivec2 coord1 = ivec2(var_uv * vec2(tex_size1));
+    ivec2 coord2 = ivec2(var_uv * vec2(tex_size2));
+    ivec2 coord3 = ivec2(var_uv * vec2(tex_size3));
 
     for (int y = -radius; y <= radius; ++y) {
-        for (int x = -radius; x <= radius; ++x) {
-            vec2 offset = vec2(float(x), float(y)) * texel_size;
-            vec2 sample_uv = uv + offset;
-            vec4 tex = textureLod(BNB_SAMPLER_2D(tex), sample_uv, 0.f);
-            vec3 I_val = tex.rgb;
-            float p_val = tex.a;
-            p_val = smooth_binarize(p_val, 0.2, 0.005);
+        vec4 h0 = texelFetch(BNB_SAMPLER_2D(s_horiz_sums0), clamp(coord0 + ivec2(0, y), ivec2(0), tex_size0 - ivec2(1)), 0);
+        vec4 h1 = texelFetch(BNB_SAMPLER_2D(s_horiz_sums1), clamp(coord1 + ivec2(0, y), ivec2(0), tex_size1 - ivec2(1)), 0);
+        vec4 h2 = texelFetch(BNB_SAMPLER_2D(s_horiz_sums2), clamp(coord2 + ivec2(0, y), ivec2(0), tex_size2 - ivec2(1)), 0);
+        vec2 h3 = texelFetch(BNB_SAMPLER_2D(s_horiz_sums3), clamp(coord3 + ivec2(0, y), ivec2(0), tex_size3 - ivec2(1)), 0).rg;
 
-            sum_I += I_val;
-            sum_p += p_val;
-            sum_Ip += I_val * p_val;
+        sum_I += h0.rgb;
+        sum_p += h0.a;
+        sum_Ip += h1.rgb;
 
-            sum_rr += I_val.r * I_val.r;
-            sum_rg += I_val.r * I_val.g;
-            sum_rb += I_val.r * I_val.b;
-            sum_gg += I_val.g * I_val.g;
-            sum_gb += I_val.g * I_val.b;
-            sum_bb += I_val.b * I_val.b;
-        }
+        sum_rr += h2.r;
+        sum_rg += h2.g;
+        sum_rb += h2.b;
+        sum_gg += h2.a;
+        sum_gb += h3.r;
+        sum_bb += h3.g;
     }
 
-    vec3 mean_I = sum_I / kernel_area;
-    float mean_p = sum_p / kernel_area;
-    vec3 mean_Ip = sum_Ip / kernel_area;
+    vec3 mean_I = sum_I * kernel_scaler;
+    float mean_p = sum_p * kernel_scaler;
+    vec3 mean_Ip = sum_Ip * kernel_scaler;
 
-    float rr = sum_rr / kernel_area - mean_I.r * mean_I.r;
-    float rg = sum_rg / kernel_area - mean_I.r * mean_I.g;
-    float rb = sum_rb / kernel_area - mean_I.r * mean_I.b;
-    float gg = sum_gg / kernel_area - mean_I.g * mean_I.g;
-    float gb = sum_gb / kernel_area - mean_I.g * mean_I.b;
-    float bb = sum_bb / kernel_area - mean_I.b * mean_I.b;
+    float rr = max(0.f, sum_rr * kernel_scaler - mean_I.r * mean_I.r);
+    float rg = max(0.f, sum_rg * kernel_scaler - mean_I.r * mean_I.g);
+    float rb = max(0.f, sum_rb * kernel_scaler - mean_I.r * mean_I.b);
+    float gg = max(0.f, sum_gg * kernel_scaler - mean_I.g * mean_I.g);
+    float gb = max(0.f, sum_gb * kernel_scaler - mean_I.g * mean_I.b);
+    float bb = max(0.f, sum_bb * kernel_scaler - mean_I.b * mean_I.b);
 
     mat3 sigma = mat3(
-        rr + eps, rg, rb, rg, gg + eps, gb, rb, gb, bb + eps
+        rr + bnb_eps, rg, rb, rg, gg + bnb_eps, gb, rb, gb, bb + bnb_eps
     );
 
     vec3 cov_Ip = mean_Ip - mean_I * mean_p;
     vec3 a = inverse(sigma) * cov_Ip;
     float b = mean_p - dot(a, mean_I);
 
-    return vec4(a, b);
+    bnb_FragColor = vec4(a, b);
+}
+#ifndef BNB_GUIDED_FILTER_COMMON_GLSL
+#define BNB_GUIDED_FILTER_COMMON_GLSL
+
+precision highp float;
+precision highp int;
+
+// For more info (base realisation, ...) see pr: https://bitbucket.org/BanubaLimited/banuba_sdk/pull-requests/6503/overview
+// and pr: https://bitbucket.org/BanubaLimited/banuba_sdk/pull-requests/6705/overview
+
+const int bnb_radius = 8;
+const float bnb_eps = 0.2f;
+const float bnb_cut = 0.67f;
+const float bnb_cut_pow = 0.45f;
+
+const float bnb_kernel_area = 17.f; // calcualted by 2 * bnb_radius + 1;
+
+float bnb_smooth_binarize(float x, float threshold, float c)
+{
+    return pow(max(0.f, x - threshold), c);
 }
 
-#endif // BNB_GUIDED_FILTER_GLSL
+float bnb_cut_and_rescale(float x, float cut, float p)
+{
+    float cutted = max(0.f, x - cut) / (1.f - cut);
+    return pow(cutted, p);
+}
+
+#endif // BNB_GUIDED_FILTER_COMMON_GLSL
+#include <bnb/glsl.vert>
+
+BNB_LAYOUT_LOCATION(0)
+BNB_IN vec3 attrib_pos;
+
+BNB_OUT(0)
+vec2 var_uv;
+
+void main()
+{
+    vec2 v = attrib_pos.xy;
+    gl_Position = vec4(v, 0., 1.);
+    var_uv = v * 0.5 + 0.5;
+
+#ifdef BNB_VK_1
+    var_uv.y = 1. - var_uv.y;
+#endif
+}
+#include <bnb/glsl.frag>
+#include <bnb/guided_filter/common.glsl>
+
+BNB_IN(0)
+vec2 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, ab);
+
+void main()
+{
+    int radius = bnb_radius;
+    float kernel_scaler = bnb_kernel_area;
+    if (bnb_SCREEN.x < 1280.f) {
+        radius = max(1, int(float(radius) * bnb_SCREEN.x / 1280.f));
+        kernel_scaler = float(2 * radius + 1);
+    }
+    kernel_scaler = 1.f / kernel_scaler;
+
+    vec4 sum = vec4(0.f);
+    ivec2 tex_size = textureSize(BNB_SAMPLER_2D(ab), 0);
+    ivec2 coord = ivec2(var_uv * vec2(tex_size));
+
+    for (int x = -radius; x <= radius; ++x) {
+        sum += texelFetch(BNB_SAMPLER_2D(ab), clamp(coord + ivec2(x, 0), ivec2(0), tex_size - ivec2(1)), 0);
+    }
+
+    bnb_FragColor = sum * kernel_scaler;
+}
+#include <bnb/glsl.frag>
+#include <bnb/guided_filter/common.glsl>
+
+BNB_IN(0)
+vec2 var_uv;
+
+BNB_DECLARE_SAMPLER_2D(0, 1, ab);
+BNB_DECLARE_SAMPLER_2D(2, 3, s_src_texture);
+
+void main()
+{
+    int radius = bnb_radius;
+    float kernel_scaler = bnb_kernel_area;
+    if (bnb_SCREEN.x < 1280.f) {
+        radius = max(1, int(float(radius) * bnb_SCREEN.x / 1280.f));
+        kernel_scaler = float(2 * radius + 1);
+    }
+    kernel_scaler = 1.f / kernel_scaler;
+
+    vec4 sum = vec4(0.f);
+    ivec2 tex_size = textureSize(BNB_SAMPLER_2D(ab), 0);
+    ivec2 coord = ivec2(vec2(tex_size) * var_uv);
+
+    for (int y = -radius; y <= radius; ++y) {
+        sum += texelFetch(BNB_SAMPLER_2D(ab), clamp(coord + ivec2(0, y), ivec2(0), tex_size - ivec2(1)), 0);
+    }
+
+    sum *= kernel_scaler;
+
+    vec4 source_camera = textureLod(BNB_SAMPLER_2D(s_src_texture), var_uv, 0.f);
+    float fg_mask = clamp(dot(sum.rgb, source_camera.rgb) + sum.a, 0.f, 1.f);
+    fg_mask = bnb_cut_and_rescale(fg_mask, bnb_cut, bnb_cut_pow);
+
+    bnb_FragColor = vec4(source_camera.rgb, fg_mask);
+}
 #include <bnb/glsl.frag>
 #include <bnb/mediump.glsl>
 
@@ -10337,6 +11553,8 @@ void main()
 #include <bnb/glsl.frag>
 #include <bnb/mediump.glsl>
 #include <bnb/transform_uv.glsl>
+
+#include <bnb/texture_bicubic.glsl>
 
 BNB_IN(0)
 vec2 var_uv;
@@ -13429,7 +14647,6 @@ void main()
     translation = ((attrib_pos - attrib_static_pos) / max_range) * 0.5 + 0.5;
 }#include <bnb/glsl.frag>
 #include <bnb/mediump.glsl>
-#include <bnb/guided_filter.glsl>
 
 precision highp float;
 precision highp int;
@@ -13441,18 +14658,6 @@ vec2 var_bg_uv;
 
 BNB_DECLARE_SAMPLER_2D(0, 1, s_bg_texture);
 BNB_DECLARE_SAMPLER_2D(2, 3, s_src_texture);
-
-#if defined(BNB_OS_EMSCRIPTEN) || defined(BNB_OS_WINDOWS) || defined(BNB_OS_LINUX)
-const int radius = 6;
-const float eps = 0.1f;
-const float cut = 0.7f;
-const float cut_pow = 0.6f;
-#else
-const int radius = 6;
-const float eps = 0.1f;
-const float cut = 0.7f;
-const float cut_pow = 0.3f;
-#endif
 
 bool is_blend_default()
 {
@@ -13553,20 +14758,9 @@ void main()
     vec3 source_vbg = get_vbg();
     float vbg_alpha = get_vbg_alpha();
 
-    float fg_mask = 1.f;
-    if (vbg_use_clear_color_and_guided.g == 1.f) {
-        vec4 mean = bnb_guided_filter(
-            BNB_PASS_SAMPLER_ARGUMENT(s_src_texture), var_uv, radius, eps
-        );
-        fg_mask = clamp(dot(mean.rgb, source_camera.rgb) + mean.a, 0.f, 1.f);
-        fg_mask = cut_and_rescale(fg_mask, cut, cut_pow);
-    } else {
-        fg_mask = source_camera.a;
-    }
+    float bg_mask = 1.f - source_camera.a;
 
-    float bg_mask = 1.f - fg_mask;
-
-    float is_custom_clear_color = vbg_use_clear_color_and_guided.r;
+    float is_custom_clear_color = vbg_use_clear_color.r;
 
     vec2 uv_coeff = step(vec2(0.0, 0.0), var_bg_uv) - step(vec2(1., 1.), var_bg_uv);
     float texture_border = uv_coeff.x * uv_coeff.y;
@@ -13583,7 +14777,9 @@ void main()
         );
     } else {
         out_color = use_blend(
-            source_camera.rgb, source_vbg * texture_border, bg_mask * vbg_alpha
+            source_camera.rgb,
+            source_vbg * texture_border,
+            bg_mask * vbg_alpha
         );
     }
 
@@ -14200,6 +15396,41 @@ vec4 bnb_texture_bicubic(BNB_DECLARE_SAMPLER_2D_ARGUMENT(tex), vec2 uv)
     );
 }
 
+float bnb_texture_bicubic1(BNB_DECLARE_SAMPLER_2D_ARGUMENT(tex), vec2 uv)
+{
+    vec2 tex_size = vec2(textureSize(BNB_SAMPLER_2D(tex), 0));
+    vec2 invtex_size = 1.0 / tex_size;
+
+    uv = uv * tex_size - 0.5;
+
+    vec2 fxy = fract(uv);
+    uv -= fxy;
+
+    vec4 xcubic = cubic(fxy.x);
+    vec4 ycubic = cubic(fxy.y);
+
+    vec4 c = uv.xxyy + vec2(-0.5, +1.5).xyxy;
+
+    vec4 s = vec4(xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw);
+    vec4 offset = c + vec4(xcubic.yw, ycubic.yw) / s;
+
+    offset *= invtex_size.xxyy;
+
+    float sample0 = textureLod(BNB_SAMPLER_2D(tex), offset.xz, 0.).x;
+    float sample1 = textureLod(BNB_SAMPLER_2D(tex), offset.yz, 0.).x;
+    float sample2 = textureLod(BNB_SAMPLER_2D(tex), offset.xw, 0.).x;
+    float sample3 = textureLod(BNB_SAMPLER_2D(tex), offset.yw, 0.).x;
+
+    float sx = s.x / (s.x + s.y);
+    float sy = s.z / (s.z + s.w);
+
+    return mix(
+        mix(sample3, sample2, sx),
+        mix(sample1, sample0, sx),
+        sy
+    );
+}
+
 #endif // BNB_TEXTURE_BICUBIC_GLSL
 #ifndef BNB_TEXTURES_LOOKUP_GLSL
 #define BNB_TEXTURES_LOOKUP_GLSL
@@ -14534,6 +15765,8 @@ if (Api.getCurrentTimeNs() != 0) {
                     "bnb_prefabs/lights",
                     "bnb_prefabs/msaa",
                     "bnb_prefabs/video_texture",
+                    "bnb_prefabs/bokeh",
+                    "bnb_prefabs/earrings",
                     "watermark.png",
                     "watermark_blurred.png",
                     "modules.json"
@@ -14563,14 +15796,7 @@ if (Api.getCurrentTimeNs() != 0) {
                     "MoMoFRX",
                     "flow/face_detector_offline.tflite",
                     "flow/face_detector_online.tflite",
-                    "flow/frx_prior.tflite",
-                    "flow/landmarks_224.tflite",
-                    "flow/landmarks_contour_filter.tflite",
-                    "flow/landmarks_contour_prior.tflite",
-                    "flow/landmarks_lips_fast.tflite",
                     "flow/landmarks_eyes.tflite",
-                    "flow/landmarks_ears.tflite",
-                    "flow/face_detector_multiface_offline.tflite",
                     "bnb_prefabs/morphing",
                     "bnb_prefabs/action_units",
                     "bnb_prefabs/eyelashes",
@@ -14582,36 +15808,14 @@ if (Api.getCurrentTimeNs() != 0) {
                 ]
             }
         },
-        "acne_eyebags_removal": {
+        "acne": {
             "dependencies": [
                 "sdk_core", "effect_player", "scripting", "face_tracker"
             ],
             "resources": {
-                "ios": [
-                    "cml/coreMLPaint.mlmodelc",
-                    "cml/acne.mlmodelc",
-                    "cml/bags.mlmodelc"
-                ],
-                "mac": [
-                    "cml/coreMLPaint.mlmodelc",
-                    "cml/acne.mlmodelc",
-                    "cml/bags.mlmodelc"
-                ],
-                "webgl": [
-                    "flow/acne.tflite",
-                    "flow/paint.tflite"
-                ],
-                "android": [
-                    "flow/acne.tflite",
-                    "flow/paint.tflite"
-                ],
-                "win": [
-                    "flow/acne.tflite",
-                    "flow/paint.tflite"
-                ],
-                "ubuntu": [
-                    "flow/acne.tflite",
-                    "flow/paint.tflite"
+                "all": [
+                    "flow/acne_segm.fp16.tflite",
+                    "bnb_binaries/acne_segmentation"
                 ]
             }
         },
@@ -14671,14 +15875,6 @@ if (Api.getCurrentTimeNs() != 0) {
                 ]
             }
         },
-        "body": {
-            "dependencies": [
-                "sdk_core", "effect_player", "scripting"
-            ],
-            "resources": {
-                "all": "flow/body_segm.tflite"
-            }
-        },
         "eyes": {
             "dependencies": [
                 "sdk_core", "effect_player", "scripting", "face_tracker"
@@ -14687,7 +15883,8 @@ if (Api.getCurrentTimeNs() != 0) {
                 "all": [
                     "bnb_prefabs/eyes", 
                     "bnb_prefabs/eyes_nn", 
-                    "bnb_prefabs/eye_lenses"
+                    "bnb_prefabs/eye_lenses",
+                    "flow/eye_lenses.fp16.tflite"
                 ],
                 "ios": "cml/coreMLEyes_v3.mlmodelc",
                 "mac": "cml/coreMLEyes_v3.mlmodelc",
@@ -14739,17 +15936,6 @@ if (Api.getCurrentTimeNs() != 0) {
                     "flow/face_segm.tflite"
                 ]
             }
-        },
-        "frx_med_mask": {
-            "resources": {
-                "all": [
-                    "flow/landmarks_lips_medmask.tflite",
-                    "flow/landmarks_lips.tflite",
-                    "flow/landmarks_contour_medmask.tflite",
-                    "flow/landmarks_contour.tflite"
-                ]
-            },
-            "private": true
         },
         "hair": {
             "dependencies": [
@@ -14853,7 +16039,7 @@ if (Api.getCurrentTimeNs() != 0) {
                     "flow/hairstyle_women.tflite",
                     "flow/eyewear.tflite",
                     "flow/landmarks_nose.tflite",
-                    "flow/face_shape.tflite",
+                    "flow/face_shape.fp16.tflite",
                     "flow/brows_segm.tflite"
                 ]
             }
@@ -14874,15 +16060,6 @@ if (Api.getCurrentTimeNs() != 0) {
             ],
             "resources": {
                 "all": "flow/neck_segmentation.tflite"
-            }
-        },
-        "occlusion": {
-            "dependencies": [
-                "sdk_core", "effect_player", "scripting", "face_tracker"
-            ],
-            "resources": {
-                "ios": "cml/coreMLOcclusion.mlmodelc",
-                "mac": "cml/coreMLOcclusion.mlmodelc"
             }
         },
         "makeup": {
@@ -14908,7 +16085,10 @@ if (Api.getCurrentTimeNs() != 0) {
                     "bnb_prefabs/makeup_lipsgloss",
                     "bnb_prefabs/makeup_lipschameleon",
                     "bnb_prefabs/makeup_eyelidsgloss",
-                    "bnb_prefabs/makeup_eyelids_chameleon"
+                    "bnb_prefabs/makeup_eyelids_chameleon",
+                    "bnb_prefabs/makeup_glitter_base",
+                    "bnb_prefabs/makeup_lips_glitter",
+                    "bnb_prefabs/makeup_eyelids_glitter"
                 ]
             }
         },
@@ -14939,8 +16119,7 @@ if (Api.getCurrentTimeNs() != 0) {
                 "eyes",
                 "skin",
                 "background",
-                "body",
-                "acne_eyebags_removal",
+                "acne",
                 "makeup",
                 "face_attributes",
                 "light_source_detector"
@@ -14992,7 +16171,6 @@ if (Api.getCurrentTimeNs() != 0) {
 1.17.0 flow/landmarks_112.tflite
 0.38.2 flow/hand_skelet.tflite
 1.4.0 flow/frx_prior.tflite
-0.38.2 flow/body_segm.tflite
 1.10.0 flow/lips_segmentation.tflite
 0.38.2 flow/hand_gestures.tflite
 1.7.1 flow/bg_lite_vert.tflite
@@ -15026,7 +16204,6 @@ if (Api.getCurrentTimeNs() != 0) {
 1.12.0 flow/hairstyle_women.tflite
 1.14.0 flow/eyewear.tflite
 1.12.0 flow/landmarks_nose.tflite
-1.12.0 flow/face_shape.tflite
 1.14.0 flow/brows_segm.tflite
 1.17.0 flow/light_detection.tflite
 5.0.0 other_assets

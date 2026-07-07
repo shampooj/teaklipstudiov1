@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { zipSync, strToU8 } from "fflate";
 import { supabase } from "@/integrations/supabase/client";
+import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
 
 interface Props {
   lipToneLabel: string;
@@ -10,7 +11,7 @@ interface Props {
   opacity: number;
 }
 
-const SDK_BASE = "/banuba";
+const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 
 // Map admin finish values to Banuba finish values
@@ -100,7 +101,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity 
         setStatus("Creating player…");
         player = await Player.create({
           clientToken,
-          locateFile: (fileName: string) => `${SDK_BASE}/${fileName}`,
+          locateFile: locateBanubaFile,
         });
         if (cancelled) {
           await player.destroy();
