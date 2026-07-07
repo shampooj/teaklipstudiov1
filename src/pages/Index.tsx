@@ -672,7 +672,7 @@ const Index = () => {
               
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Choose your closest lip tone
+                    Choose your closest lip tone category
                   </p>
                   <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-2xl mx-auto">
                     {LIP_TONES.map((tone) =>
