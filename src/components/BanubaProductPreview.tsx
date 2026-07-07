@@ -79,7 +79,7 @@ const BanubaProductPreview = ({ imageUrl, hex, finish, opacity, alt, className, 
     // Poll the canvas until it has rendered a visible frame.
     const startTime = Date.now();
     const RENDER_TIMEOUT_MS = 20_000;
-    const POLL_INTERVAL_MS = 250;
+    const POLL_INTERVAL_MS = 1000;
     const checkCanvas = () => {
       const elapsed = Date.now() - startTime;
       if (elapsed > RENDER_TIMEOUT_MS) return;
