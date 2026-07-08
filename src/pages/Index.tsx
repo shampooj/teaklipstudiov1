@@ -53,12 +53,12 @@ const AVATAR_OPTIONS = [
   { id: "avatar-6", url: avatar6Asset.url },
   { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
   { id: "avatar-nupoora", url: avatarNupooraAsset.url },
+  { id: "avatar-3", url: avatar3Asset.url },
   { id: "avatar-4", url: avatar4Asset.url },
   { id: "avatar-5", url: avatar5Asset.url },
-  { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
-  { id: "avatar-3", url: avatar3Asset.url },
-  { id: "skin-light-brown", url: avatarSkinLightAsset.url },
   { id: "avatar-mauve-model", url: avatarMauveModelAsset.url },
+  { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
+  { id: "skin-light-brown", url: avatarSkinLightAsset.url },
 ] as const;
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
