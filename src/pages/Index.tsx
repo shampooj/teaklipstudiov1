@@ -782,28 +782,92 @@ const Index = () => {
                     <p className="font-display text-xl text-foreground text-center">
                       Choose an avatar
                     </p>
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {AVATAR_OPTIONS.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => {
-                            setOriginalImage(avatar.url);
-                            setFaceCropImage(avatar.url);
-                            trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
-                            setState("uploaded");
-                          }}
-                          className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
-                        >
-                          <img
-                            src={avatar.url}
-                            alt="Avatar option"
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </button>
-                      ))}
-                    </div>
+                    <p className="mt-1 font-sans text-[9px] uppercase text-muted-foreground text-center tracking-wider">
+                      Grouped by skin tone
+                    </p>
+
+                    {(() => {
+                      // MOCKUP: grouped by skin tone, 4 avatars per category.
+                      // Reusing existing images as placeholders where needed.
+                      const GROUPS: { id: string; label: string; avatars: { id: string; url: string }[] }[] = [
+                        {
+                          id: "rich-brown",
+                          label: "Rich Brown",
+                          avatars: [
+                            { id: "avatar-6", url: avatar6Asset.url },
+                            { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
+                            { id: "avatar-nupoora", url: avatarNupooraAsset.url },
+                            { id: "avatar-3", url: avatar3Asset.url },
+                          ],
+                        },
+                        {
+                          id: "deep-brown",
+                          label: "Deep Brown",
+                          avatars: [
+                            { id: "avatar-4", url: avatar4Asset.url },
+                            { id: "avatar-5", url: avatar5Asset.url },
+                            { id: "avatar-3-b", url: avatar3Asset.url },
+                            { id: "avatar-nupoora-b", url: avatarNupooraAsset.url },
+                          ],
+                        },
+                        {
+                          id: "medium-brown",
+                          label: "Medium Brown",
+                          avatars: [
+                            { id: "avatar-mauve-model", url: avatarMauveModelAsset.url },
+                            { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
+                            { id: "avatar-5-b", url: avatar5Asset.url },
+                            { id: "avatar-4-b", url: avatar4Asset.url },
+                          ],
+                        },
+                        {
+                          id: "light-brown",
+                          label: "Light Brown",
+                          avatars: [
+                            { id: "skin-light-brown", url: avatarSkinLightAsset.url },
+                            { id: "avatar-mauve-model-b", url: avatarMauveModelAsset.url },
+                            { id: "skin-light-brown-b", url: avatarSkinLightAsset.url },
+                            { id: "skin-medium-brown-b", url: avatarSkinMediumAsset.url },
+                          ],
+                        },
+                      ];
+                      return (
+                        <div className="mt-6 space-y-6">
+                          {GROUPS.map((group) => (
+                            <div key={group.id}>
+                              <div className="flex items-center gap-3 mb-2">
+                                <p className="font-display text-sm text-foreground uppercase tracking-widest whitespace-nowrap">
+                                  {group.label}
+                                </p>
+                                <span className="h-px flex-1 bg-border" />
+                              </div>
+                              <div className="grid grid-cols-4 gap-2 sm:gap-3">
+                                {group.avatars.map((avatar) => (
+                                  <button
+                                    key={avatar.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setOriginalImage(avatar.url);
+                                      setFaceCropImage(avatar.url);
+                                      trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
+                                      setState("uploaded");
+                                    }}
+                                    className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
+                                  >
+                                    <img
+                                      src={avatar.url}
+                                      alt={`${group.label} avatar`}
+                                      loading="lazy"
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                 </div>
