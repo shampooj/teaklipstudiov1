@@ -644,7 +644,7 @@ const Index = () => {
                           }`}
                         >
                           {samples.length === 4 ? (
-                            <div className="w-full aspect-[4/1] grid grid-cols-4 gap-px bg-border">
+                            <div className="w-full aspect-square grid grid-cols-2 grid-rows-2 gap-px bg-border">
                               {samples.map((src, i) => (
                                 <img
                                   key={i}
