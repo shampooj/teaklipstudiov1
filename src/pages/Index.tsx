@@ -627,7 +627,7 @@ const Index = () => {
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
                     {SKIN_TONES.map((tone) => {
-                      // MOCKUP: 4 sample photos per skin-tone category (placeholders reuse existing images).
+                      // MOCKUP: cycling/overlapping sample photos per skin-tone category.
                       const SAMPLES: Record<string, string[]> = {
                         "light-brown": [avatarSkinLightAsset.url, avatarMauveModelAsset.url, avatarSkinLightAsset.url, avatarSkinMediumAsset.url],
                         "medium-brown": [avatarSkinMediumAsset.url, avatarMauveModelAsset.url, avatar5Asset.url, avatar4Asset.url],
@@ -644,13 +644,19 @@ const Index = () => {
                           }`}
                         >
                           {samples.length === 4 ? (
-                            <div className="w-full aspect-square grid grid-cols-2 gap-px bg-border">
+                            <div className="relative w-full aspect-square overflow-hidden">
                               {samples.map((src, i) => (
                                 <img
                                   key={i}
                                   src={src}
                                   alt={`${tone.label} sample ${i + 1}`}
-                                  className="w-full h-full object-cover"
+                                  className="absolute inset-0 w-[92%] h-[92%] object-cover shadow-sm"
+                                  style={{
+                                    top: `${2 + i * 2}%`,
+                                    left: `${2 + i * 2}%`,
+                                    animation: `cycleStack 8s infinite ${i * 2}s`,
+                                    zIndex: samples.length - i,
+                                  }}
                                 />
                               ))}
                             </div>
