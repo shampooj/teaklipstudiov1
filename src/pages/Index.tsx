@@ -626,30 +626,44 @@ const Index = () => {
                     If you're in between, go with the deeper shade.
                   </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
-                    {SKIN_TONES.map((tone) =>
-                  <button
-                    key={tone.id}
-                    onClick={() => setSkinTone(tone.id)}
-                    className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
-                    skinTone === tone.id ? "ring-2 ring-foreground" : ""}`
-                    }>
-                    
-                        {'image' in tone && tone.image ?
-                    <img
-                      src={tone.image}
-                      alt={tone.label}
-                      className="w-full aspect-square object-cover" /> :
-
-
-                    <div
-                      className="w-full aspect-square"
-                      style={{ backgroundColor: tone.color }} />
-
-                    }
-                        <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
-                      </button>
-                  )}
-                   </div>
+                    {SKIN_TONES.map((tone) => {
+                      // MOCKUP: 4 sample photos per skin-tone category (placeholders reuse existing images).
+                      const SAMPLES: Record<string, string[]> = {
+                        "light-brown": [avatarSkinLightAsset.url, avatarMauveModelAsset.url, avatarSkinLightAsset.url, avatarSkinMediumAsset.url],
+                        "medium-brown": [avatarSkinMediumAsset.url, avatarMauveModelAsset.url, avatar5Asset.url, avatar4Asset.url],
+                        "deep-brown": [avatar4Asset.url, avatar5Asset.url, avatar3Asset.url, avatarNupooraAsset.url],
+                        "rich-brown": [avatar6Asset.url, avatarSkinRichAsset.url, avatarNupooraAsset.url, avatar3Asset.url],
+                      };
+                      const samples = SAMPLES[tone.id] ?? [];
+                      return (
+                        <button
+                          key={tone.id}
+                          onClick={() => setSkinTone(tone.id)}
+                          className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                            skinTone === tone.id ? "ring-2 ring-foreground" : ""
+                          }`}
+                        >
+                          {samples.length === 4 ? (
+                            <div className="w-full aspect-square grid grid-cols-2 gap-px bg-border">
+                              {samples.map((src, i) => (
+                                <img
+                                  key={i}
+                                  src={src}
+                                  alt={`${tone.label} sample ${i + 1}`}
+                                  className="w-full h-full object-cover"
+                                />
+                              ))}
+                            </div>
+                          ) : 'image' in tone && tone.image ? (
+                            <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" />
+                          ) : (
+                            <div className="w-full aspect-square" style={{ backgroundColor: tone.color }} />
+                          )}
+                          <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                   <div className="mt-8">
                     <Button
                     onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("lip-tone"); }}
