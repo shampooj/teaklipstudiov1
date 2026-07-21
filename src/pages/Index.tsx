@@ -23,42 +23,42 @@ import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrownAsset from "@/assets/lip-two-toned-deep-brown.png.asset.json";
-const lipMediumBrown = lipMediumBrownAsset.url;
+import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
+const lipMediumBrown = lipMediumBrown;
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrownAsset from "@/assets/lip-brick-v2.png.asset.json";
-const lipNeutralBrown = lipNeutralBrownAsset.url;
+import lipNeutralBrown from "@/assets/lip-brick-v2.png";
+const lipNeutralBrown = lipNeutralBrown;
 import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
 import lipMauvePink from "@/assets/lip-mauve-pink.webp";
-import lipTwoTonedBrownAsset from "@/assets/lip-two-toned-brown.png.asset.json";
-const lipTwoTonedBrown = lipTwoTonedBrownAsset.url;
-import lipTwoTonedBeigeAsset from "@/assets/lip-two-toned-beige.png.asset.json";
-const lipTwoTonedBeige = lipTwoTonedBeigeAsset.url;
+import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
+const lipTwoTonedBrown = lipTwoTonedBrown;
+import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
+const lipTwoTonedBeige = lipTwoTonedBeige;
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
-const lipGreyBrown = lipGreyBrownAsset.url;
-import avatar3Asset from "@/assets/avatar-3.jpg.asset.json";
-import avatar4Asset from "@/assets/avatar-4.jpg.asset.json";
-import avatar5Asset from "@/assets/avatar-5.jpg.asset.json";
-import avatar6Asset from "@/assets/avatar-6.jpg.asset.json";
-import avatarSkinLightAsset from "@/assets/avatar-skin-light-brown.jpg.asset.json";
-import avatarSkinMediumAsset from "@/assets/avatar-skin-medium-brown.jpg.asset.json";
-import avatarSkinDeepAsset from "@/assets/avatar-skin-deep-brown.jpg.asset.json";
-import avatarSkinRichAsset from "@/assets/avatar-skin-rich-brown.jpg.asset.json";
-import avatarNupooraAsset from "@/assets/avatar-nupoora.jpg.asset.json";
-import avatarMauveModelAsset from "@/assets/avatar-mauve-model.png.asset.json";
+import lipGreyBrown from "@/assets/lip-mostly-purple.png";
+const lipGreyBrown = lipGreyBrown;
+import avatar3 from "@/assets/avatar-3.jpg";
+import avatar4 from "@/assets/avatar-4.jpg";
+import avatar5 from "@/assets/avatar-5.jpg";
+import avatar6 from "@/assets/avatar-6.jpg";
+import avatarSkinLight from "@/assets/avatar-skin-light-brown.jpg";
+import avatarSkinMedium from "@/assets/avatar-skin-medium-brown.jpg";
+import avatarSkinDeep from "@/assets/avatar-skin-deep-brown.jpg";
+import avatarSkinRich from "@/assets/avatar-skin-rich-brown.jpg";
+import avatarNupoora from "@/assets/avatar-nupoora.jpg";
+import avatarMauveModel from "@/assets/avatar-mauve-model.png";
 
 const AVATAR_OPTIONS = [
-  { id: "avatar-6", url: avatar6Asset.url },
-  { id: "skin-rich-brown", url: avatarSkinRichAsset.url },
-  { id: "avatar-nupoora", url: avatarNupooraAsset.url },
-  { id: "avatar-3", url: avatar3Asset.url },
-  { id: "avatar-4", url: avatar4Asset.url },
-  { id: "avatar-5", url: avatar5Asset.url },
-  { id: "avatar-mauve-model", url: avatarMauveModelAsset.url },
-  { id: "skin-medium-brown", url: avatarSkinMediumAsset.url },
-  { id: "skin-light-brown", url: avatarSkinLightAsset.url },
+  { id: "avatar-6", url: avatar6 },
+  { id: "skin-rich-brown", url: avatarSkinRich },
+  { id: "avatar-nupoora", url: avatarNupoora },
+  { id: "avatar-3", url: avatar3 },
+  { id: "avatar-4", url: avatar4 },
+  { id: "avatar-5", url: avatar5 },
+  { id: "avatar-mauve-model", url: avatarMauveModel },
+  { id: "skin-medium-brown", url: avatarSkinMedium },
+  { id: "skin-light-brown", url: avatarSkinLight },
 ] as const;
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
@@ -629,10 +629,10 @@ const Index = () => {
                     {SKIN_TONES.map((tone) => {
                       // MOCKUP: 1×4 horizontal strip of sample photos per skin-tone category.
                       const SAMPLES: Record<string, string[]> = {
-                        "light-brown": [avatarSkinLightAsset.url, avatarMauveModelAsset.url, avatarSkinLightAsset.url, avatarSkinMediumAsset.url],
-                        "medium-brown": [avatarSkinMediumAsset.url, avatarMauveModelAsset.url, avatar5Asset.url, avatar4Asset.url],
-                        "deep-brown": [avatar4Asset.url, avatar5Asset.url, avatar3Asset.url, avatarNupooraAsset.url],
-                        "rich-brown": [avatar6Asset.url, avatarSkinRichAsset.url, avatarNupooraAsset.url, avatar3Asset.url],
+                        "light-brown": [avatarSkinLight, avatarMauveModel, avatarSkinLight, avatarSkinMedium],
+                        "medium-brown": [avatarSkinMedium, avatarMauveModel, avatar5, avatar4],
+                        "deep-brown": [avatar4, avatar5, avatar3, avatarNupoora],
+                        "rich-brown": [avatar6, avatarSkinRich, avatarNupoora, avatar3],
                       };
                       const samples = SAMPLES[tone.id] ?? [];
                       return (
