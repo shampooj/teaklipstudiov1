@@ -13,20 +13,15 @@ import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
-const lipMediumBrown = lipMediumBrown;
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
 import lipNeutralBrown from "@/assets/lip-brick-v2.png";
-const lipNeutralBrown = lipNeutralBrown;
 import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
 import lipMauvePink from "@/assets/lip-mauve-pink.webp";
 import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
-const lipTwoTonedBrown = lipTwoTonedBrown;
 import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
-const lipTwoTonedBeige = lipTwoTonedBeige;
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrown from "@/assets/lip-mostly-purple.png";
-const lipGreyBrown = lipGreyBrown;
 
 const SKIN_TONES_REF = [
   { id: "light-brown", label: "Light Brown", image: skinLightBrown },
