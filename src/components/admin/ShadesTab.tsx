@@ -17,7 +17,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
 import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
-const lipMediumBrown = lipMediumBrown;
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
 import lipNeutralBrown from "@/assets/lip-brick-v2.png";
