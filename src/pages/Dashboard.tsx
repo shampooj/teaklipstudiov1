@@ -12,21 +12,21 @@ import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
 import lipBeige from "@/assets/lip-beige.webp";
 import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrownAsset from "@/assets/lip-two-toned-deep-brown.png.asset.json";
-const lipMediumBrown = lipMediumBrownAsset.url;
+import lipMediumBrownAsset from "@/assets/lip-two-toned-deep-brown.png";
+const lipMediumBrown = lipMediumBrownAsset;
 import lipDeepBrown from "@/assets/lip-deep-brown.webp";
 import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrownAsset from "@/assets/lip-brick-v2.png.asset.json";
-const lipNeutralBrown = lipNeutralBrownAsset.url;
+import lipNeutralBrownAsset from "@/assets/lip-brick-v2.png";
+const lipNeutralBrown = lipNeutralBrownAsset;
 import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
 import lipMauvePink from "@/assets/lip-mauve-pink.webp";
-import lipTwoTonedBrownAsset from "@/assets/lip-two-toned-brown.png.asset.json";
-const lipTwoTonedBrown = lipTwoTonedBrownAsset.url;
-import lipTwoTonedBeigeAsset from "@/assets/lip-two-toned-beige.png.asset.json";
-const lipTwoTonedBeige = lipTwoTonedBeigeAsset.url;
+import lipTwoTonedBrownAsset from "@/assets/lip-two-toned-brown.png";
+const lipTwoTonedBrown = lipTwoTonedBrownAsset;
+import lipTwoTonedBeigeAsset from "@/assets/lip-two-toned-beige.png";
+const lipTwoTonedBeige = lipTwoTonedBeigeAsset;
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png.asset.json";
-const lipGreyBrown = lipGreyBrownAsset.url;
+import lipGreyBrownAsset from "@/assets/lip-mostly-purple.png";
+const lipGreyBrown = lipGreyBrownAsset;
 
 const SKIN_TONES_REF = [
   { id: "light-brown", label: "Light Brown", image: skinLightBrown },
