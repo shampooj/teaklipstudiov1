@@ -1,7 +1,4 @@
-project_id = "yzmedvbrjhxhnrentwfi"
-
-[functions.apply-lipstick]
-verify_jwt = false
+project_id = "ouoyczbtpbhtwbygpigx"
 
 [functions.categorize-skin-lip]
 verify_jwt = false

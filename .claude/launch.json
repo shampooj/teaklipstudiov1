@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "env",
+      "runtimeArgs": ["PATH=/usr/local/opt/node@22/bin:/usr/local/bin:/usr/bin:/bin", "npm", "run", "dev"],
+      "port": 8080
+    }
+  ]
+}
