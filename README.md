@@ -1,75 +1,47 @@
-# Welcome to your Lovable project
+# TEAK Virtual Lip Studio
 
-> Project under active development
+Virtual lipstick try-on for TEAK: customers take a skin-tone quiz, upload a selfie, preview shades with Banuba WebAR, and get a Shopify discount code. An admin dashboard (invite-only) manages shade tuning and reviews AI categorization.
 
-## Project info
+## Stack
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+| Layer | Tech |
+|---|---|
+| Frontend | Vite + React + TypeScript, shadcn/ui, Tailwind |
+| Backend | Supabase (Postgres + RLS, Auth, Edge Functions) |
+| AR try-on | Banuba WebAR |
+| AI vision | Gemini (`gemini-flash-latest`) via edge functions |
+| Commerce | Shopify Admin API (discounts, OAuth, webhooks) |
+| Hosting | Vercel |
+| Analytics | PostHog |
 
-## How can I edit this code?
+## Environments
 
-There are several ways of editing your application.
+| | Frontend | Backend (Supabase ref) |
+|---|---|---|
+| Production | teaklipstudiov1.vercel.app | `ouoyczbtpbhtwbygpigx` |
+| Staging | every PR preview URL | `haeacwygxyrtpandtwpb` |
 
-**Use Lovable**
+The committed `.env` points at **staging** — local dev and PR previews are safe by default. Production values are set in Vercel's dashboard env vars (Production scope), which override the file.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Pipeline
 
-Changes made via Lovable will be committed automatically to this repo.
+- Frontend edits happen in Lovable or any IDE; everything lands in this repo.
+- Every PR: CI (tests + build) runs, Vercel deploys a preview against staging, and changes under `supabase/` deploy to the **staging** backend.
+- Merge to `main`: Vercel deploys production, and changes under `supabase/` deploy to the **production** backend (`.github/workflows/deploy-backend.yml`).
 
-**Use your preferred IDE**
+## Local development
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Requires Node 18+ (repo was built against Node 22).
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm install
+npm run dev        # http://localhost:8080, talks to staging
+npm test
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## Backend
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Schema lives in `supabase/migrations/`, functions in `supabase/functions/`. Never edit the database by hand — add a migration and let the pipeline apply it. Function secrets (Shopify, Banuba, Gemini) are set per-project in the Supabase dashboard under Edge Functions → Secrets.
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Admin sign-in is Google OAuth restricted to allowlisted test users, with public signups disabled in Supabase.
