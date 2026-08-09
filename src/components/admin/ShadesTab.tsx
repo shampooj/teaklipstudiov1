@@ -27,35 +27,35 @@ import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrown from "@/assets/lip-mostly-purple.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
-import avatar3 from "@/assets/avatar-3.jpg";
-import avatar4 from "@/assets/avatar-4.jpg";
-import avatar5 from "@/assets/avatar-5.jpg";
-import avatar6 from "@/assets/avatar-6.jpg";
-import avatarSkinLight from "@/assets/avatar-skin-light-brown.jpg";
-import avatarSkinMedium from "@/assets/avatar-skin-medium-brown.jpg";
-import avatarSkinRichBrown from "@/assets/avatar-skin-rich-brown.jpg";
-import avatarNupoora from "@/assets/avatar-nupoora.jpg";
-import avatarMauveModel from "@/assets/avatar-mauve-model.png";
+import nero from "@/assets/nero.jpg";
+import cynthia from "@/assets/cynthia.jpg";
+import anastasia from "@/assets/anastasia.jpg";
+import maseray from "@/assets/maseray.jpg";
+import sanna from "@/assets/sanna.jpg";
+import terushka from "@/assets/terushka.jpg";
+import aaliyah from "@/assets/aaliyah.jpg";
+import nupoora from "@/assets/nupoora.jpg";
+import tanvi from "@/assets/tanvi.jpg";
 
 const AVATAR_IMAGES = [
-  avatar3,
-  avatar4,
-  avatar5,
-  avatar6,
-  avatarSkinLight,
-  avatarSkinMedium,
-  avatarNupoora,
+  nero,
+  cynthia,
+  anastasia,
+  maseray,
+  sanna,
+  terushka,
+  nupoora,
 ];
 const LIP_TONE_AVATARS: Record<string, string> = {
-  "mauve-pink": avatarMauveModel,
-  "medium-brown": avatar6,
-  "neutral-brown": avatar5,
-  "two-toned-purple": avatar3,
-  "two-toned-brown": avatar4,
-  "two-toned-grey": avatarNupoora,
-  "bright-pink": avatarSkinLight,
-  "deep-brown": avatarSkinRichBrown,
-  "beige": avatarSkinMedium,
+  "mauve-pink": tanvi,
+  "medium-brown": maseray,
+  "neutral-brown": anastasia,
+  "two-toned-purple": nero,
+  "two-toned-brown": cynthia,
+  "two-toned-grey": nupoora,
+  "bright-pink": sanna,
+  "deep-brown": aaliyah,
+  "beige": terushka,
 };
 const avatarFor = (id: string, idx: number) =>
   LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
