@@ -33,27 +33,34 @@ import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
 import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
 import lipBrownPink from "@/assets/lip-brown-pink.webp";
 import lipGreyBrown from "@/assets/lip-mostly-purple.png";
-import avatar3 from "@/assets/avatar-3.jpg";
-import avatar4 from "@/assets/avatar-4.jpg";
-import avatar5 from "@/assets/avatar-5.jpg";
-import avatar6 from "@/assets/avatar-6.jpg";
-import avatarSkinLight from "@/assets/avatar-skin-light-brown.jpg";
-import avatarSkinMedium from "@/assets/avatar-skin-medium-brown.jpg";
-import avatarSkinDeep from "@/assets/avatar-skin-deep-brown.jpg";
-import avatarSkinRich from "@/assets/avatar-skin-rich-brown.jpg";
-import avatarNupoora from "@/assets/avatar-nupoora.jpg";
-import avatarMauveModel from "@/assets/avatar-mauve-model.png";
+import nero from "@/assets/nero.jpg";
+import cynthia from "@/assets/cynthia.jpg";
+import anastasia from "@/assets/anastasia.jpg";
+import maseray from "@/assets/maseray.jpg";
+import sanna from "@/assets/sanna.jpg";
+import hareem from "@/assets/hareem.png";
+import noreen from "@/assets/noreen.jpg";
+import arris from "@/assets/arris.jpg";
+import sairaTile from "@/assets/saira-tile.jpg";
+import radhikaTile from "@/assets/radhika-tile.jpg";
+import divyaTile from "@/assets/divya-tile.png";
+import kripaTile from "@/assets/kripa-tile.png";
+import terushka from "@/assets/terushka.jpg";
+import aashi from "@/assets/aashi.jpg";
+import aaliyah from "@/assets/aaliyah.jpg";
+import nupoora from "@/assets/nupoora.jpg";
+import tanvi from "@/assets/tanvi.jpg";
 
 const AVATAR_OPTIONS = [
-  { id: "avatar-6", url: avatar6 },
-  { id: "skin-rich-brown", url: avatarSkinRich },
-  { id: "avatar-nupoora", url: avatarNupoora },
-  { id: "avatar-3", url: avatar3 },
-  { id: "avatar-4", url: avatar4 },
-  { id: "avatar-5", url: avatar5 },
-  { id: "avatar-mauve-model", url: avatarMauveModel },
-  { id: "skin-medium-brown", url: avatarSkinMedium },
-  { id: "skin-light-brown", url: avatarSkinLight },
+  { id: "avatar-6", url: maseray },
+  { id: "skin-rich-brown", url: aaliyah },
+  { id: "avatar-nupoora", url: nupoora },
+  { id: "avatar-3", url: nero },
+  { id: "avatar-4", url: cynthia },
+  { id: "avatar-5", url: anastasia },
+  { id: "avatar-mauve-model", url: tanvi },
+  { id: "skin-medium-brown", url: terushka },
+  { id: "skin-light-brown", url: sanna },
 ] as const;
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
@@ -617,17 +624,14 @@ const Index = () => {
                   <p className="font-display text-xl text-foreground">
                     What's your general skintone?
                   </p>
-                  <p className="text-sm text-foreground mt-2 font-display">
-                    If you're in between, go with the deeper shade.
-                  </p>
                   <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
                     {SKIN_TONES.map((tone) => {
                       // MOCKUP: 1×4 horizontal strip of sample photos per skin-tone category.
                       const SAMPLES: Record<string, string[]> = {
-                        "light-brown": [avatarSkinLight, avatarMauveModel, avatarSkinLight, avatarSkinMedium],
-                        "medium-brown": [avatarSkinMedium, avatarMauveModel, avatar5, avatar4],
-                        "deep-brown": [avatar4, avatar5, avatar3, avatarNupoora],
-                        "rich-brown": [avatar6, avatarSkinRich, avatarNupoora, avatar3],
+                        "light-brown": [sanna, sairaTile, hareem, ""],
+                        "medium-brown": [terushka, noreen, tanvi, radhikaTile],
+                        "deep-brown": [cynthia, anastasia, nero, kripaTile],
+                        "rich-brown": [maseray, aaliyah, divyaTile, ""],
                       };
                       const samples = SAMPLES[tone.id] ?? [];
                       return (
@@ -641,12 +645,16 @@ const Index = () => {
                           {samples.length === 4 ? (
                             <div className="w-full aspect-square grid grid-cols-2 grid-rows-2 gap-px bg-border">
                               {samples.map((src, i) => (
-                                <img
-                                  key={i}
-                                  src={src}
-                                  alt={`${tone.label} sample ${i + 1}`}
-                                  className="w-full h-full object-cover"
-                                />
+                                src ? (
+                                  <img
+                                    key={i}
+                                    src={src}
+                                    alt={`${tone.label} sample ${i + 1}`}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div key={i} className="w-full h-full bg-muted" />
+                                )
                               ))}
                             </div>
                           ) : 'image' in tone && tone.image ? (
