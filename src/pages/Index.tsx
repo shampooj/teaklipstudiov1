@@ -120,16 +120,16 @@ const SKIN_TONES = [
 const;
 
 const LIP_TONE_ROWS = [
+{ id: "mostly-pink", label: "Mostly Pink", images: [ltMostlyPink1, ltMostlyPink2, ltMostlyPink3, ltMostlyPink4] },
 { id: "beige", label: "Beige", images: [ltBeige1, ltBeige2, ltBeige3, ltBeige4] },
-{ id: "brown-rose", label: "Brown Rose", images: [ltBrownRose1, ltBrownRose2, ltBrownRose3, ltBrownRose4] },
 { id: "chestnut", label: "Chestnut", images: [ltChestnut1, ltChestnut2, ltChestnut3, ltChestnut4] },
-{ id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
-{ id: "grey-rose", label: "Grey Rose", images: [ltGreyRose1, ltGreyRose2, ltGreyRose3, ltGreyRose4] },
 { id: "mauve", label: "Mauve", images: [ltMauve1, ltMauve2, ltMauve3, ltMauve4] },
-{ id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
-{ id: "mostly-grey", label: "Mostly Grey", images: [ltMostlyGrey1, ltMostlyGrey2, ltMostlyGrey3, ltMostlyGrey4] },
+{ id: "brown-rose", label: "Brown Rose", images: [ltBrownRose1, ltBrownRose2, ltBrownRose3, ltBrownRose4] },
+{ id: "grey-rose", label: "Grey Rose", images: [ltGreyRose1, ltGreyRose2, ltGreyRose3, ltGreyRose4] },
+{ id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
 { id: "mostly-light-brown", label: "Mostly Light Brown", images: [ltMostlyLightBrown1, ltMostlyLightBrown2, ltMostlyLightBrown3, ltMostlyLightBrown4] },
-{ id: "mostly-pink", label: "Mostly Pink", images: [ltMostlyPink1, ltMostlyPink2, ltMostlyPink3, ltMostlyPink4] }] as
+{ id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
+{ id: "mostly-grey", label: "Mostly Grey", images: [ltMostlyGrey1, ltMostlyGrey2, ltMostlyGrey3, ltMostlyGrey4] }] as
 const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
