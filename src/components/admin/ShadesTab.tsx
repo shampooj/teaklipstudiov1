@@ -80,6 +80,7 @@ const SKIN_TONES = [
   { id: "medium-brown", label: "Medium Brown" },
   { id: "deep-brown", label: "Deep Brown" },
   { id: "rich-brown", label: "Rich Brown" },
+  { id: "full-brown", label: "Full Brown" },
 ] as const;
 
 interface Setting {

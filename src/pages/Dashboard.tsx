@@ -16,6 +16,7 @@ const SKIN_TONES_REF = [
   { id: "medium-brown", label: "Medium Brown", image: skinMediumBrown },
   { id: "deep-brown", label: "Deep Brown", image: skinDeepBrown },
   { id: "rich-brown", label: "Rich Brown", image: skinRichBrown },
+  { id: "full-brown", label: "Full Brown", image: skinRichBrown },
 ] as const;
 
 import ltBeige from "@/assets/lip-tone/web/beige-1.jpg";
@@ -887,6 +888,7 @@ const Dashboard = () => {
                     <SelectItem value="medium-brown">Medium Brown</SelectItem>
                     <SelectItem value="deep-brown">Deep Brown</SelectItem>
                     <SelectItem value="rich-brown">Rich Brown</SelectItem>
+                    <SelectItem value="full-brown">Full Brown</SelectItem>
                   </SelectContent>
                 </Select>
                 <div className="flex gap-2">

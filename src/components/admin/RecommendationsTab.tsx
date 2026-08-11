@@ -21,6 +21,7 @@ const SKIN_TONE_LABELS: Record<string, string> = {
   "medium-brown": "Medium Brown",
   "deep-brown": "Deep Brown",
   "rich-brown": "Rich Brown",
+  "full-brown": "Full Brown",
 };
 
 const LIP_TONE_LABELS: Record<string, string> = {

@@ -53,7 +53,7 @@ export interface Recommendation {
 }
 
 // App skin tone IDs used throughout the frontend and stored in the DB
-export const SKIN_TONE_IDS = ["light-brown", "medium-brown", "deep-brown", "rich-brown"] as const;
+export const SKIN_TONE_IDS = ["light-brown", "medium-brown", "deep-brown", "rich-brown", "full-brown"] as const;
 export type SkinToneId = (typeof SKIN_TONE_IDS)[number];
 
 // App lip tone IDs used throughout the frontend and stored in the DB

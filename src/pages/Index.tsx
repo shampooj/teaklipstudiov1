@@ -115,7 +115,8 @@ const SKIN_TONES = [
 { id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
 { id: "medium-brown", label: "Medium Brown", color: "#8D5524", image: skinMediumBrown },
 { id: "deep-brown", label: "Deep Brown", color: "#5C3317", image: skinDeepBrown },
-{ id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown }] as
+{ id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown },
+{ id: "full-brown", label: "Full Brown", color: "#2A1505" }] as
 const;
 
 const LIP_TONE_ROWS = [
@@ -672,7 +673,8 @@ const Index = () => {
                         "light-brown": [stSanna, stSaira, stArris, stHareem],
                         "medium-brown": [stTerushka, stNoreen, stTanvi, stAashi],
                         "deep-brown": [stCynthia, stDoe, stNero, stAnastasia],
-                        "rich-brown": [stDivya, stAaliyah, stMaseray, stPritt],
+                        "rich-brown": [stDivya, stAaliyah, "", stPritt],
+                        "full-brown": [stMaseray, "", "", ""],
                       };
                       const samples = SAMPLES[tone.id] ?? [];
                       return (
