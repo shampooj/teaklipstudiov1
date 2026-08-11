@@ -21,18 +21,46 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
-import lipBeige from "@/assets/lip-beige.webp";
-import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
-import lipDeepBrown from "@/assets/lip-deep-brown.webp";
-import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrown from "@/assets/lip-brick-v2.png";
-import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
-import lipMauvePink from "@/assets/lip-mauve-pink.webp";
-import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
-import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
-import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrown from "@/assets/lip-mostly-purple.png";
+import ltBeige1 from "@/assets/lip-tone/web/beige-1.jpg";
+import ltBeige2 from "@/assets/lip-tone/web/beige-2.jpg";
+import ltBeige3 from "@/assets/lip-tone/web/beige-3.jpg";
+import ltBeige4 from "@/assets/lip-tone/web/beige-4.jpg";
+import ltBrownRose1 from "@/assets/lip-tone/web/brown-rose-1.jpg";
+import ltBrownRose2 from "@/assets/lip-tone/web/brown-rose-2.jpg";
+import ltBrownRose3 from "@/assets/lip-tone/web/brown-rose-3.jpg";
+import ltBrownRose4 from "@/assets/lip-tone/web/brown-rose-4.jpg";
+import ltChestnut1 from "@/assets/lip-tone/web/chestnut-1.jpg";
+import ltChestnut2 from "@/assets/lip-tone/web/chestnut-2.jpg";
+import ltChestnut3 from "@/assets/lip-tone/web/chestnut-3.jpg";
+import ltChestnut4 from "@/assets/lip-tone/web/chestnut-4.jpg";
+import ltDeepBrownRose1 from "@/assets/lip-tone/web/deep-brown-rose-1.jpg";
+import ltDeepBrownRose2 from "@/assets/lip-tone/web/deep-brown-rose-2.jpg";
+import ltDeepBrownRose3 from "@/assets/lip-tone/web/deep-brown-rose-3.jpg";
+import ltDeepBrownRose4 from "@/assets/lip-tone/web/deep-brown-rose-4.jpg";
+import ltGreyRose1 from "@/assets/lip-tone/web/grey-rose-1.jpg";
+import ltGreyRose2 from "@/assets/lip-tone/web/grey-rose-2.jpg";
+import ltGreyRose3 from "@/assets/lip-tone/web/grey-rose-3.jpg";
+import ltGreyRose4 from "@/assets/lip-tone/web/grey-rose-4.jpg";
+import ltMauve1 from "@/assets/lip-tone/web/mauve-1.jpg";
+import ltMauve2 from "@/assets/lip-tone/web/mauve-2.jpg";
+import ltMauve3 from "@/assets/lip-tone/web/mauve-3.jpg";
+import ltMauve4 from "@/assets/lip-tone/web/mauve-4.jpg";
+import ltMostlyDeepBrown1 from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
+import ltMostlyDeepBrown2 from "@/assets/lip-tone/web/mostly-deep-brown-2.jpg";
+import ltMostlyDeepBrown3 from "@/assets/lip-tone/web/mostly-deep-brown-3.jpg";
+import ltMostlyDeepBrown4 from "@/assets/lip-tone/web/mostly-deep-brown-4.jpg";
+import ltMostlyGrey1 from "@/assets/lip-tone/web/mostly-grey-1.jpg";
+import ltMostlyGrey2 from "@/assets/lip-tone/web/mostly-grey-2.jpg";
+import ltMostlyGrey3 from "@/assets/lip-tone/web/mostly-grey-3.jpg";
+import ltMostlyGrey4 from "@/assets/lip-tone/web/mostly-grey-4.jpg";
+import ltMostlyLightBrown1 from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
+import ltMostlyLightBrown2 from "@/assets/lip-tone/web/mostly-light-brown-2.jpg";
+import ltMostlyLightBrown3 from "@/assets/lip-tone/web/mostly-light-brown-3.jpg";
+import ltMostlyLightBrown4 from "@/assets/lip-tone/web/mostly-light-brown-4.jpg";
+import ltMostlyPink1 from "@/assets/lip-tone/web/mostly-pink-1.jpg";
+import ltMostlyPink2 from "@/assets/lip-tone/web/mostly-pink-2.jpg";
+import ltMostlyPink3 from "@/assets/lip-tone/web/mostly-pink-3.jpg";
+import ltMostlyPink4 from "@/assets/lip-tone/web/mostly-pink-4.jpg";
 import nero from "@/assets/nero.jpg";
 import cynthia from "@/assets/cynthia.jpg";
 import anastasia from "@/assets/anastasia.jpg";
@@ -41,10 +69,22 @@ import sanna from "@/assets/sanna.jpg";
 import hareem from "@/assets/hareem.png";
 import noreen from "@/assets/noreen.jpg";
 import arris from "@/assets/arris.jpg";
-import sairaTile from "@/assets/saira-tile.jpg";
-import radhikaTile from "@/assets/radhika-tile.jpg";
-import divyaTile from "@/assets/divya-tile.png";
-import kripaTile from "@/assets/kripa-tile.png";
+import stSanna from "@/assets/skin_tone/web/skin_tone_sanna.jpg";
+import stSaira from "@/assets/skin_tone/web/skin_tone_saira.jpg";
+import stArris from "@/assets/skin_tone/web/skin_tone_arris.jpg";
+import stHareem from "@/assets/skin_tone/web/skin_tone_hareem.jpg";
+import stTerushka from "@/assets/skin_tone/web/skin_tone_terushka.jpg";
+import stNoreen from "@/assets/skin_tone/web/skin_tone_noreen.jpg";
+import stTanvi from "@/assets/skin_tone/web/skin_tone_tanvi.jpg";
+import stAashi from "@/assets/skin_tone/web/skin_tone_aashi.jpg";
+import stCynthia from "@/assets/skin_tone/web/skin_tone_cynthia.jpg";
+import stAnastasia from "@/assets/skin_tone/web/skin_tone_anastasia.jpg";
+import stNero from "@/assets/skin_tone/web/skin_tone_nero.jpg";
+import stPritt from "@/assets/skin_tone/web/skin_tone_pritt.jpg";
+import stMaseray from "@/assets/skin_tone/web/skin_tone_maseray.jpg";
+import stAaliyah from "@/assets/skin_tone/web/skin_tone_aaliyah.jpg";
+import stDivya from "@/assets/skin_tone/web/skin_tone_divya.jpg";
+import stDoe from "@/assets/skin_tone/web/skin_tone_doe.jpg";
 import terushka from "@/assets/terushka.jpg";
 import aashi from "@/assets/aashi.jpg";
 import aaliyah from "@/assets/aaliyah.jpg";
@@ -78,16 +118,17 @@ const SKIN_TONES = [
 { id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown }] as
 const;
 
-const LIP_TONES = [
-{ id: "bright-pink", label: "Bright Pink", color: "#E8577E", image: lipBrightPink },
-{ id: "beige", label: "Beige", color: "#D4A98C", image: lipBeige },
-{ id: "mauve-pink", label: "Mauve", color: "#B5838D", image: lipMauvePink },
-{ id: "neutral-brown", label: "Chestnut", color: "#A0705A", image: lipNeutralBrown },
-{ id: "two-toned-grey", label: "Two-Toned Grey", color: "#9A8B8B", image: lipTwoTonedGrey },
-{ id: "two-toned-purple", label: "Two-Toned Purple", color: "#7A3B5E", image: lipTwoTonedPurple },
-{ id: "two-toned-brown", label: "Two-Toned Brown", color: "#8B5E3C", image: lipTwoTonedBrown },
-{ id: "medium-brown", label: "Two-toned Deep Brown", color: "#7A5240", image: lipMediumBrown },
-{ id: "deep-brown", label: "Mostly Brown", color: "#4A2228", image: lipDeepBrown }] as
+const LIP_TONE_ROWS = [
+{ id: "beige", label: "Beige", images: [ltBeige1, ltBeige2, ltBeige3, ltBeige4] },
+{ id: "brown-rose", label: "Brown Rose", images: [ltBrownRose1, ltBrownRose2, ltBrownRose3, ltBrownRose4] },
+{ id: "chestnut", label: "Chestnut", images: [ltChestnut1, ltChestnut2, ltChestnut3, ltChestnut4] },
+{ id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
+{ id: "grey-rose", label: "Grey Rose", images: [ltGreyRose1, ltGreyRose2, ltGreyRose3, ltGreyRose4] },
+{ id: "mauve", label: "Mauve", images: [ltMauve1, ltMauve2, ltMauve3, ltMauve4] },
+{ id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
+{ id: "mostly-grey", label: "Mostly Grey", images: [ltMostlyGrey1, ltMostlyGrey2, ltMostlyGrey3, ltMostlyGrey4] },
+{ id: "mostly-light-brown", label: "Mostly Light Brown", images: [ltMostlyLightBrown1, ltMostlyLightBrown2, ltMostlyLightBrown3, ltMostlyLightBrown4] },
+{ id: "mostly-pink", label: "Mostly Pink", images: [ltMostlyPink1, ltMostlyPink2, ltMostlyPink3, ltMostlyPink4] }] as
 const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
@@ -441,7 +482,7 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
   const [skinTone, setSkinTone] = useState<string>("medium-brown");
-  const [lipTone, setLipTone] = useState<string>("neutral-brown");
+  const [lipTone, setLipTone] = useState<string>("chestnut");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
@@ -624,14 +665,14 @@ const Index = () => {
                   <p className="font-display text-xl text-foreground">
                     What's your general skintone?
                   </p>
-                  <div className="mt-8 grid grid-cols-2 gap-4 w-full max-w-sm mx-auto">
+                  <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {SKIN_TONES.map((tone) => {
                       // MOCKUP: 1×4 horizontal strip of sample photos per skin-tone category.
                       const SAMPLES: Record<string, string[]> = {
-                        "light-brown": [sanna, sairaTile, hareem, ""],
-                        "medium-brown": [terushka, noreen, tanvi, radhikaTile],
-                        "deep-brown": [cynthia, anastasia, nero, kripaTile],
-                        "rich-brown": [maseray, aaliyah, divyaTile, ""],
+                        "light-brown": [stSanna, stSaira, stArris, stHareem],
+                        "medium-brown": [stTerushka, stNoreen, stTanvi, stAashi],
+                        "deep-brown": [stCynthia, stDoe, stNero, stAnastasia],
+                        "rich-brown": [stDivya, stAaliyah, stMaseray, stPritt],
                       };
                       const samples = SAMPLES[tone.id] ?? [];
                       return (
@@ -643,22 +684,22 @@ const Index = () => {
                           }`}
                         >
                           {samples.length === 4 ? (
-                            <div className="w-full aspect-square grid grid-cols-2 grid-rows-2 gap-px bg-border">
+                            <div className="w-full grid grid-cols-4">
                               {samples.map((src, i) => (
                                 src ? (
                                   <img
                                     key={i}
                                     src={src}
                                     alt={`${tone.label} sample ${i + 1}`}
-                                    className="w-full h-full object-cover"
+                                    className="w-full aspect-[4/5] object-cover"
                                   />
                                 ) : (
-                                  <div key={i} className="w-full h-full bg-muted" />
+                                  <div key={i} className="w-full aspect-[4/5] bg-muted" />
                                 )
                               ))}
                             </div>
                           ) : 'image' in tone && tone.image ? (
-                            <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" />
+                            <img src={tone.image} alt={tone.label} className="w-full aspect-[4/5] object-cover" />
                           ) : (
                             <div className="w-full aspect-square" style={{ backgroundColor: tone.color }} />
                           )}
@@ -700,23 +741,19 @@ const Index = () => {
                   <p className="font-display text-xl text-foreground">
                     Choose your closest lip tone category
                   </p>
-                  <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-2xl mx-auto">
-                    {LIP_TONES.map((tone) =>
+                  <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
+                    {LIP_TONE_ROWS.map((tone) =>
                   <button
                     key={tone.id}
                     onClick={() => setLipTone(tone.id)}
                     className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                     lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
                     }>
-                    
-                        {'image' in tone && tone.image ?
-                    <img src={tone.image} alt={tone.label} className="w-full aspect-square object-cover" /> :
-
-                    <div
-                      className="w-full aspect-square"
-                      style={{ backgroundColor: tone.color }} />
-
-                    }
+                        <div className="w-full grid grid-cols-4">
+                          {tone.images.map((src, i) =>
+                          <img key={i} src={src} alt={`${tone.label} sample ${i + 1}`} className="w-full aspect-[3/2] object-cover" />
+                          )}
+                        </div>
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                   )}
