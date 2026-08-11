@@ -14,18 +14,6 @@ import { toast } from "sonner";
 import { Pencil, X } from "lucide-react";
 import BanubaInlinePreview from "./BanubaInlinePreview";
 import ErrorBoundary from "./ErrorBoundary";
-import lipBeige from "@/assets/lip-beige.webp";
-import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
-import lipDeepBrown from "@/assets/lip-deep-brown.webp";
-import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrown from "@/assets/lip-brick-v2.png";
-import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
-import lipMauvePink from "@/assets/lip-mauve-pink.webp";
-import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
-import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
-import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrown from "@/assets/lip-mostly-purple.png";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import nero from "@/assets/nero.jpg";
 import cynthia from "@/assets/cynthia.jpg";
@@ -47,29 +35,41 @@ const AVATAR_IMAGES = [
   nupoora,
 ];
 const LIP_TONE_AVATARS: Record<string, string> = {
-  "mauve-pink": tanvi,
-  "medium-brown": maseray,
-  "neutral-brown": anastasia,
-  "two-toned-purple": nero,
-  "two-toned-brown": cynthia,
-  "two-toned-grey": nupoora,
-  "bright-pink": sanna,
-  "deep-brown": aaliyah,
   "beige": terushka,
+  "brown-rose": cynthia,
+  "chestnut": anastasia,
+  "deep-brown-rose": maseray,
+  "grey-rose": nero,
+  "mauve": tanvi,
+  "mostly-deep-brown": aaliyah,
+  "mostly-grey": nupoora,
+  "mostly-light-brown": sanna,
+  "mostly-pink": sanna,
 };
 const avatarFor = (id: string, idx: number) =>
   LIP_TONE_AVATARS[id] ?? AVATAR_IMAGES[idx % AVATAR_IMAGES.length];
 
+import ltBeige from "@/assets/lip-tone/web/beige-1.jpg";
+import ltBrownRose from "@/assets/lip-tone/web/brown-rose-1.jpg";
+import ltChestnut from "@/assets/lip-tone/web/chestnut-1.jpg";
+import ltDeepBrownRose from "@/assets/lip-tone/web/deep-brown-rose-1.jpg";
+import ltGreyRose from "@/assets/lip-tone/web/grey-rose-1.jpg";
+import ltMauve from "@/assets/lip-tone/web/mauve-1.jpg";
+import ltMostlyDeepBrown from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
+import ltMostlyGrey from "@/assets/lip-tone/web/mostly-grey-1.jpg";
+import ltMostlyLightBrown from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
+import ltMostlyPink from "@/assets/lip-tone/web/mostly-pink-1.jpg";
 const LIP_TONES = [
-  { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
-  { id: "beige", label: "Beige", image: lipBeige },
-  { id: "mauve-pink", label: "Mauve", image: lipMauvePink },
-  { id: "neutral-brown", label: "Chestnut", image: lipNeutralBrown },
-  { id: "two-toned-grey", label: "Two-Toned Grey", image: lipTwoTonedGrey },
-  { id: "two-toned-purple", label: "Two-Toned Purple", image: lipTwoTonedPurple },
-  { id: "two-toned-brown", label: "Two-Toned Brown", image: lipTwoTonedBrown },
-  { id: "medium-brown", label: "Two-toned Deep Brown", image: lipMediumBrown },
-  { id: "deep-brown", label: "Mostly Brown", image: lipDeepBrown },
+  { id: "beige", label: "Beige", image: ltBeige },
+  { id: "brown-rose", label: "Brown Rose", image: ltBrownRose },
+  { id: "chestnut", label: "Chestnut", image: ltChestnut },
+  { id: "deep-brown-rose", label: "Deep Brown Rose", image: ltDeepBrownRose },
+  { id: "grey-rose", label: "Grey Rose", image: ltGreyRose },
+  { id: "mauve", label: "Mauve", image: ltMauve },
+  { id: "mostly-deep-brown", label: "Mostly Deep Brown", image: ltMostlyDeepBrown },
+  { id: "mostly-grey", label: "Mostly Grey", image: ltMostlyGrey },
+  { id: "mostly-light-brown", label: "Mostly Light Brown", image: ltMostlyLightBrown },
+  { id: "mostly-pink", label: "Mostly Pink", image: ltMostlyPink },
 ] as const;
 
 const FINISHES = ["matte", "satin", "glossy"] as const;
@@ -247,7 +247,7 @@ const ShadesTab = () => {
                             src={avatarImg}
                             alt={t.label}
                             className={`absolute inset-0 w-full h-full object-cover ${
-                              t.id === "two-toned-grey" || t.id === "bright-pink"
+                              false
                                 ? "scale-150"
                                 : ""
                             }`}
@@ -352,7 +352,7 @@ const ShadesTab = () => {
                               hex={row.hex}
                               finish={row.finish}
                               opacity={row.opacity}
-                              scale={t.id === "two-toned-grey" || t.id === "bright-pink" ? 1.5 : 1}
+                              scale={false ? 1.5 : 1}
                             />
                           </ErrorBoundary>
                         </td>

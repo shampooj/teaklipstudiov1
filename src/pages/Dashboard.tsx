@@ -10,18 +10,6 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
-import lipBeige from "@/assets/lip-beige.webp";
-import lipBrightPink from "@/assets/lip-bright-pink.webp";
-import lipMediumBrown from "@/assets/lip-two-toned-deep-brown.png";
-import lipDeepBrown from "@/assets/lip-deep-brown.webp";
-import lipTwoTonedPurple from "@/assets/lip-two-toned-purple.webp";
-import lipNeutralBrown from "@/assets/lip-brick-v2.png";
-import lipTwoTonedGrey from "@/assets/lip-two-toned-grey.webp";
-import lipMauvePink from "@/assets/lip-mauve-pink.webp";
-import lipTwoTonedBrown from "@/assets/lip-two-toned-brown.png";
-import lipTwoTonedBeige from "@/assets/lip-two-toned-beige.png";
-import lipBrownPink from "@/assets/lip-brown-pink.webp";
-import lipGreyBrown from "@/assets/lip-mostly-purple.png";
 
 const SKIN_TONES_REF = [
   { id: "light-brown", label: "Light Brown", image: skinLightBrown },
@@ -30,16 +18,27 @@ const SKIN_TONES_REF = [
   { id: "rich-brown", label: "Rich Brown", image: skinRichBrown },
 ] as const;
 
+import ltBeige from "@/assets/lip-tone/web/beige-1.jpg";
+import ltBrownRose from "@/assets/lip-tone/web/brown-rose-1.jpg";
+import ltChestnut from "@/assets/lip-tone/web/chestnut-1.jpg";
+import ltDeepBrownRose from "@/assets/lip-tone/web/deep-brown-rose-1.jpg";
+import ltGreyRose from "@/assets/lip-tone/web/grey-rose-1.jpg";
+import ltMauve from "@/assets/lip-tone/web/mauve-1.jpg";
+import ltMostlyDeepBrown from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
+import ltMostlyGrey from "@/assets/lip-tone/web/mostly-grey-1.jpg";
+import ltMostlyLightBrown from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
+import ltMostlyPink from "@/assets/lip-tone/web/mostly-pink-1.jpg";
 const LIP_TONES_REF = [
-  { id: "bright-pink", label: "Bright Pink", image: lipBrightPink },
-  { id: "beige", label: "Beige", image: lipBeige },
-  { id: "mauve-pink", label: "Mauve", image: lipMauvePink },
-  { id: "neutral-brown", label: "Chestnut", image: lipNeutralBrown },
-  { id: "two-toned-grey", label: "Two-Toned Grey", image: lipTwoTonedGrey },
-  { id: "two-toned-purple", label: "Two-Toned Purple", image: lipTwoTonedPurple },
-  { id: "two-toned-brown", label: "Two-Toned Brown", image: lipTwoTonedBrown },
-  { id: "medium-brown", label: "Two-toned Deep Brown", image: lipMediumBrown },
-  { id: "deep-brown", label: "Mostly Brown", image: lipDeepBrown },
+  { id: "beige", label: "Beige", image: ltBeige },
+  { id: "brown-rose", label: "Brown Rose", image: ltBrownRose },
+  { id: "chestnut", label: "Chestnut", image: ltChestnut },
+  { id: "deep-brown-rose", label: "Deep Brown Rose", image: ltDeepBrownRose },
+  { id: "grey-rose", label: "Grey Rose", image: ltGreyRose },
+  { id: "mauve", label: "Mauve", image: ltMauve },
+  { id: "mostly-deep-brown", label: "Mostly Deep Brown", image: ltMostlyDeepBrown },
+  { id: "mostly-grey", label: "Mostly Grey", image: ltMostlyGrey },
+  { id: "mostly-light-brown", label: "Mostly Light Brown", image: ltMostlyLightBrown },
+  { id: "mostly-pink", label: "Mostly Pink", image: ltMostlyPink },
 ] as const;
 import {
   DropdownMenu,
@@ -868,17 +867,15 @@ const Dashboard = () => {
                   </SelectTrigger>
                   <SelectContent className="rounded-2xl">
                     <SelectItem value="beige">Beige</SelectItem>
-                    <SelectItem value="bright-pink">Bright Pink</SelectItem>
-                    <SelectItem value="brown-pink">Brown Pink</SelectItem>
-                    <SelectItem value="mauve-pink">Mauve Pink</SelectItem>
-                    <SelectItem value="neutral-brown">Brick</SelectItem>
-                    <SelectItem value="two-toned-beige">Two-Toned Beige</SelectItem>
-                    <SelectItem value="two-toned-grey">Two-Toned Grey</SelectItem>
-                    <SelectItem value="two-toned-purple">Two-Toned Purple</SelectItem>
-                    <SelectItem value="two-toned-brown">Two-Toned Brown</SelectItem>
-                    <SelectItem value="medium-brown">Two-toned Deep Brown</SelectItem>
-                    <SelectItem value="deep-brown">Mostly Brown</SelectItem>
-                    <SelectItem value="grey-brown">Mostly Purple</SelectItem>
+                    <SelectItem value="brown-rose">Brown Rose</SelectItem>
+                    <SelectItem value="chestnut">Chestnut</SelectItem>
+                    <SelectItem value="deep-brown-rose">Deep Brown Rose</SelectItem>
+                    <SelectItem value="grey-rose">Grey Rose</SelectItem>
+                    <SelectItem value="mauve">Mauve</SelectItem>
+                    <SelectItem value="mostly-deep-brown">Mostly Deep Brown</SelectItem>
+                    <SelectItem value="mostly-grey">Mostly Grey</SelectItem>
+                    <SelectItem value="mostly-light-brown">Mostly Light Brown</SelectItem>
+                    <SelectItem value="mostly-pink">Mostly Pink</SelectItem>
                   </SelectContent>
                 </Select>
                 <Select value={selectedSkinTone} onValueChange={setSelectedSkinTone}>

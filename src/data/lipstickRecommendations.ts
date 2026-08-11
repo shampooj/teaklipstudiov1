@@ -58,9 +58,7 @@ export type SkinToneId = (typeof SKIN_TONE_IDS)[number];
 
 // App lip tone IDs used throughout the frontend and stored in the DB
 export const LIP_TONE_IDS = [
-  "bright-pink", "brown-pink", "mauve-pink", "beige",
-  "two-toned-purple", "two-toned-brown", "two-toned-grey", "two-toned-beige",
-  "neutral-brown", "medium-brown", "deep-brown", "grey-brown",
+  "beige", "brown-rose", "chestnut", "deep-brown-rose", "grey-rose", "mauve", "mostly-deep-brown", "mostly-grey", "mostly-light-brown", "mostly-pink",
 ] as const;
 export type LipToneId = (typeof LIP_TONE_IDS)[number];
 
