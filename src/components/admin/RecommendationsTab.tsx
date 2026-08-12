@@ -32,7 +32,7 @@ const LIP_TONE_LABELS: Record<string, string> = {
   "grey-rose": "Grey Rose",
   "mauve": "Mauve",
   "mostly-deep-brown": "Mostly Deep Brown",
-  "mostly-grey": "Mostly Grey",
+  "mostly-purple": "Mostly Purple",
   "mostly-light-brown": "Mostly Light Brown",
   "mostly-pink": "Mostly Pink",
 };
@@ -45,7 +45,7 @@ const FRONTEND_LIP_TONE_IDS = [
   "grey-rose",
   "mauve",
   "mostly-deep-brown",
-  "mostly-grey",
+  "mostly-purple",
   "mostly-light-brown",
   "mostly-pink",
 ];

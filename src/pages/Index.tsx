@@ -49,10 +49,10 @@ import ltMostlyDeepBrown1 from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
 import ltMostlyDeepBrown2 from "@/assets/lip-tone/web/mostly-deep-brown-2.jpg";
 import ltMostlyDeepBrown3 from "@/assets/lip-tone/web/mostly-deep-brown-3.jpg";
 import ltMostlyDeepBrown4 from "@/assets/lip-tone/web/mostly-deep-brown-4.jpg";
-import ltMostlyGrey1 from "@/assets/lip-tone/web/mostly-grey-1.jpg";
-import ltMostlyGrey2 from "@/assets/lip-tone/web/mostly-grey-2.jpg";
-import ltMostlyGrey3 from "@/assets/lip-tone/web/mostly-grey-3.jpg";
-import ltMostlyGrey4 from "@/assets/lip-tone/web/mostly-grey-4.jpg";
+import ltMostlyPurple1 from "@/assets/lip-tone/web/mostly-purple-1.jpg";
+import ltMostlyPurple2 from "@/assets/lip-tone/web/mostly-purple-2.jpg";
+import ltMostlyPurple3 from "@/assets/lip-tone/web/mostly-purple-3.jpg";
+import ltMostlyPurple4 from "@/assets/lip-tone/web/mostly-purple-4.jpg";
 import ltMostlyLightBrown1 from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
 import ltMostlyLightBrown2 from "@/assets/lip-tone/web/mostly-light-brown-2.jpg";
 import ltMostlyLightBrown3 from "@/assets/lip-tone/web/mostly-light-brown-3.jpg";
@@ -96,15 +96,18 @@ import nupoora from "@/assets/nupoora.jpg";
 import tanvi from "@/assets/tanvi.jpg";
 
 const AVATAR_OPTIONS = [
-  { id: "avatar-6", url: maseray },
-  { id: "skin-rich-brown", url: aaliyah },
-  { id: "avatar-nupoora", url: nupoora },
-  { id: "avatar-3", url: nero },
-  { id: "avatar-4", url: cynthia },
-  { id: "avatar-5", url: anastasia },
-  { id: "avatar-mauve-model", url: tanvi },
-  { id: "skin-medium-brown", url: terushka },
-  { id: "skin-light-brown", url: sanna },
+  { id: "avatar-6", url: stMaseray },
+  { id: "skin-rich-brown", url: stAaliyah },
+  { id: "avatar-3", url: stNero },
+  { id: "avatar-4", url: stCynthia },
+  { id: "avatar-5", url: stAnastasia },
+  { id: "avatar-mauve-model", url: stTanvi },
+  { id: "skin-medium-brown", url: stTerushka },
+  { id: "skin-light-brown", url: stSanna },
+  { id: "avatar-geeta", url: stGeeta },
+  { id: "avatar-apoorva", url: stApoorva },
+  { id: "avatar-aashi", url: stAashi },
+  { id: "avatar-divya", url: stDivya },
 ] as const;
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
@@ -133,7 +136,7 @@ const LIP_TONE_ROWS = [
 { id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
 { id: "mostly-light-brown", label: "Mostly Light Brown", images: [ltMostlyLightBrown1, ltMostlyLightBrown2, ltMostlyLightBrown3, ltMostlyLightBrown4] },
 { id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
-{ id: "mostly-grey", label: "Mostly Grey", images: [ltMostlyGrey1, ltMostlyGrey2, ltMostlyGrey3, ltMostlyGrey4] }] as
+{ id: "mostly-purple", label: "Mostly Purple", images: [ltMostlyPurple1, ltMostlyPurple2, ltMostlyPurple3, ltMostlyPurple4] }] as
 const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
@@ -740,7 +743,10 @@ const Index = () => {
               
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    What is your lip tone?
+                    Take a look in the mirror! What is your current natural lip tone?
+                  </p>
+                  <p className="text-sm text-foreground mt-2 font-display">
+                    (Lip shape doesn't matter here.)
                   </p>
                   <div className="mt-6 flex gap-3 justify-center">
                     <Button
@@ -784,74 +790,59 @@ const Index = () => {
                 {!originalImage ?
               <>
                 <h2 className="font-display text-xl md:text-2xl text-foreground text-center leading-snug mb-6">
-                  Try our recommended lipstick shades on
+                  Who would you like to see our recommended lipstick shades on?
                 </h2>
-                <div className="flex flex-col gap-4 md:gap-6">
-                  <div className="flex flex-col border border-border bg-background transition-all duration-300 hover:border-foreground/40">
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                     <div
                       onDrop={handleDrop}
                       onDragOver={(e) => e.preventDefault()}
                       onClick={() => fileInputRef.current?.click()}
-                      className="group relative flex flex-1 cursor-pointer p-8 sm:p-10 text-center">
+                      className="group relative aspect-[4/5] flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={handleInputChange} />
-                      <div className="m-auto flex flex-col items-center gap-6">
-                        <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <div className="m-auto flex flex-col items-center gap-3 px-3">
+                        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
-                          <p className="font-display text-xl text-foreground">
+                          <p className="font-display text-lg text-foreground">
                             Upload a selfie
                           </p>
-                          <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                            Drag & drop or click to upload
+                          <p className="mt-1 text-muted-foreground font-sans text-[9px] uppercase">
+                            Drag & drop or click
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-4 text-center">
-                      <p className="text-xs text-muted-foreground font-sans">
-                        <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
-                        {" \u00B7 "}
-                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
-                      </p>
-                    </div>
+                    {AVATAR_OPTIONS.map((avatar) => (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => {
+                          setOriginalImage(avatar.url);
+                          setFaceCropImage(avatar.url);
+                          trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
+                          setState("uploaded");
+                        }}
+                        className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
+                      >
+                        <img
+                          src={avatar.url}
+                          alt="Avatar option"
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </button>
+                    ))}
                   </div>
-
-                  <div className="flex items-center justify-center">
-                    <span className="font-display text-lg text-muted-foreground uppercase tracking-widest">or</span>
-                  </div>
-
-                  <div className="border border-border bg-background p-6 sm:p-8">
-                    <p className="font-display text-xl text-foreground text-center">
-                      Choose an avatar
-                    </p>
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {AVATAR_OPTIONS.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => {
-                            setOriginalImage(avatar.url);
-                            setFaceCropImage(avatar.url);
-                            trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
-                            setState("uploaded");
-                          }}
-                          className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
-                        >
-                          <img
-                            src={avatar.url}
-                            alt="Avatar option"
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
+                  <p className="text-xs text-muted-foreground font-sans text-center">
+                    <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
+                    {" \u00B7 "}
+                    <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                  </p>
                 </div>
               </> :
 
