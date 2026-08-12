@@ -808,7 +808,10 @@ const Index = () => {
               {originalImage && (
                   <div className="mt-6 max-w-md mx-auto">
 
-                  <div className="border-t border-foreground/10 pt-6">
+                  <div className="border border-foreground p-5">
+                    <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground mb-4">
+                      Optional
+                    </p>
                     <div className="select-none">
                       <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                         <Checkbox
@@ -819,19 +822,32 @@ const Index = () => {
                             if (checked) setNoStoreChecked(false);
                           }}
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
-                        <span className="block font-display text-[15px] text-foreground leading-snug">
-                          Save my selections and photo to help AI work better for brown skin and get a 10% off discount code in return
+                        <span className="block">
+                          <span className="block font-display text-lg text-foreground leading-none tracking-normal">
+                            Get 10% Off
+                          </span>
+                          <span className="mt-2 block font-display text-[12px] leading-[1.15] tracking-normal text-foreground">
+                            Save my selections and photo to help Teak create better colors and tools for brown skin.
+                          </span>
                         </span>
                       </label>
+                      <div className="mt-3 ml-8 flex items-center gap-3">
+                        <a href="#" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Learn More
+                        </a>
+                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Privacy Policy
+                        </a>
+                      </div>
                       <div className="mt-5 ml-8">
                         <input
                           id="user-email"
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder="Enter email to receive discount code"
                           value={userEmail}
                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-sm font-sans placeholder:text-foreground/30 focus:outline-none transition-colors`} />
-                        {emailError && <p className="text-destructive text-[10px] font-sans mt-2">Please enter your email address to receive your discount code.</p>}
+                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-xs font-sans font-medium tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                        {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
                     </div>
                   </div>
