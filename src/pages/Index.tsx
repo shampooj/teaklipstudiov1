@@ -493,8 +493,6 @@ const Index = () => {
   const [lipTone, setLipTone] = useState<string>("");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
-  const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
-  const [croppingFace, setCroppingFace] = useState(false);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -542,62 +540,10 @@ const Index = () => {
       setOriginalImage(base64);
       setState("idle");
       trackEvent("selfie_uploaded", {}, true);
-      
-      // Detect and crop face
-      setCroppingFace(true);
-      try {
-        const resized = await downscaleImage(base64, 512);
-        const { data, error } = await supabase.functions.invoke("detect-face-region", {
-          body: { imageBase64: resized }
-        });
-        if (!error && data && data.top !== undefined) {
-          const cropped = await cropImage(base64, data);
-          setFaceCropImage(cropped);
-        }
-      } catch (err) {
-        console.error("Face crop failed, showing original:", err);
-      } finally {
-        setCroppingFace(false);
-      }
     };
     reader.readAsDataURL(file);
   }, []);
 
-  const downscaleImage = (base64: string, maxSize = 1024): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-        if (scale >= 1) {resolve(base64);return;}
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
-      };
-      img.src = base64;
-    });
-  };
-
-  const cropImage = (base64: string, region: { top: number; bottom: number; left: number; right: number }): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const sx = Math.round(region.left * img.width);
-        const sy = Math.round(region.top * img.height);
-        const sw = Math.round((region.right - region.left) * img.width);
-        const sh = Math.round((region.bottom - region.top) * img.height);
-        const canvas = document.createElement("canvas");
-        canvas.width = sw;
-        canvas.height = sh;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
-      };
-      img.src = base64;
-    });
-  };
 
 
   const handleDrop = useCallback(
@@ -622,7 +568,6 @@ const Index = () => {
     setSkinTone("");
     setLipTone("");
     setOriginalImage(null);
-    setFaceCropImage(null);
     setSelectedLook("classic-red");
     setSelectedRecIndex(0);
   };
@@ -823,7 +768,6 @@ const Index = () => {
                         type="button"
                         onClick={() => {
                           setOriginalImage(avatar.url);
-                          setFaceCropImage(avatar.url);
                           trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
                           setState("uploaded");
                         }}
@@ -848,25 +792,20 @@ const Index = () => {
 
               <div className="flex flex-col items-center">
                 <div className="w-80 h-80 mx-auto overflow-hidden relative">
-                  {croppingFace && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-                      <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
-                    </div>
-                  )}
                   <img
-                    src={faceCropImage || originalImage}
+                    src={originalImage}
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
                 </div>
                 <button
-                  onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
+                  onClick={() => {setOriginalImage(null);}}
                   className="mt-3 font-sans text-[9px] uppercase text-muted-foreground underline hover:text-foreground transition-colors tracking-wider">
                   Retake
                 </button>
               </div>
               }
 
-              {faceCropImage && (
+              {originalImage && (
                   <div className="mt-6 max-w-md mx-auto">
 
                   <div className="border-t border-foreground/10 pt-6">
@@ -902,7 +841,7 @@ const Index = () => {
               {/* Bottom action bar */}
               <div className="mt-8 flex items-center justify-between max-w-md mx-auto w-full">
                 <Button
-                  onClick={() => { setOriginalImage(null); setFaceCropImage(null); }}
+                  onClick={() => { setOriginalImage(null); }}
                   size="lg"
                   variant="ghost"
                   className="font-sans text-[9px] uppercase gap-2 text-muted-foreground hover:text-foreground hover:bg-transparent">
@@ -927,7 +866,7 @@ const Index = () => {
                       // Fire-and-forget: upload image + save submission in the background
                       void (async () => {
                         try {
-                          const sourceImage = faceCropImage || originalImage!;
+                          const sourceImage = originalImage!;
                           const img = new Image();
                           img.crossOrigin = "anonymous";
                           await new Promise<void>((resolve, reject) => {
@@ -1057,7 +996,7 @@ const Index = () => {
               
                 {originalImage &&
               <div className="relative w-64 h-64 overflow-hidden">
-                    <img src={faceCropImage || originalImage} alt="Your photo" className="w-full h-full object-cover" />
+                    <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <motion.div
                       className="absolute inset-0 bg-foreground/5"
                       animate={{ opacity: [0.3, 0.6, 0.3] }}
@@ -1100,7 +1039,7 @@ const Index = () => {
                       const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
                       const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
                       const setting = shadeSettings?.[rec.variantName];
-                      const userFace = faceCropImage || originalImage;
+                      const userFace = originalImage;
                       const canRenderBanuba = Boolean(setting && userFace);
                       return (
                         <div
@@ -1243,9 +1182,9 @@ const Index = () => {
                   <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
 
-                  {(faceCropImage || originalImage) && (
+                  {originalImage && (
                     <TryOnOtherShades
-                      userFace={(faceCropImage || originalImage)!}
+                      userFace={originalImage!}
                       skinTone={skinTone}
                       lipTone={lipTone}
                       sessionId={sessionId}
@@ -1280,7 +1219,7 @@ const Index = () => {
                   )}
 
                   <div className="flex gap-3 justify-center pt-2">
-                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background">
+                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background">
                       Go Back
                     </Button>
                   </div>
