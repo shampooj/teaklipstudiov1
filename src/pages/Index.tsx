@@ -49,10 +49,10 @@ import ltMostlyDeepBrown1 from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
 import ltMostlyDeepBrown2 from "@/assets/lip-tone/web/mostly-deep-brown-2.jpg";
 import ltMostlyDeepBrown3 from "@/assets/lip-tone/web/mostly-deep-brown-3.jpg";
 import ltMostlyDeepBrown4 from "@/assets/lip-tone/web/mostly-deep-brown-4.jpg";
-import ltMostlyGrey1 from "@/assets/lip-tone/web/mostly-grey-1.jpg";
-import ltMostlyGrey2 from "@/assets/lip-tone/web/mostly-grey-2.jpg";
-import ltMostlyGrey3 from "@/assets/lip-tone/web/mostly-grey-3.jpg";
-import ltMostlyGrey4 from "@/assets/lip-tone/web/mostly-grey-4.jpg";
+import ltMostlyPurple1 from "@/assets/lip-tone/web/mostly-purple-1.jpg";
+import ltMostlyPurple2 from "@/assets/lip-tone/web/mostly-purple-2.jpg";
+import ltMostlyPurple3 from "@/assets/lip-tone/web/mostly-purple-3.jpg";
+import ltMostlyPurple4 from "@/assets/lip-tone/web/mostly-purple-4.jpg";
 import ltMostlyLightBrown1 from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
 import ltMostlyLightBrown2 from "@/assets/lip-tone/web/mostly-light-brown-2.jpg";
 import ltMostlyLightBrown3 from "@/assets/lip-tone/web/mostly-light-brown-3.jpg";
@@ -96,15 +96,18 @@ import nupoora from "@/assets/nupoora.jpg";
 import tanvi from "@/assets/tanvi.jpg";
 
 const AVATAR_OPTIONS = [
-  { id: "avatar-6", url: maseray },
-  { id: "skin-rich-brown", url: aaliyah },
-  { id: "avatar-nupoora", url: nupoora },
-  { id: "avatar-3", url: nero },
-  { id: "avatar-4", url: cynthia },
-  { id: "avatar-5", url: anastasia },
-  { id: "avatar-mauve-model", url: tanvi },
-  { id: "skin-medium-brown", url: terushka },
-  { id: "skin-light-brown", url: sanna },
+  { id: "avatar-6", url: stMaseray },
+  { id: "skin-rich-brown", url: stAaliyah },
+  { id: "avatar-3", url: stNero },
+  { id: "avatar-4", url: stCynthia },
+  { id: "avatar-5", url: stAnastasia },
+  { id: "avatar-mauve-model", url: stTanvi },
+  { id: "skin-medium-brown", url: stTerushka },
+  { id: "skin-light-brown", url: stSanna },
+  { id: "avatar-geeta", url: stGeeta },
+  { id: "avatar-apoorva", url: stApoorva },
+  { id: "avatar-aashi", url: stAashi },
+  { id: "avatar-divya", url: stDivya },
 ] as const;
 
 type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
@@ -133,7 +136,7 @@ const LIP_TONE_ROWS = [
 { id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
 { id: "mostly-light-brown", label: "Mostly Light Brown", images: [ltMostlyLightBrown1, ltMostlyLightBrown2, ltMostlyLightBrown3, ltMostlyLightBrown4] },
 { id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
-{ id: "mostly-grey", label: "Mostly Grey", images: [ltMostlyGrey1, ltMostlyGrey2, ltMostlyGrey3, ltMostlyGrey4] }] as
+{ id: "mostly-purple", label: "Mostly Purple", images: [ltMostlyPurple1, ltMostlyPurple2, ltMostlyPurple3, ltMostlyPurple4] }] as
 const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
@@ -486,12 +489,10 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 
 const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
-  const [skinTone, setSkinTone] = useState<string>("medium-brown");
-  const [lipTone, setLipTone] = useState<string>("chestnut");
+  const [skinTone, setSkinTone] = useState<string>("");
+  const [lipTone, setLipTone] = useState<string>("");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
-  const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
-  const [croppingFace, setCroppingFace] = useState(false);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
   const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
   const [consentChecked, setConsentChecked] = useState(false);
@@ -518,6 +519,11 @@ const Index = () => {
     trackEvent("quiz_started", {}, true);
   }, [trackEvent]);
 
+  // Each quiz step should open at the top of the page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [state]);
+
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
@@ -534,62 +540,10 @@ const Index = () => {
       setOriginalImage(base64);
       setState("idle");
       trackEvent("selfie_uploaded", {}, true);
-      
-      // Detect and crop face
-      setCroppingFace(true);
-      try {
-        const resized = await downscaleImage(base64, 512);
-        const { data, error } = await supabase.functions.invoke("detect-face-region", {
-          body: { imageBase64: resized }
-        });
-        if (!error && data && data.top !== undefined) {
-          const cropped = await cropImage(base64, data);
-          setFaceCropImage(cropped);
-        }
-      } catch (err) {
-        console.error("Face crop failed, showing original:", err);
-      } finally {
-        setCroppingFace(false);
-      }
     };
     reader.readAsDataURL(file);
   }, []);
 
-  const downscaleImage = (base64: string, maxSize = 1024): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-        if (scale >= 1) {resolve(base64);return;}
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
-      };
-      img.src = base64;
-    });
-  };
-
-  const cropImage = (base64: string, region: { top: number; bottom: number; left: number; right: number }): Promise<string> => {
-    return new Promise((resolve) => {
-      const img = new Image();
-      img.onload = () => {
-        const sx = Math.round(region.left * img.width);
-        const sy = Math.round(region.top * img.height);
-        const sw = Math.round((region.right - region.left) * img.width);
-        const sh = Math.round((region.bottom - region.top) * img.height);
-        const canvas = document.createElement("canvas");
-        canvas.width = sw;
-        canvas.height = sh;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh);
-        resolve(canvas.toDataURL("image/jpeg", 0.9));
-      };
-      img.src = base64;
-    });
-  };
 
 
   const handleDrop = useCallback(
@@ -614,7 +568,6 @@ const Index = () => {
     setSkinTone("");
     setLipTone("");
     setOriginalImage(null);
-    setFaceCropImage(null);
     setSelectedLook("classic-red");
     setSelectedRecIndex(0);
   };
@@ -635,9 +588,9 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 text-foreground font-display text-lg tracking-wide">
+          className="mt-4 text-foreground font-display text-lg tracking-normal">
           
-          Virtual Lip Studio <sup className="font-sans text-[10px]">BETA</sup>
+          Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
         </motion.p>
       </header>
 
@@ -684,7 +637,7 @@ const Index = () => {
                       return (
                         <button
                           key={tone.id}
-                          onClick={() => setSkinTone(tone.id)}
+                          onClick={() => { setSkinTone(tone.id); trackEvent("skin_tone_selected", { skin_tone: tone.id }); setState("lip-tone"); }}
                           className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                             skinTone === tone.id ? "ring-2 ring-foreground" : ""
                           }`}
@@ -714,16 +667,6 @@ const Index = () => {
                       );
                     })}
                   </div>
-                  <div className="mt-8">
-                    <Button
-                    onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("lip-tone"); }}
-                    disabled={!skinTone}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Next
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             }
@@ -745,13 +688,25 @@ const Index = () => {
               
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Choose your closest lip tone category
+                    Take a look in the mirror! What is your current natural lip tone?
                   </p>
+                  <p className="text-sm text-foreground mt-2 font-display">
+                    (Lip shape doesn't matter here.)
+                  </p>
+                  <div className="mt-6 flex gap-3 justify-center">
+                    <Button
+                    onClick={() => setState("skin-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                      Back
+                    </Button>
+                  </div>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {LIP_TONE_ROWS.map((tone) =>
                   <button
                     key={tone.id}
-                    onClick={() => setLipTone(tone.id)}
+                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState("idle"); }}
                     className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                     lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
                     }>
@@ -763,24 +718,6 @@ const Index = () => {
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                   )}
-                  </div>
-                  <div className="mt-8 flex gap-3 justify-center">
-                    <Button
-                    onClick={() => setState("skin-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    
-                      Back
-                    </Button>
-                    <Button
-                    onClick={() => { trackEvent("lip_tone_selected", { lip_tone: lipTone }); setState("idle"); }}
-                    disabled={!lipTone}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Next
-                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -798,101 +735,83 @@ const Index = () => {
                 {!originalImage ?
               <>
                 <h2 className="font-display text-xl md:text-2xl text-foreground text-center leading-snug mb-6">
-                  Try our recommended lipstick shades on
+                  Who would you like to see our recommended lipstick shades on?
                 </h2>
-                <div className="flex flex-col gap-4 md:gap-6">
-                  <div className="flex flex-col border border-border bg-background transition-all duration-300 hover:border-foreground/40">
+                <div className="flex flex-col gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                     <div
                       onDrop={handleDrop}
                       onDragOver={(e) => e.preventDefault()}
                       onClick={() => fileInputRef.current?.click()}
-                      className="group relative flex flex-1 cursor-pointer p-8 sm:p-10 text-center">
+                      className="group relative aspect-[4/5] flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
                       <input
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={handleInputChange} />
-                      <div className="m-auto flex flex-col items-center gap-6">
-                        <Upload className="h-6 w-6 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      <div className="m-auto flex flex-col items-center gap-3 px-3">
+                        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
-                          <p className="font-display text-xl text-foreground">
+                          <p className="font-display text-lg text-foreground">
                             Upload a selfie
                           </p>
-                          <p className="mt-2 text-muted-foreground font-sans text-[9px] uppercase">
-                            Drag & drop or click to upload
+                          <p className="mt-1 text-muted-foreground font-sans text-[9px] uppercase">
+                            Drag & drop or click
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="px-4 pb-4 text-center">
-                      <p className="text-xs text-muted-foreground font-sans">
-                        <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
-                        {" \u00B7 "}
-                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
-                      </p>
-                    </div>
+                    {AVATAR_OPTIONS.map((avatar) => (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => {
+                          setOriginalImage(avatar.url);
+                          trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
+                          setState("uploaded");
+                        }}
+                        className="group relative aspect-[4/5] overflow-hidden"
+                      >
+                        <img
+                          src={avatar.url}
+                          alt="Avatar option"
+                          loading="lazy"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </button>
+                    ))}
                   </div>
-
-                  <div className="flex items-center justify-center">
-                    <span className="font-display text-lg text-muted-foreground uppercase tracking-widest">or</span>
-                  </div>
-
-                  <div className="border border-border bg-background p-6 sm:p-8">
-                    <p className="font-display text-xl text-foreground text-center">
-                      Choose an avatar
-                    </p>
-                    <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                      {AVATAR_OPTIONS.map((avatar) => (
-                        <button
-                          key={avatar.id}
-                          type="button"
-                          onClick={() => {
-                            setOriginalImage(avatar.url);
-                            setFaceCropImage(avatar.url);
-                            trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
-                            setState("uploaded");
-                          }}
-                          className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
-                        >
-                          <img
-                            src={avatar.url}
-                            alt="Avatar option"
-                            loading="lazy"
-                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
+                  <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center">
+                    <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
+                    {" \u00B7 "}
+                    <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                  </p>
                 </div>
               </> :
 
               <div className="flex flex-col items-center">
                 <div className="w-80 h-80 mx-auto overflow-hidden relative">
-                  {croppingFace && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10">
-                      <motion.p className="text-foreground font-display text-sm" animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1.5, repeat: Infinity }}>Detecting face…</motion.p>
-                    </div>
-                  )}
                   <img
-                    src={faceCropImage || originalImage}
+                    src={originalImage}
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
                 </div>
                 <button
-                  onClick={() => {setOriginalImage(null); setFaceCropImage(null);}}
-                  className="mt-3 font-sans text-[9px] uppercase text-muted-foreground underline hover:text-foreground transition-colors tracking-wider">
+                  onClick={() => {setOriginalImage(null);}}
+                  className="mt-3 font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground underline hover:text-foreground transition-colors">
                   Retake
                 </button>
               </div>
               }
 
-              {faceCropImage && (
+              {originalImage && (
                   <div className="mt-6 max-w-md mx-auto">
 
-                  <div className="border-t border-foreground/10 pt-6">
+                  <div className="border border-foreground p-5">
+                    <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground mb-4">
+                      Optional
+                    </p>
                     <div className="select-none">
                       <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                         <Checkbox
@@ -903,19 +822,32 @@ const Index = () => {
                             if (checked) setNoStoreChecked(false);
                           }}
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
-                        <span className="block font-display text-[15px] text-foreground leading-snug">
-                          Save my selections and photo to help AI work better for brown skin and get a 10% off discount code in return
+                        <span className="block">
+                          <span className="block font-display text-lg text-foreground leading-none tracking-normal">
+                            Get 10% Off
+                          </span>
+                          <span className="mt-2 block font-display text-[12px] leading-[1.15] tracking-normal text-foreground">
+                            Save my selections and photo to help Teak create better colors and tools for brown skin.
+                          </span>
                         </span>
                       </label>
+                      <div className="mt-3 ml-8 flex items-center gap-3">
+                        <a href="#" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Learn More
+                        </a>
+                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Privacy Policy
+                        </a>
+                      </div>
                       <div className="mt-5 ml-8">
                         <input
                           id="user-email"
                           type="email"
-                          placeholder="you@example.com"
+                          placeholder="Enter email to receive discount code"
                           value={userEmail}
                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-sm font-sans placeholder:text-foreground/30 focus:outline-none transition-colors`} />
-                        {emailError && <p className="text-destructive text-[10px] font-sans mt-2">Please enter your email address to receive your discount code.</p>}
+                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-xs font-sans font-medium tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                        {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
                     </div>
                   </div>
@@ -925,11 +857,11 @@ const Index = () => {
               {/* Bottom action bar */}
               <div className="mt-8 flex items-center justify-between max-w-md mx-auto w-full">
                 <Button
-                  onClick={() => { setOriginalImage(null); setFaceCropImage(null); }}
+                  onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
                   size="lg"
-                  variant="ghost"
-                  className="font-sans text-[9px] uppercase gap-2 text-muted-foreground hover:text-foreground hover:bg-transparent">
-                  <ArrowLeft className="h-3 w-3" /> Go Back
+                  variant="outline"
+                  className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                  Back
                 </Button>
 
 {originalImage && (
@@ -950,7 +882,7 @@ const Index = () => {
                       // Fire-and-forget: upload image + save submission in the background
                       void (async () => {
                         try {
-                          const sourceImage = faceCropImage || originalImage!;
+                          const sourceImage = originalImage!;
                           const img = new Image();
                           img.crossOrigin = "anonymous";
                           await new Promise<void>((resolve, reject) => {
@@ -1080,7 +1012,7 @@ const Index = () => {
               
                 {originalImage &&
               <div className="relative w-64 h-64 overflow-hidden">
-                    <img src={faceCropImage || originalImage} alt="Your photo" className="w-full h-full object-cover" />
+                    <img src={originalImage} alt="Your photo" className="w-full h-full object-cover" />
                     <motion.div
                       className="absolute inset-0 bg-foreground/5"
                       animate={{ opacity: [0.3, 0.6, 0.3] }}
@@ -1094,7 +1026,7 @@ const Index = () => {
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
                     Analyzing your complexion…
                   </motion.p>
-                  <p className="text-muted-foreground font-sans text-[10px] uppercase">
+                  <p className="text-muted-foreground font-sans font-medium text-[9px] uppercase tracking-normal">
                     This won't take long
                   </p>
                 </div>
@@ -1123,14 +1055,14 @@ const Index = () => {
                       const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
                       const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
                       const setting = shadeSettings?.[rec.variantName];
-                      const userFace = faceCropImage || originalImage;
+                      const userFace = originalImage;
                       const canRenderBanuba = Boolean(setting && userFace);
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
                           className="group relative flex flex-col items-center gap-2 p-2 rounded-lg w-full"
                         >
-                          <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
+                          <span className="font-sans font-medium text-[9px] text-foreground uppercase tracking-normal">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
@@ -1199,14 +1131,14 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
-                            <span className="font-sans text-[10px] text-muted-foreground text-center leading-tight">{img.productTitle}</span>
+                            <span className="font-display text-[12px] leading-[1.15] tracking-normal text-muted-foreground text-center">{img.productTitle}</span>
                           )}
                           {img?.price && (
-                            <span className="font-sans text-[10px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
+                            <span className="font-sans font-medium text-[9px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
                           )}
                           <Button
                             size="sm"
-                            className={`w-full mt-auto font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full ${
+                            className={`w-full mt-auto font-sans font-medium text-[9px] uppercase tracking-normal transition-all duration-300 rounded-none ${
                               cartStates[rec.variantId] === "added"
                                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                 : cartStates[rec.variantId] === "error"
@@ -1266,9 +1198,9 @@ const Index = () => {
                   <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
                   )}
 
-                  {(faceCropImage || originalImage) && (
+                  {originalImage && (
                     <TryOnOtherShades
-                      userFace={(faceCropImage || originalImage)!}
+                      userFace={originalImage!}
                       skinTone={skinTone}
                       lipTone={lipTone}
                       sessionId={sessionId}
@@ -1283,9 +1215,9 @@ const Index = () => {
                   {discountCode && (
                     <div className="flex gap-3">
                       <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
+                          <p className="font-display text-lg text-primary tracking-normal">{discountCode}</p>
                           <button
                             onClick={() => { navigator.clipboard.writeText(discountCode); }}
                             className="text-muted-foreground hover:text-foreground transition-colors"
@@ -1294,17 +1226,17 @@ const Index = () => {
                             <Copy size={14} />
                           </button>
                         </div>
-                        <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Expires in 7 days · Apply at checkout</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Expires in 7 days · Apply at checkout</p>
                       </div>
                       <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>
                   )}
 
                   <div className="flex gap-3 justify-center pt-2">
-                    <Button onClick={() => {setOriginalImage(null);setFaceCropImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background">
-                      Go Back
+                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                      Back
                     </Button>
                   </div>
                 </div>

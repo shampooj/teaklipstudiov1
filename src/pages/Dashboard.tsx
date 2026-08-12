@@ -26,7 +26,7 @@ import ltDeepBrownRose from "@/assets/lip-tone/web/deep-brown-rose-1.jpg";
 import ltGreyRose from "@/assets/lip-tone/web/grey-rose-1.jpg";
 import ltMauve from "@/assets/lip-tone/web/mauve-1.jpg";
 import ltMostlyDeepBrown from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
-import ltMostlyGrey from "@/assets/lip-tone/web/mostly-grey-1.jpg";
+import ltMostlyPurple from "@/assets/lip-tone/web/mostly-purple-1.jpg";
 import ltMostlyLightBrown from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
 import ltMostlyPink from "@/assets/lip-tone/web/mostly-pink-1.jpg";
 const LIP_TONES_REF = [
@@ -37,7 +37,7 @@ const LIP_TONES_REF = [
   { id: "grey-rose", label: "Grey Rose", image: ltGreyRose },
   { id: "mauve", label: "Mauve", image: ltMauve },
   { id: "mostly-deep-brown", label: "Mostly Deep Brown", image: ltMostlyDeepBrown },
-  { id: "mostly-grey", label: "Mostly Grey", image: ltMostlyGrey },
+  { id: "mostly-purple", label: "Mostly Purple", image: ltMostlyPurple },
   { id: "mostly-light-brown", label: "Mostly Light Brown", image: ltMostlyLightBrown },
   { id: "mostly-pink", label: "Mostly Pink", image: ltMostlyPink },
 ] as const;
@@ -874,7 +874,7 @@ const Dashboard = () => {
                     <SelectItem value="grey-rose">Grey Rose</SelectItem>
                     <SelectItem value="mauve">Mauve</SelectItem>
                     <SelectItem value="mostly-deep-brown">Mostly Deep Brown</SelectItem>
-                    <SelectItem value="mostly-grey">Mostly Grey</SelectItem>
+                    <SelectItem value="mostly-purple">Mostly Purple</SelectItem>
                     <SelectItem value="mostly-light-brown">Mostly Light Brown</SelectItem>
                     <SelectItem value="mostly-pink">Mostly Pink</SelectItem>
                   </SelectContent>
