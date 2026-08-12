@@ -85,6 +85,10 @@ import stMaseray from "@/assets/skin_tone/web/skin_tone_maseray.jpg";
 import stAaliyah from "@/assets/skin_tone/web/skin_tone_aaliyah.jpg";
 import stDivya from "@/assets/skin_tone/web/skin_tone_divya.jpg";
 import stDoe from "@/assets/skin_tone/web/skin_tone_doe.jpg";
+import stCharithra from "@/assets/skin_tone/web/skin_tone_charithra.jpg";
+import stGeeta from "@/assets/skin_tone/web/skin_tone_geeta.jpg";
+import stApoorva from "@/assets/skin_tone/web/skin_tone_apoorva.jpg";
+import stLakshmi from "@/assets/skin_tone/web/skin_tone_lakshmi.jpg";
 import terushka from "@/assets/terushka.jpg";
 import aashi from "@/assets/aashi.jpg";
 import aaliyah from "@/assets/aaliyah.jpg";
@@ -673,8 +677,8 @@ const Index = () => {
                         "light-brown": [stSanna, stSaira, stArris, stHareem],
                         "medium-brown": [stTerushka, stNoreen, stTanvi, stAashi],
                         "deep-brown": [stCynthia, stDoe, stNero, stAnastasia],
-                        "rich-brown": [stDivya, stAaliyah, "", stPritt],
-                        "full-brown": [stMaseray, "", "", ""],
+                        "rich-brown": [stDivya, stAaliyah, stCharithra, stPritt],
+                        "full-brown": [stMaseray, stGeeta, stApoorva, stLakshmi],
                       };
                       const samples = SAMPLES[tone.id] ?? [];
                       return (
