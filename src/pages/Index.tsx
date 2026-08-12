@@ -857,7 +857,7 @@ const Index = () => {
               {/* Bottom action bar */}
               <div className="mt-8 flex items-center justify-between max-w-md mx-auto w-full">
                 <Button
-                  onClick={() => { setOriginalImage(null); }}
+                  onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
                   size="lg"
                   variant="ghost"
                   className="font-sans text-[9px] uppercase gap-2 text-muted-foreground hover:text-foreground hover:bg-transparent">
