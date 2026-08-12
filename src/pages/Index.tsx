@@ -588,9 +588,9 @@ const Index = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className="mt-4 text-foreground font-display text-lg tracking-wide">
+          className="mt-4 text-foreground font-display text-lg tracking-normal">
           
-          Virtual Lip Studio <sup className="font-sans text-[10px]">BETA</sup>
+          Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
         </motion.p>
       </header>
 
@@ -698,7 +698,7 @@ const Index = () => {
                     onClick={() => setState("skin-tone")}
                     size="lg"
                     variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                    className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
                       Back
                     </Button>
                   </div>
@@ -771,7 +771,7 @@ const Index = () => {
                           trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
                           setState("uploaded");
                         }}
-                        className="group relative aspect-[4/5] overflow-hidden border border-border hover:border-foreground/60 transition-colors"
+                        className="group relative aspect-[4/5] overflow-hidden"
                       >
                         <img
                           src={avatar.url}
@@ -782,7 +782,7 @@ const Index = () => {
                       </button>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground font-sans text-center">
+                  <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center">
                     <a href="#" className="underline hover:text-foreground transition-colors">Learn More</a>
                     {" \u00B7 "}
                     <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
@@ -799,7 +799,7 @@ const Index = () => {
                 </div>
                 <button
                   onClick={() => {setOriginalImage(null);}}
-                  className="mt-3 font-sans text-[9px] uppercase text-muted-foreground underline hover:text-foreground transition-colors tracking-wider">
+                  className="mt-3 font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground underline hover:text-foreground transition-colors">
                   Retake
                 </button>
               </div>
@@ -859,9 +859,9 @@ const Index = () => {
                 <Button
                   onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
                   size="lg"
-                  variant="ghost"
-                  className="font-sans text-[9px] uppercase gap-2 text-muted-foreground hover:text-foreground hover:bg-transparent">
-                  <ArrowLeft className="h-3 w-3" /> Go Back
+                  variant="outline"
+                  className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                  Back
                 </Button>
 
 {originalImage && (
@@ -1026,7 +1026,7 @@ const Index = () => {
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
                     Analyzing your complexion…
                   </motion.p>
-                  <p className="text-muted-foreground font-sans text-[10px] uppercase">
+                  <p className="text-muted-foreground font-sans font-medium text-[9px] uppercase tracking-normal">
                     This won't take long
                   </p>
                 </div>
@@ -1062,7 +1062,7 @@ const Index = () => {
                           key={`${rec.category}-${rec.variantName}`}
                           className="group relative flex flex-col items-center gap-2 p-2 rounded-lg w-full"
                         >
-                          <span className="font-sans text-[10px] text-foreground uppercase tracking-wider">
+                          <span className="font-sans font-medium text-[9px] text-foreground uppercase tracking-normal">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
@@ -1131,14 +1131,14 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {img?.productTitle && (
-                            <span className="font-sans text-[10px] text-muted-foreground text-center leading-tight">{img.productTitle}</span>
+                            <span className="font-display text-[12px] leading-[1.15] tracking-normal text-muted-foreground text-center">{img.productTitle}</span>
                           )}
                           {img?.price && (
-                            <span className="font-sans text-[10px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
+                            <span className="font-sans font-medium text-[9px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
                           )}
                           <Button
                             size="sm"
-                            className={`w-full mt-auto font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full ${
+                            className={`w-full mt-auto font-sans font-medium text-[9px] uppercase tracking-normal transition-all duration-300 rounded-none ${
                               cartStates[rec.variantId] === "added"
                                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                 : cartStates[rec.variantId] === "error"
@@ -1215,9 +1215,9 @@ const Index = () => {
                   {discountCode && (
                     <div className="flex gap-3">
                       <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider mb-1">Your 10% off code</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-lg text-primary tracking-wide">{discountCode}</p>
+                          <p className="font-display text-lg text-primary tracking-normal">{discountCode}</p>
                           <button
                             onClick={() => { navigator.clipboard.writeText(discountCode); }}
                             className="text-muted-foreground hover:text-foreground transition-colors"
@@ -1226,17 +1226,17 @@ const Index = () => {
                             <Copy size={14} />
                           </button>
                         </div>
-                        <p className="font-sans text-[9px] text-muted-foreground uppercase tracking-wider mt-1">Expires in 7 days · Apply at checkout</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Expires in 7 days · Apply at checkout</p>
                       </div>
                       <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
-                        <p className="font-sans text-xs text-muted-foreground uppercase tracking-wider">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>
                   )}
 
                   <div className="flex gap-3 justify-center pt-2">
-                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground hover:text-background">
-                      Go Back
+                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                      Back
                     </Button>
                   </div>
                 </div>
