@@ -21,30 +21,33 @@ const SKIN_TONE_LABELS: Record<string, string> = {
   "medium-brown": "Medium Brown",
   "deep-brown": "Deep Brown",
   "rich-brown": "Rich Brown",
+  "full-brown": "Full Brown",
 };
 
 const LIP_TONE_LABELS: Record<string, string> = {
-  "bright-pink": "Bright Pink",
   "beige": "Beige",
-  "mauve-pink": "Mauve",
-  "neutral-brown": "Chestnut",
-  "two-toned-grey": "Two-Toned Grey",
-  "two-toned-purple": "Two-Toned Purple",
-  "two-toned-brown": "Two-Toned Brown",
-  "medium-brown": "Two-toned Deep Brown",
-  "deep-brown": "Mostly Brown",
+  "brown-rose": "Brown Rose",
+  "chestnut": "Chestnut",
+  "deep-brown-rose": "Deep Brown Rose",
+  "grey-rose": "Grey Rose",
+  "mauve": "Mauve",
+  "mostly-deep-brown": "Mostly Deep Brown",
+  "mostly-grey": "Mostly Grey",
+  "mostly-light-brown": "Mostly Light Brown",
+  "mostly-pink": "Mostly Pink",
 };
 
 const FRONTEND_LIP_TONE_IDS = [
-  "bright-pink",
   "beige",
-  "mauve-pink",
-  "neutral-brown",
-  "two-toned-grey",
-  "two-toned-purple",
-  "two-toned-brown",
-  "medium-brown",
-  "deep-brown",
+  "brown-rose",
+  "chestnut",
+  "deep-brown-rose",
+  "grey-rose",
+  "mauve",
+  "mostly-deep-brown",
+  "mostly-grey",
+  "mostly-light-brown",
+  "mostly-pink",
 ];
 
 interface Row {

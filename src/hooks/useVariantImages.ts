@@ -71,6 +71,7 @@ export function getSkinToneImage(
     "medium-brown": ["medium"],
     "deep-brown": ["dark", "deep"],
     "rich-brown": ["dark", "deep"],
+    "full-brown": ["dark", "deep"],
   };
 
   const keywords = keywordMap[skinToneId] || [];

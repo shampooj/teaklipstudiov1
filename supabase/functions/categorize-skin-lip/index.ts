@@ -9,11 +9,9 @@ const corsHeaders = {
 
 const MODEL = "gemini-flash-latest";
 
-const SKIN_TONE_OPTIONS = ["light-brown", "medium-brown", "deep-brown", "rich-brown"];
+const SKIN_TONE_OPTIONS = ["light-brown", "medium-brown", "deep-brown", "rich-brown", "full-brown"];
 const LIP_TONE_OPTIONS = [
-  "bright-pink", "brown-pink", "mauve-pink", "beige",
-  "two-toned-purple", "two-toned-brown", "two-toned-grey", "two-toned-beige",
-  "neutral-brown", "medium-brown", "deep-brown", "grey-brown",
+  "beige", "brown-rose", "chestnut", "deep-brown-rose", "grey-rose", "mauve", "mostly-deep-brown", "mostly-grey", "mostly-light-brown", "mostly-pink",
 ];
 
 serve(async (req) => {
