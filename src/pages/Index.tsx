@@ -486,8 +486,8 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 
 const Index = () => {
   const [state, setState] = useState<AppState>("skin-tone");
-  const [skinTone, setSkinTone] = useState<string>("medium-brown");
-  const [lipTone, setLipTone] = useState<string>("chestnut");
+  const [skinTone, setSkinTone] = useState<string>("");
+  const [lipTone, setLipTone] = useState<string>("");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [faceCropImage, setFaceCropImage] = useState<string | null>(null);
@@ -517,6 +517,11 @@ const Index = () => {
   useEffect(() => {
     trackEvent("quiz_started", {}, true);
   }, [trackEvent]);
+
+  // Each quiz step should open at the top of the page
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [state]);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -684,7 +689,7 @@ const Index = () => {
                       return (
                         <button
                           key={tone.id}
-                          onClick={() => setSkinTone(tone.id)}
+                          onClick={() => { setSkinTone(tone.id); trackEvent("skin_tone_selected", { skin_tone: tone.id }); setState("lip-tone"); }}
                           className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                             skinTone === tone.id ? "ring-2 ring-foreground" : ""
                           }`}
@@ -714,16 +719,6 @@ const Index = () => {
                       );
                     })}
                   </div>
-                  <div className="mt-8">
-                    <Button
-                    onClick={() => { trackEvent("skin_tone_selected", { skin_tone: skinTone }); setState("lip-tone"); }}
-                    disabled={!skinTone}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Next
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             }
@@ -745,13 +740,22 @@ const Index = () => {
               
                 <div className="text-center w-full">
                   <p className="font-display text-xl text-foreground">
-                    Choose your closest lip tone category
+                    What is your lip tone?
                   </p>
+                  <div className="mt-6 flex gap-3 justify-center">
+                    <Button
+                    onClick={() => setState("skin-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
+                      Back
+                    </Button>
+                  </div>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {LIP_TONE_ROWS.map((tone) =>
                   <button
                     key={tone.id}
-                    onClick={() => setLipTone(tone.id)}
+                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState("idle"); }}
                     className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                     lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
                     }>
@@ -763,24 +767,6 @@ const Index = () => {
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                   )}
-                  </div>
-                  <div className="mt-8 flex gap-3 justify-center">
-                    <Button
-                    onClick={() => setState("skin-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans text-[9px] uppercase gap-2 border-foreground/20 hover:bg-foreground/5">
-                    
-                      Back
-                    </Button>
-                    <Button
-                    onClick={() => { trackEvent("lip_tone_selected", { lip_tone: lipTone }); setState("idle"); }}
-                    disabled={!lipTone}
-                    size="lg"
-                    className="bg-foreground text-background hover:bg-foreground/85 font-sans text-[9px] uppercase gap-2 px-8">
-                    
-                      Next
-                    </Button>
                   </div>
                 </div>
               </motion.div>
