@@ -171,8 +171,6 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
           }
         });
 
-        if (containerRef.current) Dom.render(player, containerRef.current);
-
         setStatus("Loading image…");
         const res = await fetch(lipToneImage);
         const blob = await res.blob();
@@ -185,6 +183,9 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
         imageFileRef.current = processedFile;
         await player.use(new BanubaImage(processedFile));
         player.play({ pauseOnEmpty: false });
+        // Attach the renderer only after the player has an input: rendering an
+        // input-less player rejects with "Cannot destructure property 'frame'".
+        if (containerRef.current) Dom.render(player, containerRef.current);
 
 
         readyRef.current = true;
