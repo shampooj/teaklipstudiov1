@@ -10635,6 +10635,30 @@ float bnb_blur_hv_r7(BNB_DECLARE_SAMPLER_2D_ARGUMENT(s_img), ivec2 iuv, ivec2 ax
     return blurred;
 }
 
+// one-pass one-channel gauss blur. use it only with a small radius (not higher than 2.f)!
+float bnb_gauss_blur(BNB_DECLARE_SAMPLER_2D_ARGUMENT(img), ivec2 iuv, float r, int channel /* [0...3] */)
+{
+    ivec2 isz1 = textureSize(BNB_SAMPLER_2D(img), 0) - 1;
+    float c = texelFetch(BNB_SAMPLER_2D(img), iuv, 0)[channel];
+
+    float sigma = r / 2.;
+    float sigma_mult = 1. / (2. * sigma * sigma);
+
+    float blurred = c;
+    float mult_sum = 1.;
+    int ir = int(r);
+    for (int y = 0; y <= ir; ++y) {
+        for (int x = 1; x <= ir; ++x) {
+            float mult = exp(-sigma_mult * float(x * x + y * y));
+            mult_sum += mult * 4.;
+            blurred += mult * (texelFetch(BNB_SAMPLER_2D(img), clamp(iuv + ivec2(x, y), ivec2(0), isz1), 0)[channel] + texelFetch(BNB_SAMPLER_2D(img), clamp(iuv + ivec2(-y, x), ivec2(0), isz1), 0)[channel] + texelFetch(BNB_SAMPLER_2D(img), clamp(iuv + ivec2(-x, -y), ivec2(0), isz1), 0)[channel] + texelFetch(BNB_SAMPLER_2D(img), clamp(iuv + ivec2(y, -x), ivec2(0), isz1), 0)[channel]);
+        }
+    }
+    blurred *= 1. / mult_sum;
+    blurred = clamp(blurred, 0., 1.);
+    return blurred;
+}
+
 #endif // BNB_BLUR_HV_GLSL
 // https://github.com/tobspr/GLSL-Color-Spaces/blob/master/ColorSpaces.inc.glsl
 // https://github.com/graypegg/chromatism
@@ -15815,7 +15839,8 @@ if (Api.getCurrentTimeNs() != 0) {
             "resources": {
                 "all": [
                     "flow/acne_segm.fp16.tflite",
-                    "bnb_binaries/acne_segmentation"
+                    "bnb_binaries/acne_segmentation",
+                    "bnb_binaries/acne_severity"
                 ]
             }
         },
