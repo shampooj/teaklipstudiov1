@@ -10,13 +10,15 @@ import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
 import skinRichBrown from "@/assets/skin-rich-brown.jpg";
+import stNero from "@/assets/skin_tone/web/skin_tone_nero.jpg";
+import stMaseray from "@/assets/skin_tone/web/skin_tone_maseray.jpg";
 
 const SKIN_TONES_REF = [
   { id: "light-brown", label: "Light Brown", image: skinLightBrown },
   { id: "medium-brown", label: "Medium Brown", image: skinMediumBrown },
-  { id: "deep-brown", label: "Deep Brown", image: skinDeepBrown },
+  { id: "deep-brown", label: "Deep Brown", image: stNero },
   { id: "rich-brown", label: "Rich Brown", image: skinRichBrown },
-  { id: "full-brown", label: "Full Brown", image: skinRichBrown },
+  { id: "full-brown", label: "Full Brown", image: stMaseray },
 ] as const;
 
 import ltBeige from "@/assets/lip-tone/web/beige-1.jpg";
