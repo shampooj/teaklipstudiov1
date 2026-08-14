@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { zipSync, strToU8 } from "fflate";
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
+import { resolveBanubaFinish } from "@/lib/banubaFinish";
 
 interface Props {
   imageUrl: string;
@@ -15,12 +16,6 @@ interface Props {
 
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
-
-const FINISH_MAP: Record<string, string> = {
-  matte: "matte_cream",
-  satin: "satin",
-  glossy: "shine",
-};
 
 function hexToRgbString(hex: string) {
   const normalized = hex.trim().replace(/^#/, "");
@@ -41,7 +36,7 @@ function buildEffectZip(color: string, finish: string, coverage: number) {
       {
         makeup_lipstick: {
           color: hexToRgbString(color),
-          finish: FINISH_MAP[finish] ?? "satin",
+          finish: resolveBanubaFinish(finish),
           coverage,
         },
       },

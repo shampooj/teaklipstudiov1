@@ -11,12 +11,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
+import { BANUBA_FINISHES, type BanubaFinish } from "@/lib/banubaFinish";
 
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "face_attributes", "eyes", "lips", "skin", "makeup"];
 
-type Finish = "matte_cream" | "satin" | "shine" | "balm" | "shimmer";
-const FINISH_OPTIONS: Finish[] = ["matte_cream", "satin", "shine", "balm", "shimmer"];
+type Finish = BanubaFinish;
+const FINISH_OPTIONS: readonly Finish[] = BANUBA_FINISHES;
 
 function buildConfig(color: string, finish: Finish, coverage: number) {
   return {

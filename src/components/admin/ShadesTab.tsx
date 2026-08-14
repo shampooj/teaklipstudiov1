@@ -24,6 +24,15 @@ import terushka from "@/assets/terushka.jpg";
 import aaliyah from "@/assets/aaliyah.jpg";
 import nupoora from "@/assets/nupoora.jpg";
 import tanvi from "@/assets/tanvi.jpg";
+import arris from "@/assets/skin_tone/web/skin_tone_arris.jpg";
+import pritt from "@/assets/skin_tone/web/skin_tone_pritt.jpg";
+import geeta from "@/assets/skin_tone/web/skin_tone_geeta.jpg";
+import {
+  BANUBA_FINISHES,
+  type BanubaFinish,
+  finishLabel,
+  resolveBanubaFinish,
+} from "@/lib/banubaFinish";
 
 const AVATAR_IMAGES = [
   nero,
@@ -35,15 +44,15 @@ const AVATAR_IMAGES = [
   nupoora,
 ];
 const LIP_TONE_AVATARS: Record<string, string> = {
-  "beige": terushka,
+  "beige": arris,
   "brown-rose": cynthia,
   "chestnut": anastasia,
   "deep-brown-rose": maseray,
   "grey-rose": nero,
   "mauve": tanvi,
   "mostly-deep-brown": aaliyah,
-  "mostly-purple": nupoora,
-  "mostly-light-brown": sanna,
+  "mostly-purple": geeta,
+  "mostly-light-brown": pritt,
   "mostly-pink": sanna,
 };
 const avatarFor = (id: string, idx: number) =>
@@ -72,8 +81,7 @@ const LIP_TONES = [
   { id: "mostly-pink", label: "Mostly Pink", image: ltMostlyPink },
 ] as const;
 
-const FINISHES = ["matte", "satin", "glossy"] as const;
-type Finish = (typeof FINISHES)[number];
+type Finish = BanubaFinish;
 
 const SKIN_TONES = [
   { id: "light-brown", label: "Light Brown" },
@@ -123,7 +131,12 @@ const ShadesTab = () => {
     LIP_TONES.forEach((t) => {
       const existing = (data || []).find((r: any) => r.lip_tone === t.id);
       map[t.id] = existing
-        ? { ...existing, opacity: Number(existing.opacity) }
+        ? {
+            ...existing,
+            opacity: Number(existing.opacity),
+            // rows saved before the full preset list used matte/satin/glossy
+            finish: resolveBanubaFinish(existing.finish),
+          }
         : {
             variant_name: selectedShade,
             skin_tone: DEFAULT_SKIN_TONE,
@@ -233,12 +246,6 @@ const ShadesTab = () => {
                   const row = rows[t.id];
                   if (!row) return null;
                   const avatarImg = avatarFor(t.id, tIdx);
-                  const blend =
-                    row.finish === "matte"
-                      ? "multiply"
-                      : row.finish === "glossy"
-                      ? "overlay"
-                      : "multiply";
                   return (
                     <Fragment key={t.id}>
                     <tr className="border-t border-border">
@@ -277,13 +284,13 @@ const ShadesTab = () => {
                           value={row.finish}
                           onValueChange={(v) => updateRow(t.id, { finish: v as Finish })}
                         >
-                          <SelectTrigger className="h-7 w-28 text-[10px] rounded-md border-foreground/20">
+                          <SelectTrigger className="h-7 w-44 text-[10px] rounded-md border-foreground/20">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="rounded-2xl">
-                            {FINISHES.map((f) => (
-                              <SelectItem key={f} value={f} className="text-[10px] capitalize">
-                                {f}
+                          <SelectContent className="rounded-2xl max-h-72">
+                            {BANUBA_FINISHES.map((f) => (
+                              <SelectItem key={f} value={f} className="text-[10px]">
+                                {finishLabel(f)}
                               </SelectItem>
                             ))}
                           </SelectContent>
