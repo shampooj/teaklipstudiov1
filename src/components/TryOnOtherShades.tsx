@@ -74,7 +74,7 @@ const TryOnOtherShades = ({
 
   return (
     <div className="w-full max-w-lg flex flex-col gap-4 mt-8 bg-card px-4 py-8 sm:px-6">
-      <label className="font-display text-lg text-foreground text-center">
+      <label className="font-display text-[18px] leading-[18px] text-foreground text-center">
         Try On Other Shades
       </label>
 
@@ -92,17 +92,15 @@ const TryOnOtherShades = ({
             href={productUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-display text-base text-foreground text-center hover:underline"
+            className="font-display text-[12px] leading-[13px] text-foreground text-center hover:underline"
             onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades", product_handle: activeImg?.productHandle })}
           >
             {active.name}
           </a>
-          <span className="font-sans text-[10px] text-muted-foreground text-center uppercase tracking-wider">
+          <span className="font-display text-[12px] leading-[13px] text-muted-foreground text-center">
             {active.formula}
+            {activeImg?.price && ` · $${parseFloat(activeImg.price).toFixed(2)}`}
           </span>
-          {activeImg?.price && (
-            <span className="font-sans text-[10px] text-foreground">${parseFloat(activeImg.price).toFixed(2)}</span>
-          )}
           <div className="mt-2 flex flex-wrap justify-center gap-2">
             <Button
               asChild
@@ -174,7 +172,7 @@ const TryOnOtherShades = ({
                 }`}
                 style={{ backgroundColor: shade.color }}
               />
-              <span className="font-sans text-[9px] uppercase tracking-wider text-muted-foreground">
+              <span className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground">
                 {shade.name}
               </span>
             </button>

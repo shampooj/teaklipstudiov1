@@ -604,7 +604,7 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="mt-4 text-foreground font-display text-lg tracking-normal">
+            className="mt-4 text-foreground font-display text-[18px] leading-[18px] tracking-normal">
 
             Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
           </motion.p>
@@ -620,7 +620,7 @@ const Index = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
               className="text-center mb-8">
-              <p className="font-display text-xl md:text-2xl text-foreground leading-snug">
+              <p className="font-display text-[18px] leading-[18px] text-foreground">
                 Get personalized shade recommendations and see how our lipsticks might look on you
               </p>
             </motion.div>
@@ -637,7 +637,7 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
               
                 <div className="text-center w-full">
-                  <p className="font-display text-xl text-foreground">
+                  <p className="font-display text-[28px] leading-[29px] text-foreground">
                     What's your general skintone?
                   </p>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
@@ -704,10 +704,10 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
               
                 <div className="text-center w-full">
-                  <p className="font-display text-xl text-foreground">
+                  <p className="font-display text-[28px] leading-[29px] text-foreground">
                     Take a look in the mirror! What is your current natural lip tone?
                   </p>
-                  <p className="text-sm text-foreground mt-2 font-display">
+                  <p className="font-display text-[12px] leading-[13px] text-foreground mt-3">
                     (Lip shape doesn't matter here.)
                   </p>
                   <div className="mt-6 flex gap-3 justify-center">
@@ -751,7 +751,7 @@ const Index = () => {
               
                 {!originalImage ?
               <>
-                <h2 className="font-display text-xl md:text-2xl text-foreground text-center leading-snug mb-6">
+                <h2 className="font-display text-[28px] leading-[29px] text-foreground text-center mb-6">
                   Who would you like to see our recommended lipstick shades on?
                 </h2>
                 <div className="flex flex-col gap-4">
@@ -770,7 +770,7 @@ const Index = () => {
                       <div className="m-auto flex flex-col items-center gap-3 px-3">
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
-                          <p className="font-display text-lg text-foreground">
+                          <p className="font-display text-[18px] leading-[18px] text-foreground">
                             Upload a selfie
                           </p>
                           <p className="mt-1 text-muted-foreground font-sans text-[9px] uppercase">
@@ -840,10 +840,10 @@ const Index = () => {
                           }}
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
-                          <span className="block font-display text-lg text-foreground leading-none tracking-normal">
+                          <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
                             Get 10% Off
                           </span>
-                          <span className="mt-2 block font-display text-[12px] leading-[1.15] tracking-normal text-foreground">
+                          <span className="mt-2 block font-display text-[12px] leading-[13px] tracking-normal text-foreground">
                             Save my selections and photo to help Teak create better colors and tools for brown skin.
                           </span>
                         </span>
@@ -863,7 +863,7 @@ const Index = () => {
                           placeholder="Enter email to receive discount code"
                           value={userEmail}
                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground text-xs font-sans font-medium tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[9px] tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
                     </div>
@@ -1038,7 +1038,7 @@ const Index = () => {
               }
                 <div className="flex flex-col items-center gap-3">
                   <motion.p
-                    className="text-foreground font-display text-lg"
+                    className="text-foreground font-display text-[18px] leading-[18px]"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
                     Analyzing your complexion…
@@ -1062,11 +1062,11 @@ const Index = () => {
               
                 <div className="w-full max-w-lg flex flex-col gap-5">
                    {getComplexionType(skinTone, lipTone) !== null && (
-                     <h1 className="font-display text-2xl md:text-[28px] md:leading-[29px] text-foreground text-center">
+                     <h1 className="font-display text-[28px] leading-[29px] text-foreground text-center">
                        You are Complexion {getComplexionType(skinTone, lipTone)}
                      </h1>
                    )}
-                   <label className="font-display text-lg text-foreground text-center">
+                   <label className="font-display text-[18px] leading-[18px] text-foreground text-center">
                      The Best Shades For Your Complexion
                    </label>
                   {recommendations.length > 0 ? (
@@ -1084,7 +1084,7 @@ const Index = () => {
                           key={`${rec.category}-${rec.variantName}`}
                           className="group relative flex flex-col items-center gap-2 p-2 rounded-lg w-full"
                         >
-                          <span className="font-sans font-medium text-[9px] text-foreground uppercase tracking-normal">
+                          <span className="font-display text-[18px] leading-[18px] text-foreground text-center">
                             {rec.categoryLabel}
                           </span>
                           <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
@@ -1141,7 +1141,7 @@ const Index = () => {
                               )}
                             </div>
                           </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 font-display text-xs leading-tight text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
+                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 font-display text-[12px] leading-[13px] text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
                             <span
                               className="w-3 h-3 rounded-full border border-foreground/20 shrink-0"
                               style={{ backgroundColor: rec.color }}
@@ -1150,7 +1150,7 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {(img?.productTitle || img?.price) && (
-                            <span className="font-display text-[12px] leading-[1.15] tracking-normal text-muted-foreground text-center">
+                            <span className="font-display text-[12px] leading-[13px] tracking-normal text-muted-foreground text-center">
                               {img?.productTitle}
                               {img?.productTitle && img?.price && " · "}
                               {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
@@ -1230,7 +1230,7 @@ const Index = () => {
                       <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
                         <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-lg text-primary tracking-normal">{discountCode}</p>
+                          <p className="font-display text-[18px] leading-[18px] text-primary tracking-normal">{discountCode}</p>
                           <button
                             onClick={() => { navigator.clipboard.writeText(discountCode); }}
                             className="text-muted-foreground hover:text-foreground transition-colors"
