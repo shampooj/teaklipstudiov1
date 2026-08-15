@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { shareLook, downloadLook } from "@/lib/shareLook";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useVariantImages } from "@/hooks/useVariantImages";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
@@ -12,8 +13,6 @@ interface Props {
   skinTone: string;
   lipTone: string;
   sessionId: string;
-  cartStates: Record<string, "adding" | "added" | "error">;
-  setCartStates: React.Dispatch<React.SetStateAction<Record<string, "adding" | "added" | "error">>>;
   trackEvent: (event: string, props?: Record<string, unknown>) => void;
 }
 
@@ -30,8 +29,6 @@ const TryOnOtherShades = ({
   skinTone,
   lipTone,
   sessionId,
-  cartStates,
-  setCartStates,
   trackEvent,
 }: Props) => {
   const { data: settings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
@@ -72,46 +69,10 @@ const TryOnOtherShades = ({
     ? `https://nupoora-784.myshopify.com/products/${activeImg.productHandle}?variant=${active.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}`
     : "#";
 
-  const handleAddToCart = async () => {
-    if (!active) return;
-    const variantId = active.variantId;
-    setCartStates((prev) => ({ ...prev, [variantId]: "adding" }));
-    trackEvent("add_to_cart", { variant_id: variantId, variant_name: active.name, source: "try_on_other_shades" });
-    try {
-      const cartPromise = new Promise<boolean>((resolve) => {
-        const timeout = setTimeout(() => resolve(false), 5000);
-        const handler = (event: MessageEvent) => {
-          if (event.data?.type === "cart-add-response") {
-            clearTimeout(timeout);
-            window.removeEventListener("message", handler);
-            resolve(!!event.data.success);
-          }
-        };
-        window.addEventListener("message", handler);
-      });
-      window.top?.postMessage({
-        type: "cart-add",
-        variantId: parseInt(variantId),
-        quantity: 1,
-        quizSessionId: sessionId,
-      }, "*");
-      const success = await cartPromise;
-      if (!success) {
-        trackEvent("add_to_cart_failed", { variant_id: variantId, variant_name: active.name, source: "try_on_other_shades", reason: "no_response_or_error" });
-      }
-      setCartStates((prev) => ({ ...prev, [variantId]: success ? "added" : "error" }));
-    } catch {
-      trackEvent("add_to_cart_failed", { variant_id: variantId, variant_name: active.name, source: "try_on_other_shades", reason: "exception" });
-      setCartStates((prev) => ({ ...prev, [variantId]: "error" }));
-    }
-  };
-
   if (availableShades.length === 0) return null;
 
-  const cartState = active ? cartStates[active.variantId] : undefined;
-
   return (
-    <div className="w-full max-w-lg flex flex-col gap-4 mt-8">
+    <div className="w-full max-w-lg flex flex-col gap-4 mt-8 bg-card px-4 py-8 sm:px-6">
       <label className="font-display text-lg text-foreground text-center">
         Try On Other Shades
       </label>
@@ -141,28 +102,49 @@ const TryOnOtherShades = ({
           {activeImg?.price && (
             <span className="font-sans text-[10px] text-foreground">${parseFloat(activeImg.price).toFixed(2)}</span>
           )}
-          <Button
-            size="sm"
-            className={`mt-2 font-sans text-[8px] uppercase tracking-wider transition-all duration-300 rounded-full px-6 ${
-              cartState === "added"
-                ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
-                : cartState === "error"
-                ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
-                : "bg-background text-foreground border-2 border-foreground hover:bg-foreground hover:text-background"
-            }`}
-            disabled={cartState === "adding" || cartState === "added"}
-            onClick={handleAddToCart}
-          >
-            {cartState === "adding" ? (
-              <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
-            ) : cartState === "added" ? (
-              <><Check className="w-2.5 h-2.5" /> Added</>
-            ) : cartState === "error" ? (
-              <>Failed</>
-            ) : (
-              <>Add to Cart</>
-            )}
-          </Button>
+          <div className="mt-2 flex flex-wrap justify-center gap-2">
+            <Button
+              asChild
+              size="sm"
+              className="font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+            >
+              <a
+                href={productUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades_store_button", product_handle: activeImg?.productHandle })}
+              >
+                Shop Now
+              </a>
+            </Button>
+            <Button
+              size="sm"
+              className="gap-1.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+              onClick={() => {
+                trackEvent("share_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades" });
+                void shareLook({
+                  text: `What do you think of ${active.label} on me?`,
+                  url: productUrl,
+                  imageUrl: activeSnapshot,
+                });
+              }}
+            >
+              <Share2 className="w-2.5 h-2.5" /> Get A Friend's Opinion
+            </Button>
+            <Button
+              size="sm"
+              aria-label={`Download ${active.label} on your photo`}
+              className="px-2 rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+              disabled={!activeSnapshot}
+              onClick={() => {
+                if (!activeSnapshot) return;
+                trackEvent("download_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades" });
+                void downloadLook(activeSnapshot, `teak-${active.name.toLowerCase()}.jpg`);
+              }}
+            >
+              <Download className="w-2.5 h-2.5" />
+            </Button>
+          </div>
         </div>
       )}
 

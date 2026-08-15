@@ -3,7 +3,7 @@ import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
 import { shopifyImg } from "@/lib/shopifyImg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Copy } from "lucide-react";
+import { Copy, Share2 } from "lucide-react";
 import { Upload, Download, RotateCcw, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
+import { shareLook, downloadLook } from "@/lib/shareLook";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
@@ -501,7 +502,6 @@ const Index = () => {
    
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -580,6 +580,11 @@ const Index = () => {
     setOriginalImage(null);
     setSelectedLook("classic-red");
     setSelectedRecIndex(0);
+    setConsentChecked(false);
+    setNoStoreChecked(false);
+    setUserEmail("");
+    setEmailError(false);
+    setDiscountCode(null);
   };
 
   const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
@@ -588,20 +593,22 @@ const Index = () => {
     <div className="bg-background flex flex-col">
       {/* Header */}
       <header className="py-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}>
-          
-          <img src={teakLogo} alt="TEAK" className="h-10 md:h-12 mx-auto" />
-        </motion.div>
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="mt-4 text-foreground font-display text-lg tracking-normal">
-          
-          Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
-        </motion.p>
+        <button type="button" onClick={reset} aria-label="Restart the quiz" className="mx-auto block cursor-pointer">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}>
+
+            <img src={teakLogo} alt="TEAK" className="h-10 md:h-12 mx-auto" />
+          </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="mt-4 text-foreground font-display text-lg tracking-normal">
+
+            Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
+          </motion.p>
+        </button>
       </header>
 
       {/* Main Content */}
@@ -1088,7 +1095,7 @@ const Index = () => {
                                     <img
                                       src={banubaSnapshots[rec.variantName]!}
                                       alt={`${rec.label} on your photo`}
-                                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                                      className="absolute inset-0 w-full h-full object-cover"
                                     />
                                   )}
                                 </>
@@ -1137,66 +1144,57 @@ const Index = () => {
                             />
                             {rec.variantName}
                           </a>
-                          {img?.productTitle && (
-                            <span className="font-display text-[12px] leading-[1.15] tracking-normal text-muted-foreground text-center">{img.productTitle}</span>
+                          {(img?.productTitle || img?.price) && (
+                            <span className="font-display text-[12px] leading-[1.15] tracking-normal text-muted-foreground text-center">
+                              {img?.productTitle}
+                              {img?.productTitle && img?.price && " · "}
+                              {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
+                            </span>
                           )}
-                          {img?.price && (
-                            <span className="font-sans font-medium text-[9px] text-foreground">${parseFloat(img.price).toFixed(2)}</span>
-                          )}
-                          <Button
-                            size="sm"
-                            className={`w-full mt-auto font-sans font-medium text-[9px] uppercase tracking-normal transition-all duration-300 rounded-none ${
-                              cartStates[rec.variantId] === "added"
-                                ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
-                                : cartStates[rec.variantId] === "error"
-                                ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
-                                : "bg-background text-foreground border-2 border-foreground hover:bg-foreground hover:text-background"
-                            }`}
-                            disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
-                            onClick={async (e) => {
-                              e.stopPropagation();
-                              setCartStates((prev) => ({ ...prev, [rec.variantId]: "adding" }));
-                              // Track intent immediately so funnel works even if parent cart write fails (e.g. incognito)
-                              trackEvent("add_to_cart", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
-                              try {
-                                const cartPromise = new Promise<boolean>((resolve) => {
-                                  const timeout = setTimeout(() => resolve(false), 5000);
-                                  const handler = (event: MessageEvent) => {
-                                    if (event.data?.type === "cart-add-response") {
-                                      clearTimeout(timeout);
-                                      window.removeEventListener("message", handler);
-                                      resolve(!!event.data.success);
-                                    }
-                                  };
-                                  window.addEventListener("message", handler);
+                          <div className="w-full mt-auto flex flex-wrap gap-2">
+                            <Button
+                              asChild
+                              size="sm"
+                              className="flex-1 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                            >
+                              <a
+                                href={productUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle, source: "view_in_store_button" })}
+                              >
+                                Shop Now
+                              </a>
+                            </Button>
+                            <Button
+                              size="sm"
+                              className="flex-1 gap-1 px-2 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                              onClick={() => {
+                                trackEvent("share_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
+                                void shareLook({
+                                  text: `What do you think of ${rec.label} on me?`,
+                                  url: productUrl,
+                                  imageUrl: banubaSnapshots[rec.variantName],
                                 });
-                                window.top?.postMessage({
-                                  type: "cart-add",
-                                  variantId: parseInt(rec.variantId),
-                                  quantity: 1,
-                                  quizSessionId: sessionId
-                                }, "*");
-                                const success = await cartPromise;
-                                if (!success) {
-                                  trackEvent("add_to_cart_failed", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, reason: "no_response_or_error" });
-                                }
-                                setCartStates((prev) => ({ ...prev, [rec.variantId]: success ? "added" : "error" }));
-                              } catch (err) {
-                                trackEvent("add_to_cart_failed", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, reason: "exception" });
-                                setCartStates((prev) => ({ ...prev, [rec.variantId]: "error" }));
-                              }
-                            }}
-                          >
-                            {cartStates[rec.variantId] === "adding" ? (
-                              <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
-                            ) : cartStates[rec.variantId] === "added" ? (
-                              <><Check className="w-2.5 h-2.5" /> Added</>
-                            ) : cartStates[rec.variantId] === "error" ? (
-                              <>Failed</>
-                            ) : (
-                              <>Add to Cart</>
-                            )}
-                          </Button>
+                              }}
+                            >
+                              <Share2 className="w-2.5 h-2.5" /> Get A Friend's Opinion
+                            </Button>
+                            <Button
+                              size="sm"
+                              aria-label={`Download ${rec.label} on your photo`}
+                              className="px-2 rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                              disabled={!banubaSnapshots[rec.variantName]}
+                              onClick={() => {
+                                const snap = banubaSnapshots[rec.variantName];
+                                if (!snap) return;
+                                trackEvent("download_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
+                                void downloadLook(snap, `teak-${rec.variantName.toLowerCase()}.jpg`);
+                              }}
+                            >
+                              <Download className="w-2.5 h-2.5" />
+                            </Button>
+                          </div>
                         </div>
                       );
                     })}
@@ -1211,8 +1209,6 @@ const Index = () => {
                       skinTone={skinTone}
                       lipTone={lipTone}
                       sessionId={sessionId}
-                      cartStates={cartStates}
-                      setCartStates={setCartStates}
                       trackEvent={trackEvent}
                     />
                   )}
