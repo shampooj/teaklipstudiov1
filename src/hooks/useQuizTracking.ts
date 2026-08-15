@@ -1,19 +1,18 @@
 import { useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import posthog from "posthog-js";
+import { captureAnalyticsEvent } from "@/lib/analytics";
 
+// In-memory only — no device storage is touched, which keeps the anonymous
+// first-party funnel events outside cookie-consent requirements. The quiz is a
+// single page, so losing the id on a full reload is acceptable.
+let sessionId: string | null = null;
 const getSessionId = (): string => {
-  const key = "quiz_session_id";
-  let id = sessionStorage.getItem(key);
-  if (!id) {
-    id = crypto.randomUUID();
-    sessionStorage.setItem(key, id);
-  }
-  return id;
+  if (!sessionId) sessionId = crypto.randomUUID();
+  return sessionId;
 };
 
 export const useQuizTracking = () => {
-  const sessionId = useRef(getSessionId());
+  const sessionIdRef = useRef(getSessionId());
   const firedEvents = useRef(new Set<string>());
 
   const trackEvent = useCallback(
@@ -21,12 +20,12 @@ export const useQuizTracking = () => {
       if (dedupe && firedEvents.current.has(eventName)) return;
       if (dedupe) firedEvents.current.add(eventName);
 
-      posthog.capture(eventName, { ...eventData, quiz_session_id: sessionId.current });
+      captureAnalyticsEvent(eventName, { ...eventData, quiz_session_id: sessionIdRef.current });
 
       supabase
         .from("quiz_events" as any)
         .insert({
-          session_id: sessionId.current,
+          session_id: sessionIdRef.current,
           event_name: eventName,
           event_data: eventData,
         } as any)
@@ -37,5 +36,5 @@ export const useQuizTracking = () => {
     []
   );
 
-  return { trackEvent, sessionId: sessionId.current };
+  return { trackEvent, sessionId: sessionIdRef.current };
 };

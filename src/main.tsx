@@ -1,11 +1,10 @@
 import { createRoot } from "react-dom/client";
-import posthog from "posthog-js";
 import App from "./App.tsx";
 import "./index.css";
+import { initAnalyticsFromStoredConsent } from "@/lib/analytics";
 
-posthog.init("phc_mXFsYGtX6hXPU7BNbdufBiapYPh2BCQQDSw3bKNtzpce", {
-  api_host: "https://us.i.posthog.com",
-  person_profiles: "identified_only",
-});
+// PostHog starts only for visitors who already allowed analytics; first-time
+// visitors decide via the consent banner.
+initAnalyticsFromStoredConsent();
 
 createRoot(document.getElementById("root")!).render(<App />);
