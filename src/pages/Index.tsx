@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
-import BanubaProductPreview from "@/components/BanubaProductPreview";
+import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
+import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
@@ -501,7 +502,6 @@ const Index = () => {
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
-  const [banubaReady, setBanubaReady] = useState<Record<number, boolean>>({});
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -513,6 +513,16 @@ const Index = () => {
   const variantImages = useVariantImages(recVariantIds);
   const { data: shadeSettings } = useShadeSettings(recVariantNames, skinTone, lipTone);
   const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
+
+  const shadeSpecs = useMemo<ShadeSnapshotSpec[]>(
+    () =>
+      recommendations.flatMap((rec) => {
+        const s = shadeSettings?.[rec.variantName];
+        return s ? [{ key: rec.variantName, hex: s.hex, finish: s.finish, opacity: s.opacity }] : [];
+      }),
+    [recommendations, shadeSettings],
+  );
+  const banubaSnapshots = useBanubaSnapshots(state === "uploaded" ? originalImage : null, shadeSpecs);
 
   // Track quiz_started once on mount
   useEffect(() => {
@@ -1072,18 +1082,15 @@ const Index = () => {
                                   <img
                                     src={userFace!}
                                     alt="Your photo"
-                                    className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${banubaReady[i] ? 'opacity-100' : 'opacity-0'}`}
+                                    className="absolute inset-0 w-full h-full object-cover"
                                   />
-                                  <div className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0">
-                                    <BanubaProductPreview
-                                      imageUrl={userFace!}
-                                      hex={setting!.hex}
-                                      finish={setting!.finish}
-                                      opacity={setting!.opacity}
+                                  {banubaSnapshots[rec.variantName] && (
+                                    <img
+                                      src={banubaSnapshots[rec.variantName]!}
                                       alt={`${rec.label} on your photo`}
-                                      onReady={() => setBanubaReady((prev) => ({ ...prev, [i]: true }))}
+                                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
                                     />
-                                  </div>
+                                  )}
                                 </>
                               ) : img?.imageUrl ? (
                                 <>

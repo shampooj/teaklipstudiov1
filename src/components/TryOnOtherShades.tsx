@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useVariantImages } from "@/hooks/useVariantImages";
-import BanubaProductPreview from "@/components/BanubaProductPreview";
+import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
+import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 
 interface Props {
   userFace: string;
@@ -57,6 +58,16 @@ const TryOnOtherShades = ({
   const activeName = selected ?? availableShades[0]?.name ?? null;
   const active = availableShades.find((s) => s.name === activeName);
   const activeImg = active ? variantImages[active.variantId] : null;
+
+  const activeSpecs = useMemo<ShadeSnapshotSpec[]>(
+    () =>
+      active
+        ? [{ key: active.name, hex: active.setting.hex, finish: active.setting.finish, opacity: active.setting.opacity }]
+        : [],
+    [active],
+  );
+  const snapshots = useBanubaSnapshots(userFace, activeSpecs);
+  const activeSnapshot = active ? snapshots[active.name] : undefined;
   const productUrl = active && activeImg?.productHandle
     ? `https://nupoora-784.myshopify.com/products/${activeImg.productHandle}?variant=${active.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}`
     : "#";
@@ -106,18 +117,11 @@ const TryOnOtherShades = ({
       </label>
 
       <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative mx-auto max-w-sm">
-        {active ? (
-          <BanubaProductPreview
-            key={active.name}
-            imageUrl={userFace}
-            hex={active.setting.hex}
-            finish={active.setting.finish}
-            opacity={active.setting.opacity}
-            alt={`${active.label} on your photo`}
-          />
-        ) : (
-          <img src={userFace} alt="Your photo" className="w-full h-full object-cover" />
-        )}
+        <img
+          src={active ? activeSnapshot ?? userFace : userFace}
+          alt={active ? `${active.label} on your photo` : "Your photo"}
+          className="w-full h-full object-cover"
+        />
       </div>
 
       {active && (
