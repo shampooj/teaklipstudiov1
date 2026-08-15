@@ -97,7 +97,7 @@ const TryOnOtherShades = ({
           >
             {active.name}
           </a>
-          <span className="font-display text-[12px] leading-[13px] text-muted-foreground text-center">
+          <span className="font-display text-[12px] leading-[13px] text-foreground text-center">
             {active.formula}
             {activeImg?.price && ` · $${parseFloat(activeImg.price).toFixed(2)}`}
           </span>

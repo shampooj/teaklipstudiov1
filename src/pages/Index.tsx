@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useRecommendations } from "@/hooks/useRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
@@ -507,9 +506,7 @@ const Index = () => {
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
-  const [biometricOpen, setBiometricOpen] = useState(false);
-  const biometricAgreedRef = useRef(false);
-  const pendingFileRef = useRef<File | null>(null);
+  const [biometricChecked, setBiometricChecked] = useState(false);
 
   const { trackEvent, sessionId } = useQuizTracking();
 
@@ -540,20 +537,9 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, [state]);
 
-  const applyFile = useCallback((file: File) => {
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      const base64 = e.target?.result as string;
-      setOriginalImage(base64);
-      setState("idle");
-      trackEvent("selfie_uploaded", {}, true);
-    };
-    reader.readAsDataURL(file);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [trackEvent]);
-
-  // Selfies pass through the biometric notice once per visit before any
-  // face processing; stock avatars carry no user biometrics and skip it.
+  // Selfies require the biometric consent checkbox before results (face
+  // mapping only runs on the results screen); stock avatars skip the review
+  // page entirely and carry no user biometrics.
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
@@ -563,27 +549,17 @@ const Index = () => {
       toast.error("Image must be under 15MB");
       return;
     }
-    if (biometricAgreedRef.current) {
-      applyFile(file);
-      return;
-    }
-    pendingFileRef.current = file;
-    setBiometricOpen(true);
-  }, [applyFile]);
-
-  const agreeBiometric = useCallback(() => {
-    biometricAgreedRef.current = true;
-    setBiometricOpen(false);
-    const file = pendingFileRef.current;
-    pendingFileRef.current = null;
-    if (file) applyFile(file);
-  }, [applyFile]);
-
-  const declineBiometric = useCallback(() => {
-    setBiometricOpen(false);
-    pendingFileRef.current = null;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const base64 = e.target?.result as string;
+      setOriginalImage(base64);
+      setBiometricChecked(false);
+      setState("idle");
+      trackEvent("selfie_uploaded", {}, true);
+    };
+    reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, []);
+  }, [trackEvent]);
 
 
 
@@ -613,6 +589,7 @@ const Index = () => {
     setSelectedRecIndex(0);
     setConsentChecked(false);
     setNoStoreChecked(false);
+    setBiometricChecked(false);
     setUserEmail("");
     setEmailError(false);
     setDiscountCode(null);
@@ -741,15 +718,6 @@ const Index = () => {
                   <p className="font-display text-[12px] leading-[13px] text-foreground mt-3">
                     (Lip shape doesn't matter here.)
                   </p>
-                  <div className="mt-6 flex gap-3 justify-center">
-                    <Button
-                    onClick={() => setState("skin-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
-                      Back
-                    </Button>
-                  </div>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {LIP_TONE_ROWS.map((tone) =>
                   <button
@@ -766,6 +734,15 @@ const Index = () => {
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
                       </button>
                   )}
+                  </div>
+                  <div className="mt-8 flex gap-3 justify-center">
+                    <Button
+                    onClick={() => setState("skin-tone")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                      Back
+                    </Button>
                   </div>
                 </div>
               </motion.div>
@@ -845,11 +822,18 @@ const Index = () => {
                     alt="Your selfie"
                     className="w-full h-full object-cover" />
                 </div>
-                <button
-                  onClick={() => {setOriginalImage(null);}}
-                  className="mt-3 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
-                  Retake
-                </button>
+                <div className="mt-3 flex items-center justify-center gap-4">
+                  <button
+                    onClick={() => {setOriginalImage(null); setBiometricChecked(false);}}
+                    className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                    Retake
+                  </button>
+                  <button
+                    onClick={() => {setOriginalImage(null); setBiometricChecked(false);}}
+                    className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                    Use A Model Instead
+                  </button>
+                </div>
               </div>
               }
 
@@ -857,7 +841,26 @@ const Index = () => {
                   <div className="mt-6 max-w-md mx-auto">
 
                   <div className="border border-foreground p-5">
-                    <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground mb-4">
+                    <label htmlFor="biometric-consent" className="flex items-start gap-4 cursor-pointer select-none">
+                      <Checkbox
+                        id="biometric-consent"
+                        checked={biometricChecked}
+                        onCheckedChange={(checked) => setBiometricChecked(checked === true)}
+                        className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
+                      <span className="block">
+                        <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
+                          Let's use my photo
+                        </span>
+                        <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
+                          I understand my photo will be scanned for facial features (like lip outline) on my device to create the lipstick previews, and that nothing is automatically saved or sent.{" "}
+                          <button type="button" onClick={(e) => { e.preventDefault(); setLearnMoreOpen(true); }} className="underline">
+                            Learn More
+                          </button>
+                        </span>
+                      </span>
+                    </label>
+
+                    <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground mb-4 mt-6 pt-6 border-t border-foreground/20">
                       Optional
                     </p>
                     <div className="select-none">
@@ -872,21 +875,13 @@ const Index = () => {
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
                           <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                            Get 10% Off
+                            I want 10% off, too
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
-                            Save my photo, my quiz selections, and my email so Teak can create better colors and tools for brown skin. I agree that Teak may use AI (Google Gemini) to analyze the skin and lip tone in my photo — information that can relate to my ethnicity. I can withdraw and have my data deleted anytime.
+                            I agree to have Teak save my photo, quiz selections, and email to help them create better colors and tools for brown skin. I agree that they may use AI services to analyze my complexion that could suggest ethnicity. I understand that I can request to delete my data anytime.
                           </span>
                         </span>
                       </label>
-                      <div className="mt-3 ml-8 flex items-center gap-3">
-                        <button type="button" onClick={() => setLearnMoreOpen(true)} className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
-                          Learn More
-                        </button>
-                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
-                          Privacy Policy
-                        </a>
-                      </div>
                       <div className="mt-5 ml-8">
                         <input
                           id="user-email"
@@ -897,13 +892,21 @@ const Index = () => {
                           className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[9px] tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
+                      <div className="mt-6 flex items-center gap-3">
+                        <button type="button" onClick={() => setLearnMoreOpen(true)} className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Learn More
+                        </button>
+                        <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                          Privacy Policy
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Bottom action bar */}
-              <div className="mt-8 flex items-center justify-between max-w-md mx-auto w-full">
+              <div className={`mt-8 flex items-center ${originalImage ? "justify-between" : "justify-center"} max-w-md mx-auto w-full`}>
                 <Button
                   onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
                   size="lg"
@@ -1040,6 +1043,7 @@ const Index = () => {
                   }}
                   size="lg"
                   variant="outline"
+                  disabled={!biometricChecked}
                   className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
                   Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
@@ -1071,7 +1075,7 @@ const Index = () => {
                     className="text-foreground font-display text-[18px] leading-[18px]"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                    Analyzing your complexion…
+                    Gathering our lipstick recommendations for you…
                   </motion.p>
                   <p className="text-muted-foreground font-sans font-medium text-[9px] uppercase tracking-normal">
                     This won't take long
@@ -1112,7 +1116,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-3 w-full bg-[hsl(50_12%_90%)]"
+                          className="group relative flex flex-col items-center gap-2 p-3 w-full border border-foreground"
                         >
                           <span className="font-display text-[18px] leading-[18px] text-foreground text-center">
                             {rec.categoryLabel}
@@ -1180,7 +1184,7 @@ const Index = () => {
                             {rec.variantName}
                           </a>
                           {(img?.productTitle || img?.price) && (
-                            <span className="font-display text-[12px] leading-[13px] tracking-normal text-muted-foreground text-center">
+                            <span className="font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
                               {img?.productTitle}
                               {img?.productTitle && img?.price && " · "}
                               {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
@@ -1290,44 +1294,6 @@ const Index = () => {
       </main>
 
       <LearnMoreDialog open={learnMoreOpen} onOpenChange={setLearnMoreOpen} />
-
-      <Dialog open={biometricOpen} onOpenChange={(o) => { if (!o) declineBiometric(); }}>
-        <DialogContent className="max-w-md rounded-none sm:rounded-none border border-foreground bg-background">
-          <DialogHeader>
-            <DialogTitle className="font-display font-normal text-[18px] leading-[18px] text-left tracking-normal">
-              Your face stays on your device
-            </DialogTitle>
-          </DialogHeader>
-          <p className="font-display text-[12px] leading-[15px] text-foreground">
-            To show lipstick on your photo, our try-on maps facial features — like the outline
-            of your lips — directly in your browser. This face map is used only to draw the
-            preview, is discarded immediately, and never leaves your device. Your photo isn't
-            stored or sent anywhere unless you separately choose to share it with Teak later.
-          </p>
-          <p className="font-display text-[12px] leading-[15px] text-foreground">
-            By continuing, you agree to this on-device face mapping.{" "}
-            <button type="button" onClick={() => setLearnMoreOpen(true)} className="underline">
-              Learn More
-            </button>
-          </p>
-          <div className="flex flex-col sm:flex-row gap-2 pt-2">
-            <Button
-              size="sm"
-              className="flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
-              onClick={agreeBiometric}
-            >
-              I Agree — Try It On
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
-              onClick={declineBiometric}
-            >
-              Use A Model Instead
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>);
 
 };
