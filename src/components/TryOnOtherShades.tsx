@@ -3,6 +3,7 @@ import { Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
+import teakLogo from "@/assets/teak-logo.png";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useVariantImages } from "@/hooks/useVariantImages";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
@@ -126,6 +127,7 @@ const TryOnOtherShades = ({
                   text: `What do you think of ${active.label} on me?`,
                   url: productUrl,
                   imageUrl: activeSnapshot,
+                  brand: { logoUrl: teakLogo, shadeName: active.name, productTitle: active.formula },
                 });
               }}
             >
@@ -139,7 +141,11 @@ const TryOnOtherShades = ({
               onClick={() => {
                 if (!activeSnapshot) return;
                 trackEvent("download_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades" });
-                void downloadLook(activeSnapshot, `teak-${active.name.toLowerCase()}.jpg`);
+                void downloadLook({
+                  imageUrl: activeSnapshot,
+                  filename: `teak-${active.name.toLowerCase()}.jpg`,
+                  brand: { logoUrl: teakLogo, shadeName: active.name, productTitle: active.formula },
+                });
               }}
             >
               <Download className="w-2.5 h-2.5" />

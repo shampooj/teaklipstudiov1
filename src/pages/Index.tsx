@@ -1061,6 +1061,11 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
               
                 <div className="w-full max-w-lg flex flex-col gap-5">
+                   {getComplexionType(skinTone, lipTone) !== null && (
+                     <h1 className="font-display text-2xl md:text-[28px] md:leading-[29px] text-foreground text-center">
+                       You are Complexion {getComplexionType(skinTone, lipTone)}
+                     </h1>
+                   )}
                    <label className="font-display text-lg text-foreground text-center">
                      The Best Shades For Your Complexion
                    </label>
@@ -1175,6 +1180,7 @@ const Index = () => {
                                   text: `What do you think of ${rec.label} on me?`,
                                   url: productUrl,
                                   imageUrl: banubaSnapshots[rec.variantName],
+                                  brand: { logoUrl: teakLogo, shadeName: rec.variantName, productTitle: img?.productTitle ?? rec.label },
                                 });
                               }}
                             >
@@ -1189,7 +1195,11 @@ const Index = () => {
                                 const snap = banubaSnapshots[rec.variantName];
                                 if (!snap) return;
                                 trackEvent("download_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
-                                void downloadLook(snap, `teak-${rec.variantName.toLowerCase()}.jpg`);
+                                void downloadLook({
+                                  imageUrl: snap,
+                                  filename: `teak-${rec.variantName.toLowerCase()}.jpg`,
+                                  brand: { logoUrl: teakLogo, shadeName: rec.variantName, productTitle: img?.productTitle ?? rec.label },
+                                });
                               }}
                             >
                               <Download className="w-2.5 h-2.5" />
