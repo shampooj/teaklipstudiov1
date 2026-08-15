@@ -1067,10 +1067,10 @@ const Index = () => {
                      </h1>
                    )}
                    <label className="font-display text-[18px] leading-[18px] text-foreground text-center">
-                     The Best Shades For Your Complexion
+                     The Founders' Top Recs for This Complexion
                    </label>
                   {recommendations.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 px-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {recommendations.map((rec, i) => {
                       const img = variantImages[rec.variantId];
                       const isSelected = selectedRecIndex === i;
@@ -1082,7 +1082,7 @@ const Index = () => {
                       return (
                         <div
                           key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-2 rounded-lg w-full"
+                          className="group relative flex flex-col items-center gap-2 p-3 w-full bg-[hsl(50_12%_90%)]"
                         >
                           <span className="font-display text-[18px] leading-[18px] text-foreground text-center">
                             {rec.categoryLabel}
