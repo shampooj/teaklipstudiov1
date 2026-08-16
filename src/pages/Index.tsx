@@ -13,7 +13,8 @@ import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
-import { useRecommendations } from "@/hooks/useRecommendations";
+import { useRecommendations, useRecommendationRows } from "@/hooks/useRecommendations";
+import { useImagesPreloaded } from "@/hooks/useImagesPreloaded";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
@@ -507,6 +508,7 @@ const Index = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
+  const [analysisDone, setAnalysisDone] = useState(false);
 
   const { trackEvent, sessionId } = useQuizTracking();
 
@@ -525,7 +527,49 @@ const Index = () => {
       }),
     [recommendations, shadeSettings],
   );
-  const banubaSnapshots = useBanubaSnapshots(state === "uploaded" ? originalImage : null, shadeSpecs);
+  // Snapshots start rendering during the "Gathering…" screen so the results
+  // page can appear with every card image already in place.
+  const banubaSnapshots = useBanubaSnapshots(
+    state === "analyzing" || state === "uploaded" ? originalImage : null,
+    shadeSpecs,
+  );
+
+  const { isLoading: recsLoading } = useRecommendationRows();
+  const fallbackImageUrls = useMemo(
+    () =>
+      recommendations
+        .filter((r) => !shadeSettings?.[r.variantName])
+        .map((r) => variantImages[r.variantId]?.imageUrl)
+        .filter((u): u is string => !!u)
+        .map((u) => shopifyImg(u, 400)),
+    [recommendations, shadeSettings, variantImages],
+  );
+  const fallbackImagesReady = useImagesPreloaded(fallbackImageUrls);
+  const resultsReady =
+    !recsLoading &&
+    (recommendations.length === 0 ||
+      (shadeSettings !== undefined &&
+        shadeSpecs.every((s) => banubaSnapshots[s.key] !== undefined) &&
+        recommendations.every(
+          (r) => shadeSettings[r.variantName] || variantImages[r.variantId] !== undefined,
+        ) &&
+        fallbackImagesReady));
+
+  // Hold the "Gathering…" screen until every card image is settled, with a
+  // safety cap so a stuck loader can't trap the user there.
+  useEffect(() => {
+    if (state !== "analyzing" || !analysisDone) return;
+    if (resultsReady) {
+      setState("uploaded");
+      setAnalysisDone(false);
+      return;
+    }
+    const t = window.setTimeout(() => {
+      setState("uploaded");
+      setAnalysisDone(false);
+    }, 30_000);
+    return () => window.clearTimeout(t);
+  }, [state, analysisDone, resultsReady]);
 
   // Track quiz_started once on mount
   useEffect(() => {
@@ -590,6 +634,7 @@ const Index = () => {
     setConsentChecked(false);
     setNoStoreChecked(false);
     setBiometricChecked(false);
+    setAnalysisDone(false);
     setUserEmail("");
     setEmailError(false);
     setDiscountCode(null);
@@ -794,7 +839,8 @@ const Index = () => {
                         onClick={() => {
                           setOriginalImage(avatar.url);
                           trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
-                          setState("uploaded");
+                          setState("analyzing");
+                          setAnalysisDone(true);
                         }}
                         className="group relative aspect-[4/5] overflow-hidden"
                       >
@@ -1039,7 +1085,7 @@ const Index = () => {
                     }
 
                     trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone) });
-                    setState("uploaded");
+                    setAnalysisDone(true);
                   }}
                   size="lg"
                   variant="outline"
