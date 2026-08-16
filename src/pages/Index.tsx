@@ -672,9 +672,9 @@ const Index = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-center mb-8">
-              <p className="font-display text-[18px] leading-[18px] text-foreground">
-                Get personalized shade recommendations and see how our lipsticks might look on you
+              className="text-center mb-3">
+              <p className="font-display text-[12px] leading-[13px] text-foreground">
+                Just three questions. Get shade recs and virtually try them on.
               </p>
             </motion.div>
           )}
