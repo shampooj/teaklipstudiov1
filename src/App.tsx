@@ -9,6 +9,7 @@ import ShadePreview from "./pages/ShadePreview";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AnalyticsConsentBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
