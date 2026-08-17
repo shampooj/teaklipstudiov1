@@ -26,7 +26,10 @@ export function requestCartAdd(variantId: string, quizSessionId: string): Promis
       }
     };
     window.addEventListener("message", handler);
-    window.top?.postMessage(
+    // Post to the immediate parent, not window.top: inside Shopify's theme
+    // customizer the storefront page (which holds the cart listener) is itself
+    // framed by the editor, so top would skip right past it.
+    window.parent?.postMessage(
       { type: "cart-add", variantId: parseInt(variantId), quantity: 1, quizSessionId },
       "*",
     );
