@@ -799,7 +799,7 @@ const Index = () => {
                     onClick={() => setState("skin-tone")}
                     size="lg"
                     variant="outline"
-                    className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                    className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
                       Back
                     </Button>
                   </div>
@@ -971,7 +971,7 @@ const Index = () => {
                   onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
                   size="lg"
                   variant="outline"
-                  className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                  className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
                   Back
                 </Button>
 
@@ -1104,7 +1104,7 @@ const Index = () => {
                   size="lg"
                   variant="outline"
                   disabled={!biometricChecked}
-                  className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                  className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
                   Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
                 )}
@@ -1250,11 +1250,11 @@ const Index = () => {
                               {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
                             </span>
                           )}
-                          <div className="w-full mt-auto flex flex-col gap-2">
+                          <div className="w-full mt-auto flex flex-wrap gap-2">
                           {embedded && (
                             <Button
                               size="sm"
-                              className={`w-full font-sans font-medium text-[9px] uppercase tracking-normal rounded-none transition-all duration-300 ${
+                              className={`h-7 flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
                                 cartStates[rec.variantId] === "added"
                                   ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                                   : cartStates[rec.variantId] === "error"
@@ -1275,11 +1275,10 @@ const Index = () => {
                               )}
                             </Button>
                           )}
-                          <div className="w-full flex flex-wrap gap-2">
                             <Button
                               asChild
                               size="sm"
-                              className="flex-1 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                              className="h-7 flex-1 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
                             >
                               <a
                                 href={productUrl}
@@ -1287,12 +1286,13 @@ const Index = () => {
                                 rel="noopener noreferrer"
                                 onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle, source: "view_in_store_button" })}
                               >
-                                Shop Now
+                                View
                               </a>
                             </Button>
                             <Button
                               size="sm"
-                              className="flex-1 gap-1 px-2 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                              aria-label={`Share ${rec.label}`}
+                              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
                               onClick={() => {
                                 trackEvent("share_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
                                 void shareLook({
@@ -1303,12 +1303,12 @@ const Index = () => {
                                 });
                               }}
                             >
-                              <Share2 className="w-2.5 h-2.5" /> Get A Friend's Opinion
+                              <Share2 className="w-2.5 h-2.5" />
                             </Button>
                             <Button
                               size="sm"
                               aria-label={`Download ${rec.label} on your photo`}
-                              className="px-2 rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+                              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
                               disabled={!banubaSnapshots[rec.variantName]}
                               onClick={() => {
                                 const snap = banubaSnapshots[rec.variantName];
@@ -1323,7 +1323,6 @@ const Index = () => {
                             >
                               <Download className="w-2.5 h-2.5" />
                             </Button>
-                          </div>
                           </div>
                         </div>
                       );
@@ -1371,7 +1370,7 @@ const Index = () => {
                   )}
 
                   <div className="flex gap-3 justify-center pt-2">
-                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans font-medium text-[9px] uppercase tracking-normal gap-2 rounded-none border-foreground hover:bg-foreground hover:text-background">
+                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
                       Back
                     </Button>
                   </div>

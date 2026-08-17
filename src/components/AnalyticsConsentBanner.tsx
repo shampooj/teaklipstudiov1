@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getAnalyticsConsent, setAnalyticsConsent } from "@/lib/analytics";
 
 const buttonClass =
-  "font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background";
+  "font-sans font-medium text-[9px] uppercase tracking-normal h-7 rounded-full px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background";
 
 const AnalyticsConsentBanner = () => {
   const [visible, setVisible] = useState(() => getAnalyticsConsent() === null);

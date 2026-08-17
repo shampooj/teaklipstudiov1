@@ -111,7 +111,7 @@ const TryOnOtherShades = ({
             {embedded && (
               <Button
                 size="sm"
-                className={`font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 transition-all duration-300 ${
+                className={`font-sans font-medium text-[9px] uppercase tracking-normal h-7 rounded-full px-5 transition-all duration-300 ${
                   cartStates[active.variantId] === "added"
                     ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                     : cartStates[active.variantId] === "error"
@@ -135,7 +135,7 @@ const TryOnOtherShades = ({
             <Button
               asChild
               size="sm"
-              className="font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+              className="font-sans font-medium text-[9px] uppercase tracking-normal h-7 rounded-full px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
             >
               <a
                 href={productUrl}
@@ -143,12 +143,13 @@ const TryOnOtherShades = ({
                 rel="noopener noreferrer"
                 onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades_store_button", product_handle: activeImg?.productHandle })}
               >
-                Shop Now
+                View
               </a>
             </Button>
             <Button
               size="sm"
-              className="gap-1.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+              aria-label={`Share ${active.label}`}
+              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
               onClick={() => {
                 trackEvent("share_clicked", { variant_id: active.variantId, variant_name: active.name, source: "try_on_other_shades" });
                 void shareLook({
@@ -159,12 +160,12 @@ const TryOnOtherShades = ({
                 });
               }}
             >
-              <Share2 className="w-2.5 h-2.5" /> Get A Friend's Opinion
+              <Share2 className="w-2.5 h-2.5" />
             </Button>
             <Button
               size="sm"
               aria-label={`Download ${active.label} on your photo`}
-              className="px-2 rounded-none bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
               disabled={!activeSnapshot}
               onClick={() => {
                 if (!activeSnapshot) return;
