@@ -222,8 +222,7 @@ const TryOnOtherShades = ({
               className="truncate"
               onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "unified_try_on", product_handle: activeImg?.productHandle })}
             >
-              {activeImg?.productTitle ?? active.formula}
-              {activeImg?.price && ` · $${parseFloat(activeImg.price).toFixed(2)}`}
+              View Product
             </a>
           </Button>
           <Button
