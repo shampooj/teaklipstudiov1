@@ -598,7 +598,10 @@ const Index = () => {
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
       setOriginalImage(base64);
+      // Every new photo starts with fresh, unchecked consents
       setBiometricChecked(false);
+      setConsentChecked(false);
+      setNoStoreChecked(false);
       setState("idle");
       trackEvent("selfie_uploaded", {}, true);
     };
@@ -661,8 +664,8 @@ const Index = () => {
                 <h1 className="font-display text-[28px] leading-[29px] text-foreground">
                   The Virtual Lip Studio
                 </h1>
-                <p className="mt-4 font-display text-[12px] leading-[15px] text-foreground max-w-md mx-auto">
-                  Discover which Teak lip colors complement your unique brown skin and lip tone and see how they might look on you using our custom built Virtual Try On service. Just 3 questions.
+                <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
+                  In just 3 questions, discover our top lip color recs for your unique brown skin tone and lip tone. Use our Virtual Try On, custom built for brown skin, to see how they might look on.
                 </p>
               </div>
               <div className="w-full max-w-lg grid grid-cols-3">
@@ -774,7 +777,7 @@ const Index = () => {
                     What is your current natural lip tone?
                   </p>
                   <p className="font-display text-[12px] leading-[15px] text-foreground mt-3 max-w-md mx-auto">
-                    (Tips: Turn your phone brightness all the way up. Feel free to ignore lip shape; we just want to know your lip tone!)
+                    (Tip: Turn your device brightness up. Feel free to ignore lip shape and focus on the natural colors in your lip skin.)
                   </p>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {LIP_TONE_ROWS.map((tone) =>
@@ -833,17 +836,14 @@ const Index = () => {
                         accept="image/*"
                         className="hidden"
                         onChange={handleInputChange} />
-                      <div className="m-auto flex flex-col items-center gap-3 px-3">
+                      <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
                             Myself!
                           </p>
-                          <p className="mt-1 font-display text-[12px] leading-[13px] text-foreground">
-                            Upload a selfie
-                          </p>
-                          <p className="mt-1 text-muted-foreground font-sans text-[9px] uppercase">
-                            Drag & drop or click
+                          <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                            Upload a selfie, preferably in front of a window
                           </p>
                         </div>
                       </div>
@@ -911,13 +911,10 @@ const Index = () => {
                         className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                       <span className="block">
                         <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                          Let's use my photo
+                          Great, let's use this pic!
                         </span>
                         <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
-                          I understand my photo will be scanned for facial features (like lip outline) on my device to create the lipstick previews, and that nothing is automatically saved or sent.{" "}
-                          <button type="button" onClick={(e) => { e.preventDefault(); setLearnMoreOpen(true); }} className="underline">
-                            Learn More
-                          </button>
+                          I understand my photo will be scanned for facial features (like lip outline) on my device to create the lipstick previews.
                         </span>
                       </span>
                     </label>
@@ -937,24 +934,29 @@ const Index = () => {
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
                           <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                            I want 10% off, too
+                            Teak can save my pic for brown skin research
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
-                            I agree to have Teak save my photo, quiz selections, and email to help them create better colors and tools for brown skin. I agree that they may use AI services to analyze my complexion that could suggest ethnicity. I understand that I can request to delete my data anytime.
+                            Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity).
                           </span>
                         </span>
                       </label>
-                      <div className="mt-5 ml-8">
+                      <div className="mt-5 ml-8 relative">
                         <input
                           id="user-email"
                           type="email"
-                          placeholder="Enter email to receive discount code"
+                          aria-label="Enter email to receive a 10% discount code in return"
                           value={userEmail}
                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[9px] tracking-normal placeholder:text-foreground/30 focus:outline-none transition-colors`} />
+                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
+                        {!userEmail && (
+                          <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
+                            Enter email to receive a <span className="text-green-700">10% discount code</span> in return
+                          </span>
+                        )}
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
-                      <div className="mt-6 flex items-center gap-3">
+                      <div className="mt-6 flex items-center justify-end gap-3">
                         <button type="button" onClick={() => setLearnMoreOpen(true)} className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
                           Learn More
                         </button>

@@ -19,8 +19,7 @@ const AnalyticsConsentBanner = () => {
     <div className="fixed bottom-0 inset-x-0 z-50 bg-card border-t border-foreground px-4 py-3">
       <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
         <p className="font-display text-[12px] leading-[13px] text-foreground flex-1">
-          Teak uses an analytics cookie to understand how the Lip Studio is used — never your
-          photos or quiz answers.
+          Teak uses an analytics cookie to understand how the Lip Studio is used.
         </p>
         <div className="flex gap-2 shrink-0">
           <Button size="sm" className={buttonClass} onClick={() => choose(true)}>
