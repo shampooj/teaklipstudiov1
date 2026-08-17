@@ -1,6 +1,4 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
-import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
-import { shopifyImg } from "@/lib/shopifyImg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Copy, Share2 } from "lucide-react";
@@ -15,7 +13,6 @@ import { shareLook, downloadLook } from "@/lib/shareLook";
 import { isEmbedded, requestCartAdd } from "@/lib/cartAdd";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { useRecommendations, useRecommendationRows } from "@/hooks/useRecommendations";
-import { useImagesPreloaded } from "@/hooks/useImagesPreloaded";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
@@ -115,7 +112,9 @@ const AVATAR_OPTIONS = [
   { id: "avatar-divya", url: stDivya },
 ] as const;
 
-type AppState = "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+type AppState = "landing" | "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+
+const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
 
 const SHIRT_OPTIONS = [
   { id: "Pure White", label: "Pure White", color: "#FFFFFF" },
@@ -493,13 +492,12 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 };
 
 const Index = () => {
-  const [state, setState] = useState<AppState>("skin-tone");
+  const [state, setState] = useState<AppState>("landing");
   const [skinTone, setSkinTone] = useState<string>("");
   const [lipTone, setLipTone] = useState<string>("");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
-  const [selectedRecIndex, setSelectedRecIndex] = useState<number>(0);
   const [consentChecked, setConsentChecked] = useState(false);
    const [noStoreChecked, setNoStoreChecked] = useState(false);
    
@@ -527,18 +525,21 @@ const Index = () => {
   }, [trackEvent, sessionId]);
 
   const recommendations = useRecommendations(skinTone, lipTone);
-  const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
-  const recVariantNames = useMemo(() => recommendations.map((r) => r.variantName), [recommendations]);
-  const variantImages = useVariantImages(recVariantIds);
-  const { data: shadeSettings } = useShadeSettings(recVariantNames, skinTone, lipTone);
-  const selectedRec = recommendations[selectedRecIndex] || recommendations[0];
+  // Same query key as the unified try-on card, so its data is warm at reveal.
+  const { data: shadeSettings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
 
   const shadeSpecs = useMemo<ShadeSnapshotSpec[]>(
-    () =>
-      recommendations.flatMap((rec) => {
-        const s = shadeSettings?.[rec.variantName];
-        return s ? [{ key: rec.variantName, hex: s.hex, finish: s.finish, opacity: s.opacity }] : [];
-      }),
+    () => {
+      if (!shadeSettings) return [];
+      // Must mirror the unified card's tuned-or-fallback settings exactly so
+      // these preloads are cache hits when the card renders.
+      return recommendations.map((rec) => {
+        const s = shadeSettings[rec.variantName];
+        if (s) return { key: rec.variantName, hex: s.hex, finish: s.finish, opacity: s.opacity };
+        const details = PRODUCT_DETAILS[rec.variantName];
+        return { key: rec.variantName, hex: details?.color ?? "#000000", finish: "satin", opacity: 0.8 };
+      });
+    },
     [recommendations, shadeSettings],
   );
   // Snapshots start rendering during the "Gathering…" screen so the results
@@ -549,25 +550,11 @@ const Index = () => {
   );
 
   const { isLoading: recsLoading } = useRecommendationRows();
-  const fallbackImageUrls = useMemo(
-    () =>
-      recommendations
-        .filter((r) => !shadeSettings?.[r.variantName])
-        .map((r) => variantImages[r.variantId]?.imageUrl)
-        .filter((u): u is string => !!u)
-        .map((u) => shopifyImg(u, 400)),
-    [recommendations, shadeSettings, variantImages],
-  );
-  const fallbackImagesReady = useImagesPreloaded(fallbackImageUrls);
   const resultsReady =
     !recsLoading &&
+    shadeSettings !== undefined &&
     (recommendations.length === 0 ||
-      (shadeSettings !== undefined &&
-        shadeSpecs.every((s) => banubaSnapshots[s.key] !== undefined) &&
-        recommendations.every(
-          (r) => shadeSettings[r.variantName] || variantImages[r.variantId] !== undefined,
-        ) &&
-        fallbackImagesReady));
+      shadeSpecs.every((s) => banubaSnapshots[s.key] !== undefined));
 
   // Hold the "Gathering…" screen until every card image is settled, with a
   // safety cap so a stuck loader can't trap the user there.
@@ -639,12 +626,11 @@ const Index = () => {
   );
 
   const reset = () => {
-    setState("skin-tone");
+    setState("landing");
     setSkinTone("");
     setLipTone("");
     setOriginalImage(null);
     setSelectedLook("classic-red");
-    setSelectedRecIndex(0);
     setConsentChecked(false);
     setNoStoreChecked(false);
     setBiometricChecked(false);
@@ -654,45 +640,46 @@ const Index = () => {
     setDiscountCode(null);
   };
 
-  const currentLookLabel = selectedRec?.label ?? LIPSTICK_LOOKS.find((l) => l.id === selectedLook)?.label ?? "";
 
   return (
     <div className="bg-background flex flex-col">
-      {/* Header */}
-      <header className="py-10 text-center">
-        <button type="button" onClick={reset} aria-label="Restart the quiz" className="mx-auto block cursor-pointer">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}>
-
-            <img src={teakLogo} alt="TEAK" className="h-10 md:h-12 mx-auto" />
-          </motion.div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="mt-4 text-foreground font-display text-[18px] leading-[18px] tracking-normal">
-
-            Virtual Lip Studio <sup className="font-sans font-medium text-[9px]">BETA</sup>
-          </motion.p>
-        </button>
-      </header>
-
       {/* Main Content */}
-      <main className="flex-1 flex items-start justify-center px-4 pb-16">
+      <main className="flex-1 flex items-start justify-center px-4 pt-10 pb-16">
         <div className="w-full max-w-2xl">
-          {state === "skin-tone" && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-center mb-3">
-              <p className="font-display text-[12px] leading-[13px] text-foreground">
-                Just three questions. Get shade recs and virtually try them on.
-              </p>
-            </motion.div>
-          )}
           <AnimatePresence mode="wait">
+            {/* Landing */}
+            {state === "landing" &&
+            <motion.div
+              key="landing"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8 text-center">
+
+              <div>
+                <h1 className="font-display text-[28px] leading-[29px] text-foreground">
+                  The Virtual Lip Studio
+                </h1>
+                <p className="mt-4 font-display text-[12px] leading-[15px] text-foreground max-w-md mx-auto">
+                  Discover which Teak lip colors complement your unique brown skin and lip tone and see how they might look on you using our custom built Virtual Try On service. Just 3 questions.
+                </p>
+              </div>
+              <div className="w-full max-w-lg grid grid-cols-3">
+                {[tanvi, nero, cynthia].map((src, i) => (
+                  <img key={i} src={src} alt="" className="w-full aspect-[3/4] object-cover" />
+                ))}
+              </div>
+              <Button
+                onClick={() => { trackEvent("take_quiz_clicked"); setState("skin-tone"); }}
+                size="lg"
+                variant="outline"
+                className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+                Let's Go <ArrowRight className="h-3 w-3" />
+              </Button>
+            </motion.div>
+            }
+
             {/* Step 1: Skin Tone */}
             {state === "skin-tone" &&
             <motion.div
@@ -751,6 +738,15 @@ const Index = () => {
                       );
                     })}
                   </div>
+                  <div className="mt-8 flex gap-3 justify-center">
+                    <Button
+                    onClick={() => setState("landing")}
+                    size="lg"
+                    variant="outline"
+                    className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+                      Back
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             }
@@ -771,11 +767,14 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
               
                 <div className="text-center w-full">
-                  <p className="font-display text-[28px] leading-[29px] text-foreground">
-                    Take a look in the mirror! What is your current natural lip tone?
+                  <p className="font-display text-[18px] leading-[18px] text-foreground">
+                    Take a look in the mirror!
                   </p>
-                  <p className="font-display text-[12px] leading-[13px] text-foreground mt-3">
-                    (Lip shape doesn't matter here.)
+                  <p className="mt-3 font-display text-[28px] leading-[29px] text-foreground">
+                    What is your current natural lip tone?
+                  </p>
+                  <p className="font-display text-[12px] leading-[15px] text-foreground mt-3 max-w-md mx-auto">
+                    (Tips: Turn your phone brightness all the way up. Feel free to ignore lip shape; we just want to know your lip tone!)
                   </p>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
                     {LIP_TONE_ROWS.map((tone) =>
@@ -838,6 +837,9 @@ const Index = () => {
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
+                            Myself!
+                          </p>
+                          <p className="mt-1 font-display text-[12px] leading-[13px] text-foreground">
                             Upload a selfie
                           </p>
                           <p className="mt-1 text-muted-foreground font-sans text-[9px] uppercase">
@@ -1155,183 +1157,6 @@ const Index = () => {
               className="flex flex-col items-center gap-8">
               
                 <div className="w-full max-w-lg flex flex-col gap-5">
-                   {getComplexionType(skinTone, lipTone) !== null && (
-                     <h1 className="font-display text-[28px] leading-[29px] text-foreground text-center">
-                       You are Complexion {getComplexionType(skinTone, lipTone)}
-                     </h1>
-                   )}
-                   <label className="font-display text-[18px] leading-[18px] text-foreground text-center">
-                     The Founders' Top Recs for This Complexion
-                   </label>
-                  {recommendations.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {recommendations.map((rec, i) => {
-                      const img = variantImages[rec.variantId];
-                      const isSelected = selectedRecIndex === i;
-                      const productUrl = img?.productHandle ? `https://nupoora-784.myshopify.com/products/${img.productHandle}?variant=${rec.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}` : "#";
-                      const skinImage = img ? getSkinToneImage(skinTone, img.metaImages) : null;
-                      const setting = shadeSettings?.[rec.variantName];
-                      const userFace = originalImage;
-                      const canRenderBanuba = Boolean(setting && userFace);
-                      return (
-                        <div
-                          key={`${rec.category}-${rec.variantName}`}
-                          className="group relative flex flex-col items-center gap-2 p-3 w-full border border-foreground"
-                        >
-                          <span className="font-display text-[18px] leading-[18px] text-foreground text-center">
-                            {rec.categoryLabel}
-                          </span>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="w-full" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
-                            <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative">
-                              {canRenderBanuba ? (
-                                <>
-                                  <img
-                                    src={userFace!}
-                                    alt="Your photo"
-                                    className="absolute inset-0 w-full h-full object-cover"
-                                  />
-                                  {banubaSnapshots[rec.variantName] && (
-                                    <img
-                                      src={banubaSnapshots[rec.variantName]!}
-                                      alt={`${rec.label} on your photo`}
-                                      className="absolute inset-0 w-full h-full object-cover"
-                                    />
-                                  )}
-                                </>
-                              ) : img?.imageUrl ? (
-                                <>
-                                  <img
-                                    src={shopifyImg(img.imageUrl, 400)}
-                                    srcSet={`${shopifyImg(img.imageUrl, 400)} 1x, ${shopifyImg(img.imageUrl, 800)} 2x`}
-                                    sizes="(max-width: 640px) 50vw, 240px"
-                                    alt={rec.label}
-                                    loading={i < 2 ? "eager" : "lazy"}
-                                    decoding="async"
-                                    width={400}
-                                    height={533}
-                                    className="w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-                                  />
-                                  {skinImage && (
-                                    <img
-                                      src={shopifyImg(skinImage.url, 400)}
-                                      srcSet={`${shopifyImg(skinImage.url, 400)} 1x, ${shopifyImg(skinImage.url, 800)} 2x`}
-                                      sizes="(max-width: 640px) 50vw, 240px"
-                                      alt={skinImage.altText || `${rec.label} on skin`}
-                                      loading="lazy"
-                                      decoding="async"
-                                      width={400}
-                                      height={533}
-                                      className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                                    />
-                                  )}
-                                </>
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center">
-                                  <span
-                                    className="w-10 h-10 rounded-full"
-                                    style={{ backgroundColor: rec.color }}
-                                  />
-                                </div>
-                              )}
-                            </div>
-                          </a>
-                          <a href={productUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 font-display text-[12px] leading-[13px] text-center hover:underline" onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle })}>
-                            <span
-                              className="w-3 h-3 rounded-full border border-foreground/20 shrink-0"
-                              style={{ backgroundColor: rec.color }}
-                              aria-hidden="true"
-                            />
-                            {rec.variantName}
-                          </a>
-                          {(img?.productTitle || img?.price) && (
-                            <span className="font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
-                              {img?.productTitle}
-                              {img?.productTitle && img?.price && " · "}
-                              {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
-                            </span>
-                          )}
-                          <div className="w-full mt-auto flex flex-wrap gap-2">
-                          {embedded && (
-                            <Button
-                              size="sm"
-                              className={`h-7 flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
-                                cartStates[rec.variantId] === "added"
-                                  ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
-                                  : cartStates[rec.variantId] === "error"
-                                  ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
-                                  : "bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground"
-                              }`}
-                              disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
-                              onClick={() => addToCart(rec.variantId, rec.variantName, rec.categoryLabel)}
-                            >
-                              {cartStates[rec.variantId] === "adding" ? (
-                                <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
-                              ) : cartStates[rec.variantId] === "added" ? (
-                                <><Check className="w-2.5 h-2.5" /> Added</>
-                              ) : cartStates[rec.variantId] === "error" ? (
-                                <>Failed</>
-                              ) : (
-                                <>Add to Cart</>
-                              )}
-                            </Button>
-                          )}
-                            <Button
-                              asChild
-                              size="sm"
-                              className="h-7 flex-1 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
-                            >
-                              <a
-                                href={productUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={() => trackEvent("product_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel, product_handle: img?.productHandle, source: "view_in_store_button" })}
-                              >
-                                View
-                              </a>
-                            </Button>
-                            <Button
-                              size="sm"
-                              aria-label={`Share ${rec.label}`}
-                              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
-                              onClick={() => {
-                                trackEvent("share_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
-                                void shareLook({
-                                  text: `What do you think of ${rec.label} on me?`,
-                                  url: productUrl,
-                                  imageUrl: banubaSnapshots[rec.variantName],
-                                  brand: { logoUrl: teakLogo, shadeName: rec.variantName, productTitle: img?.productTitle ?? rec.label },
-                                });
-                              }}
-                            >
-                              <Share2 className="w-2.5 h-2.5" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              aria-label={`Download ${rec.label} on your photo`}
-                              className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
-                              disabled={!banubaSnapshots[rec.variantName]}
-                              onClick={() => {
-                                const snap = banubaSnapshots[rec.variantName];
-                                if (!snap) return;
-                                trackEvent("download_clicked", { variant_id: rec.variantId, variant_name: rec.variantName, category: rec.categoryLabel });
-                                void downloadLook({
-                                  imageUrl: snap,
-                                  filename: `teak-${rec.variantName.toLowerCase()}.jpg`,
-                                  brand: { logoUrl: teakLogo, shadeName: rec.variantName, productTitle: img?.productTitle ?? rec.label },
-                                });
-                              }}
-                            >
-                              <Download className="w-2.5 h-2.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  ) : (
-                  <p className="text-muted-foreground text-center text-sm">No recommendations available for this combination.</p>
-                  )}
-
                   {originalImage && (
                     <TryOnOtherShades
                       userFace={originalImage!}
@@ -1342,6 +1167,8 @@ const Index = () => {
                       embedded={embedded}
                       cartStates={cartStates}
                       addToCart={addToCart}
+                      recommendations={recommendations}
+                      complexionType={getComplexionType(skinTone, lipTone)}
                     />
                   )}
 
