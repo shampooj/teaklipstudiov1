@@ -3,7 +3,7 @@ import { useVariantImages, getSkinToneImage } from "@/hooks/useVariantImages";
 import { shopifyImg } from "@/lib/shopifyImg";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
-import { Copy, Share2 } from "lucide-react";
+import { Check, Copy, Share2 } from "lucide-react";
 import { Upload, Download, RotateCcw, ArrowRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
+import { isEmbedded, requestCartAdd } from "@/lib/cartAdd";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { useRecommendations, useRecommendationRows } from "@/hooks/useRecommendations";
 import { useImagesPreloaded } from "@/hooks/useImagesPreloaded";
@@ -509,8 +510,21 @@ const Index = () => {
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
   const [analysisDone, setAnalysisDone] = useState(false);
+  const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
+  const embedded = useMemo(isEmbedded, []);
 
   const { trackEvent, sessionId } = useQuizTracking();
+
+  const addToCart = useCallback(async (variantId: string, variantName: string, source: string) => {
+    setCartStates((prev) => ({ ...prev, [variantId]: "adding" }));
+    // Track intent immediately so the funnel works even if the parent cart write fails
+    trackEvent("add_to_cart", { variant_id: variantId, variant_name: variantName, source });
+    const success = await requestCartAdd(variantId, sessionId);
+    if (!success) {
+      trackEvent("add_to_cart_failed", { variant_id: variantId, variant_name: variantName, source, reason: "no_response_or_error" });
+    }
+    setCartStates((prev) => ({ ...prev, [variantId]: success ? "added" : "error" }));
+  }, [trackEvent, sessionId]);
 
   const recommendations = useRecommendations(skinTone, lipTone);
   const recVariantIds = useMemo(() => recommendations.map((r) => r.variantId), [recommendations]);
@@ -1236,7 +1250,32 @@ const Index = () => {
                               {img?.price && `$${parseFloat(img.price).toFixed(2)}`}
                             </span>
                           )}
-                          <div className="w-full mt-auto flex flex-wrap gap-2">
+                          <div className="w-full mt-auto flex flex-col gap-2">
+                          {embedded && (
+                            <Button
+                              size="sm"
+                              className={`w-full font-sans font-medium text-[9px] uppercase tracking-normal rounded-none transition-all duration-300 ${
+                                cartStates[rec.variantId] === "added"
+                                  ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
+                                  : cartStates[rec.variantId] === "error"
+                                  ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
+                                  : "bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground"
+                              }`}
+                              disabled={cartStates[rec.variantId] === "adding" || cartStates[rec.variantId] === "added"}
+                              onClick={() => addToCart(rec.variantId, rec.variantName, rec.categoryLabel)}
+                            >
+                              {cartStates[rec.variantId] === "adding" ? (
+                                <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
+                              ) : cartStates[rec.variantId] === "added" ? (
+                                <><Check className="w-2.5 h-2.5" /> Added</>
+                              ) : cartStates[rec.variantId] === "error" ? (
+                                <>Failed</>
+                              ) : (
+                                <>Add to Cart</>
+                              )}
+                            </Button>
+                          )}
+                          <div className="w-full flex flex-wrap gap-2">
                             <Button
                               asChild
                               size="sm"
@@ -1285,6 +1324,7 @@ const Index = () => {
                               <Download className="w-2.5 h-2.5" />
                             </Button>
                           </div>
+                          </div>
                         </div>
                       );
                     })}
@@ -1300,6 +1340,9 @@ const Index = () => {
                       lipTone={lipTone}
                       sessionId={sessionId}
                       trackEvent={trackEvent}
+                      embedded={embedded}
+                      cartStates={cartStates}
+                      addToCart={addToCart}
                     />
                   )}
 

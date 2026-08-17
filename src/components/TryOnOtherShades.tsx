@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Download, Share2 } from "lucide-react";
+import { Check, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
@@ -15,6 +15,9 @@ interface Props {
   lipTone: string;
   sessionId: string;
   trackEvent: (event: string, props?: Record<string, unknown>) => void;
+  embedded: boolean;
+  cartStates: Record<string, "adding" | "added" | "error">;
+  addToCart: (variantId: string, variantName: string, source: string) => void;
 }
 
 const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
@@ -31,6 +34,9 @@ const TryOnOtherShades = ({
   lipTone,
   sessionId,
   trackEvent,
+  embedded,
+  cartStates,
+  addToCart,
 }: Props) => {
   const { data: settings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
   const variantImages = useVariantImages(ALL_VARIANT_IDS);
@@ -102,6 +108,30 @@ const TryOnOtherShades = ({
             {activeImg?.price && ` · $${parseFloat(activeImg.price).toFixed(2)}`}
           </span>
           <div className="mt-2 flex flex-wrap justify-center gap-2">
+            {embedded && (
+              <Button
+                size="sm"
+                className={`font-sans font-medium text-[9px] uppercase tracking-normal rounded-none px-5 transition-all duration-300 ${
+                  cartStates[active.variantId] === "added"
+                    ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
+                    : cartStates[active.variantId] === "error"
+                    ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
+                    : "bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground"
+                }`}
+                disabled={cartStates[active.variantId] === "adding" || cartStates[active.variantId] === "added"}
+                onClick={() => addToCart(active.variantId, active.name, "try_on_other_shades")}
+              >
+                {cartStates[active.variantId] === "adding" ? (
+                  <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
+                ) : cartStates[active.variantId] === "added" ? (
+                  <><Check className="w-2.5 h-2.5" /> Added</>
+                ) : cartStates[active.variantId] === "error" ? (
+                  <>Failed</>
+                ) : (
+                  <>Add to Cart</>
+                )}
+              </Button>
+            )}
             <Button
               asChild
               size="sm"
