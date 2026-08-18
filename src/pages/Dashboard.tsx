@@ -85,6 +85,8 @@ import {
 } from "@/components/ui/table";
 import { Search } from "lucide-react";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
 
 interface AdminLabel {
   id: string;
@@ -96,6 +98,8 @@ interface AdminLabel {
   created_at?: string;
   labeled_by_email?: string;
   image_url?: string | null;
+  display_lip_crop?: boolean;
+  lip_crop_box?: { x: number; y: number; w: number; h: number } | null;
 }
 
 interface Submission {
@@ -332,6 +336,34 @@ const Dashboard = () => {
   const clampedIndex = Math.min(labelIndex, Math.max(0, unlabeled.length - 1));
   const currentImage = unlabeled.length > 0 ? unlabeled[clampedIndex] : null;
 
+  // Lip-crop preview for the image being labeled, plus the admin's call on
+  // whether that crop may appear on the Brown Skin Archive lips grid.
+  const [lipCrop, setLipCrop] = useState<LipCropResult | null>(null);
+  const [lipCropLoading, setLipCropLoading] = useState(false);
+  const [displayLipCrop, setDisplayLipCrop] = useState(false);
+
+  useEffect(() => {
+    setLipCrop(null);
+    setDisplayLipCrop(false);
+    const url = currentImage?.image_url;
+    if (!url) return;
+    let cancelled = false;
+    setLipCropLoading(true);
+    detectLipCrop(url)
+      .then((crop) => {
+        if (!cancelled) setLipCrop(crop);
+      })
+      .catch((err) => {
+        console.error("Lip crop detection failed:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setLipCropLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [currentImage?.id, currentImage?.image_url]);
+
   const handleSaveLabel = async () => {
     if (!currentImage || !selectedCategory || !selectedSkinTone || !authUserId) return;
     setSaving(true);
@@ -343,6 +375,8 @@ const Dashboard = () => {
         admin_skin_tone_category: selectedSkinTone,
         labeled_by_user_id: authUserId,
         labeled_at: now,
+        display_lip_crop: displayLipCrop && !!lipCrop,
+        lip_crop_box: lipCrop?.box ?? null,
       });
     if (error) {
       toast.error("Failed to save label");
@@ -449,31 +483,31 @@ const Dashboard = () => {
               onClick={() => setActiveTab("labeling")}
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "labeling" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
-              Admin Labeling
+              Input Data Labeling
             </button>
             <button
               onClick={() => setActiveTab("dashboard")}
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "dashboard" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
-              Dashboard
-            </button>
-            <button
-              onClick={() => setActiveTab("data")}
-              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-            >
-              Data
+              Analytics
             </button>
             <button
               onClick={() => setActiveTab("shades")}
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "shades" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
-              Shades
+              Shade Settings
             </button>
             <button
               onClick={() => setActiveTab("recommendations")}
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "recommendations" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               Recommendations
+            </button>
+            <button
+              onClick={() => setActiveTab("data")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Raw Data
             </button>
           </div>
         </div>
@@ -799,6 +833,24 @@ const Dashboard = () => {
                     <p className="text-[9px] text-muted-foreground mt-2">
                       {new Date(currentImage.created_at).toLocaleDateString()}
                     </p>
+                    <div className="mt-3">
+                      <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Lip Crop Preview</p>
+                      {lipCropLoading ? (
+                        <div className="w-full sm:w-48 aspect-[3/2] rounded-md border border-border bg-background/60 flex items-center justify-center">
+                          <p className="text-[9px] text-muted-foreground animate-pulse">Detecting lips…</p>
+                        </div>
+                      ) : lipCrop ? (
+                        <img
+                          src={lipCrop.dataUrl}
+                          alt="Lip crop preview"
+                          className="w-full sm:w-48 aspect-[3/2] object-cover rounded-md border border-border"
+                        />
+                      ) : (
+                        <div className="w-full sm:w-48 aspect-[3/2] rounded-md border border-border bg-background/60 flex items-center justify-center">
+                          <p className="text-[9px] text-muted-foreground px-3 text-center">No lips detected in this photo</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   {/* User's quiz selections */}
                   <div className="flex flex-col gap-3">
@@ -893,6 +945,18 @@ const Dashboard = () => {
                     <SelectItem value="full-brown">Full Brown</SelectItem>
                   </SelectContent>
                 </Select>
+                <label htmlFor="display-lip-crop" className={`flex items-start gap-2.5 select-none ${lipCrop ? "cursor-pointer" : "opacity-50"}`}>
+                  <Checkbox
+                    id="display-lip-crop"
+                    checked={displayLipCrop}
+                    disabled={!lipCrop}
+                    onCheckedChange={(checked) => setDisplayLipCrop(checked === true)}
+                    className="shrink-0 h-4 w-4 mt-[1px] rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground"
+                  />
+                  <span className="text-[10px] text-foreground leading-[14px]">
+                    Display this lip crop on the Brown Skin Archive lips page
+                  </span>
+                </label>
                 <div className="flex gap-2">
                   <Button
                     className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-4 h-8"
