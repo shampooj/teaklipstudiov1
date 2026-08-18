@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from "react";
-import { Upload, ArrowRight, Copy } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { Camera, ArrowRight, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
+import { isMobileDevice } from "@/lib/device";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 
 // Seed content: Teak's curated lip-tone photography. Community photos join
@@ -43,6 +44,8 @@ const BrownSkinArchive = () => {
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Archive pics must be taken in the moment: camera-only, mobile-only.
+  const mobile = useMemo(isMobileDevice, []);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -379,38 +382,45 @@ const BrownSkinArchive = () => {
                     {!photo ? (
                       <>
                         <h2 className="font-display text-[28px] leading-[29px] text-foreground text-center mb-6">
-                          Upload your selfie
+                          Take your selfie
                         </h2>
-                        <div className="flex flex-col gap-4 max-w-md mx-auto">
-                          <div
-                            onDrop={(e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) handleFile(file); }}
-                            onDragOver={(e) => e.preventDefault()}
-                            onClick={() => fileInputRef.current?.click()}
-                            className="group relative aspect-[4/5] max-w-[240px] w-full mx-auto flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
-                            <input
-                              ref={fileInputRef}
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }} />
-                            <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
-                              <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                              <div>
-                                <p className="font-display text-[18px] leading-[18px] text-foreground">
-                                  Myself!
-                                </p>
-                                <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                                  Upload a selfie, preferably taken in front of a window
-                                </p>
+                        {mobile ? (
+                          <div className="flex flex-col gap-4 max-w-md mx-auto">
+                            <div
+                              onClick={() => fileInputRef.current?.click()}
+                              className="group relative aspect-[4/5] max-w-[240px] w-full mx-auto flex cursor-pointer border border-foreground bg-background text-center transition-colors hover:border-foreground/60">
+                              <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                capture="user"
+                                className="hidden"
+                                onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }} />
+                              <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
+                                <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                                <div>
+                                  <p className="font-display text-[18px] leading-[18px] text-foreground">
+                                    Take a selfie now!
+                                  </p>
+                                  <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                                    Opens your camera — best in front of a window
+                                  </p>
+                                </div>
                               </div>
                             </div>
+                            <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center">
+                              <button type="button" onClick={() => setLearnMoreOpen(true)} className="underline hover:text-foreground transition-colors uppercase">Learn More</button>
+                              {" · "}
+                              <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                            </p>
                           </div>
-                          <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center">
-                            <button type="button" onClick={() => setLearnMoreOpen(true)} className="underline hover:text-foreground transition-colors uppercase">Learn More</button>
-                            {" · "}
-                            <a href="https://teakbeauty.com/pages/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground transition-colors">Privacy Policy</a>
+                        ) : (
+                          <p className="font-display text-[12px] leading-[16px] text-foreground max-w-md mx-auto text-center">
+                            The archive collects selfies taken in the moment, so
+                            submissions happen on a phone. Open this page on your
+                            mobile device to take your selfie and add your pic.
                           </p>
-                        </div>
+                        )}
                       </>
                     ) : (
                       <div className="flex flex-col items-center">
