@@ -421,6 +421,16 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
   return `TEAK-${skinSlug}-${lipSlug}-${randomSuffix}`;
 };
 
+// The optional research consent is only offered for selfies taken on a mobile
+// device moments before upload: a fresh camera capture's lastModified is the
+// capture time, while a camera-roll photo keeps its original date. iPadOS
+// masquerades as macOS in the user agent, hence the touch-points check.
+const isMobileDevice = () =>
+  /Android|iPhone|iPod|iPad/i.test(navigator.userAgent) ||
+  (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
+
+const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
+
 const Index = () => {
   const [state, setState] = useState<AppState>("landing");
   const [skinTone, setSkinTone] = useState<string>("");
@@ -437,6 +447,7 @@ const Index = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
+  const [freshMobileCapture, setFreshMobileCapture] = useState(false);
   const [analysisDone, setAnalysisDone] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const embedded = useMemo(isEmbedded, []);
@@ -524,16 +535,19 @@ const Index = () => {
       toast.error("Image must be under 15MB");
       return;
     }
+    const takenJustNow =
+      isMobileDevice() && Date.now() - file.lastModified <= FRESH_CAPTURE_WINDOW_MS;
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
       setOriginalImage(base64);
+      setFreshMobileCapture(takenJustNow);
       // Every new photo starts with fresh, unchecked consents
       setBiometricChecked(false);
       setConsentChecked(false);
       setNoStoreChecked(false);
       setState("idle");
-      trackEvent("selfie_uploaded", {}, true);
+      trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow }, true);
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -567,6 +581,7 @@ const Index = () => {
     setConsentChecked(false);
     setNoStoreChecked(false);
     setBiometricChecked(false);
+    setFreshMobileCapture(false);
     setAnalysisDone(false);
     setUserEmail("");
     setEmailError(false);
@@ -828,6 +843,11 @@ const Index = () => {
                       </span>
                     </label>
 
+                    {/* The research opt-in is only offered for selfies taken on a
+                        mobile device just now — camera-roll uploads and desktop
+                        files only get the on-device try-on. */}
+                    {freshMobileCapture && (
+                    <>
                     <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground mb-4 mt-6 pt-6 border-t border-foreground/20">
                       Optional
                     </p>
@@ -865,7 +885,10 @@ const Index = () => {
                         )}
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                       </div>
-                      <div className="mt-6 flex items-center justify-end gap-3">
+                    </div>
+                    </>
+                    )}
+                    <div className="mt-6 flex items-center justify-end gap-3">
                         <button type="button" onClick={() => setLearnMoreOpen(true)} className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
                           Learn More
                         </button>
@@ -873,7 +896,6 @@ const Index = () => {
                           Privacy Policy
                         </a>
                       </div>
-                    </div>
                   </div>
                 </div>
               )}
