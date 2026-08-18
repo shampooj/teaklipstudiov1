@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Copy, Share2 } from "lucide-react";
-import { Upload, Download, RotateCcw, ArrowRight, ArrowLeft } from "lucide-react";
+import { Upload, Download, RotateCcw, ArrowRight, ArrowLeft, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { getComplexionType, Recommendation, PRODUCT_DETAILS, VARIANT_MAP } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
 import { isEmbedded, requestCartAdd } from "@/lib/cartAdd";
+import { isMobileDevice } from "@/lib/device";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { useRecommendations, useRecommendationRows } from "@/hooks/useRecommendations";
 import { useShadeSettings } from "@/hooks/useShadeSettings";
@@ -422,13 +423,8 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 };
 
 // The optional research consent is only offered for selfies taken on a mobile
-// device moments before upload: a fresh camera capture's lastModified is the
-// capture time, while a camera-roll photo keeps its original date. iPadOS
-// masquerades as macOS in the user agent, hence the touch-points check.
-const isMobileDevice = () =>
-  /Android|iPhone|iPod|iPad/i.test(navigator.userAgent) ||
-  (navigator.maxTouchPoints > 1 && /Macintosh/i.test(navigator.userAgent));
-
+// device moments before upload: the camera path is fresh by construction, and
+// library picks qualify when the file's lastModified is within this window.
 const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 
 const Index = () => {
@@ -445,6 +441,8 @@ const Index = () => {
   const [emailError, setEmailError] = useState(false);
   const [discountCode, setDiscountCode] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const mobile = useMemo(isMobileDevice, []);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
   const [freshMobileCapture, setFreshMobileCapture] = useState(false);
@@ -526,7 +524,7 @@ const Index = () => {
   // Selfies require the biometric consent checkbox before results (face
   // mapping only runs on the results screen); stock avatars skip the review
   // page entirely and carry no user biometrics.
-  const handleFile = useCallback((file: File) => {
+  const handleFile = useCallback((file: File, source: "camera" | "library") => {
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
@@ -535,8 +533,11 @@ const Index = () => {
       toast.error("Image must be under 15MB");
       return;
     }
+    // The camera path is fresh by construction (capture="user" opens the
+    // camera directly); library picks fall back to the timestamp heuristic.
     const takenJustNow =
-      isMobileDevice() && Date.now() - file.lastModified <= FRESH_CAPTURE_WINDOW_MS;
+      source === "camera" ||
+      (isMobileDevice() && Date.now() - file.lastModified <= FRESH_CAPTURE_WINDOW_MS);
     const reader = new FileReader();
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
@@ -547,10 +548,11 @@ const Index = () => {
       setConsentChecked(false);
       setNoStoreChecked(false);
       setState("idle");
-      trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow }, true);
+      trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow, source }, true);
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
   }, [trackEvent]);
 
 
@@ -559,7 +561,7 @@ const Index = () => {
     (e: React.DragEvent) => {
       e.preventDefault();
       const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      if (file) handleFile(file, "library");
     },
     [handleFile]
   );
@@ -567,7 +569,15 @@ const Index = () => {
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
-      if (file) handleFile(file);
+      if (file) handleFile(file, "library");
+    },
+    [handleFile]
+  );
+
+  const handleCameraChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (file) handleFile(file, "camera");
     },
     [handleFile]
   );
@@ -749,6 +759,32 @@ const Index = () => {
                 </h2>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {/* Camera tile (mobile only): capture="user" opens the front
+                        camera directly, so this path is fresh by construction. */}
+                    {mobile && (
+                      <div
+                        onClick={() => cameraInputRef.current?.click()}
+                        className="group relative aspect-[4/5] flex cursor-pointer border border-foreground bg-background text-center transition-colors hover:border-foreground/60">
+                        <input
+                          ref={cameraInputRef}
+                          type="file"
+                          accept="image/*"
+                          capture="user"
+                          className="hidden"
+                          onChange={handleCameraChange} />
+                        <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
+                          <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          <div>
+                            <p className="font-display text-[18px] leading-[18px] text-foreground">
+                              Take a selfie now!
+                            </p>
+                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              Opens your camera — best in front of a window
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <div
                       onDrop={handleDrop}
                       onDragOver={(e) => e.preventDefault()}
@@ -764,10 +800,12 @@ const Index = () => {
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
-                            Myself!
+                            {mobile ? "Upload a pic" : "Myself!"}
                           </p>
                           <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                            Upload a selfie, preferably taken in front of a window
+                            {mobile
+                              ? "Choose one from your photos"
+                              : "Upload a selfie, preferably taken in front of a window"}
                           </p>
                         </div>
                       </div>
