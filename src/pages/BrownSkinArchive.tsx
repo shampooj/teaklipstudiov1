@@ -87,19 +87,17 @@ const BrownSkinArchive = () => {
           img.src = sourceImage;
         });
 
-        const maxSize = 768;
-        const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-        const canvas = document.createElement("canvas");
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.7));
+        // Store the original file bytes untouched — research wants full
+        // resolution, so no downscaling here. (The AI categorization payload
+        // below is still resized to keep the edge-function request small.)
+        const blob = await (await fetch(sourceImage)).blob();
+        const contentType = blob.type || "image/jpeg";
+        const ext = contentType.split("/")[1]?.split("+")[0] || "jpg";
         const imageId = crypto.randomUUID();
-        const fileName = `${imageId}.jpg`;
+        const fileName = `${imageId}.${ext === "jpeg" ? "jpg" : ext}`;
 
         let imageUrl: string | null = null;
-        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType: "image/jpeg" });
+        const { data: uploadData, error: uploadError } = await supabase.storage.from("cart-images").upload(fileName, blob, { contentType });
         if (uploadError) {
           console.error("Failed to upload image:", uploadError);
         } else {
