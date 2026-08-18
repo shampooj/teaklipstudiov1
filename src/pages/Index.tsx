@@ -19,50 +19,7 @@ import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import teakLogo from "@/assets/teak-logo.png";
-import skinLightBrown from "@/assets/skin-light-brown.jpg";
-import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
-import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
-import skinRichBrown from "@/assets/skin-rich-brown.jpg";
-import ltBeige1 from "@/assets/lip-tone/web/beige-1.jpg";
-import ltBeige2 from "@/assets/lip-tone/web/beige-2.jpg";
-import ltBeige3 from "@/assets/lip-tone/web/beige-3.jpg";
-import ltBeige4 from "@/assets/lip-tone/web/beige-4.jpg";
-import ltBrownRose1 from "@/assets/lip-tone/web/brown-rose-1.jpg";
-import ltBrownRose2 from "@/assets/lip-tone/web/brown-rose-2.jpg";
-import ltBrownRose3 from "@/assets/lip-tone/web/brown-rose-3.jpg";
-import ltBrownRose4 from "@/assets/lip-tone/web/brown-rose-4.jpg";
-import ltChestnut1 from "@/assets/lip-tone/web/chestnut-1.jpg";
-import ltChestnut2 from "@/assets/lip-tone/web/chestnut-2.jpg";
-import ltChestnut3 from "@/assets/lip-tone/web/chestnut-3.jpg";
-import ltChestnut4 from "@/assets/lip-tone/web/chestnut-4.jpg";
-import ltDeepBrownRose1 from "@/assets/lip-tone/web/deep-brown-rose-1.jpg";
-import ltDeepBrownRose2 from "@/assets/lip-tone/web/deep-brown-rose-2.jpg";
-import ltDeepBrownRose3 from "@/assets/lip-tone/web/deep-brown-rose-3.jpg";
-import ltDeepBrownRose4 from "@/assets/lip-tone/web/deep-brown-rose-4.jpg";
-import ltGreyRose1 from "@/assets/lip-tone/web/grey-rose-1.jpg";
-import ltGreyRose2 from "@/assets/lip-tone/web/grey-rose-2.jpg";
-import ltGreyRose3 from "@/assets/lip-tone/web/grey-rose-3.jpg";
-import ltGreyRose4 from "@/assets/lip-tone/web/grey-rose-4.jpg";
-import ltMauve1 from "@/assets/lip-tone/web/mauve-1.jpg";
-import ltMauve2 from "@/assets/lip-tone/web/mauve-2.jpg";
-import ltMauve3 from "@/assets/lip-tone/web/mauve-3.jpg";
-import ltMauve4 from "@/assets/lip-tone/web/mauve-4.jpg";
-import ltMostlyDeepBrown1 from "@/assets/lip-tone/web/mostly-deep-brown-1.jpg";
-import ltMostlyDeepBrown2 from "@/assets/lip-tone/web/mostly-deep-brown-2.jpg";
-import ltMostlyDeepBrown3 from "@/assets/lip-tone/web/mostly-deep-brown-3.jpg";
-import ltMostlyDeepBrown4 from "@/assets/lip-tone/web/mostly-deep-brown-4.jpg";
-import ltMostlyPurple1 from "@/assets/lip-tone/web/mostly-purple-1.jpg";
-import ltMostlyPurple2 from "@/assets/lip-tone/web/mostly-purple-2.jpg";
-import ltMostlyPurple3 from "@/assets/lip-tone/web/mostly-purple-3.jpg";
-import ltMostlyPurple4 from "@/assets/lip-tone/web/mostly-purple-4.jpg";
-import ltMostlyLightBrown1 from "@/assets/lip-tone/web/mostly-light-brown-1.jpg";
-import ltMostlyLightBrown2 from "@/assets/lip-tone/web/mostly-light-brown-2.jpg";
-import ltMostlyLightBrown3 from "@/assets/lip-tone/web/mostly-light-brown-3.jpg";
-import ltMostlyLightBrown4 from "@/assets/lip-tone/web/mostly-light-brown-4.jpg";
-import ltMostlyPink1 from "@/assets/lip-tone/web/mostly-pink-1.jpg";
-import ltMostlyPink2 from "@/assets/lip-tone/web/mostly-pink-2.jpg";
-import ltMostlyPink3 from "@/assets/lip-tone/web/mostly-pink-3.jpg";
-import ltMostlyPink4 from "@/assets/lip-tone/web/mostly-pink-4.jpg";
+import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import nero from "@/assets/nero.jpg";
 import cynthia from "@/assets/cynthia.jpg";
 import anastasia from "@/assets/anastasia.jpg";
@@ -72,25 +29,17 @@ import hareem from "@/assets/hareem.png";
 import noreen from "@/assets/noreen.jpg";
 import arris from "@/assets/arris.jpg";
 import stSanna from "@/assets/skin_tone/web/skin_tone_sanna.jpg";
-import stSaira from "@/assets/skin_tone/web/skin_tone_saira.jpg";
-import stArris from "@/assets/skin_tone/web/skin_tone_arris.jpg";
-import stHareem from "@/assets/skin_tone/web/skin_tone_hareem.jpg";
 import stTerushka from "@/assets/skin_tone/web/skin_tone_terushka.jpg";
-import stNoreen from "@/assets/skin_tone/web/skin_tone_noreen.jpg";
 import stTanvi from "@/assets/skin_tone/web/skin_tone_tanvi.jpg";
 import stAashi from "@/assets/skin_tone/web/skin_tone_aashi.jpg";
 import stCynthia from "@/assets/skin_tone/web/skin_tone_cynthia.jpg";
 import stAnastasia from "@/assets/skin_tone/web/skin_tone_anastasia.jpg";
 import stNero from "@/assets/skin_tone/web/skin_tone_nero.jpg";
-import stPritt from "@/assets/skin_tone/web/skin_tone_pritt.jpg";
 import stMaseray from "@/assets/skin_tone/web/skin_tone_maseray.jpg";
 import stAaliyah from "@/assets/skin_tone/web/skin_tone_aaliyah.jpg";
 import stDivya from "@/assets/skin_tone/web/skin_tone_divya.jpg";
-import stDoe from "@/assets/skin_tone/web/skin_tone_doe.jpg";
-import stCharithra from "@/assets/skin_tone/web/skin_tone_charithra.jpg";
 import stGeeta from "@/assets/skin_tone/web/skin_tone_geeta.jpg";
 import stApoorva from "@/assets/skin_tone/web/skin_tone_apoorva.jpg";
-import stLakshmi from "@/assets/skin_tone/web/skin_tone_lakshmi.jpg";
 import terushka from "@/assets/terushka.jpg";
 import aashi from "@/assets/aashi.jpg";
 import aaliyah from "@/assets/aaliyah.jpg";
@@ -122,26 +71,7 @@ const SHIRT_OPTIONS = [
   { id: "I'm not sure", label: "I'm not sure", color: null as string | null },
 ] as const;
 
-const SKIN_TONES = [
-{ id: "light-brown", label: "Light Brown", color: "#C68642", image: skinLightBrown },
-{ id: "medium-brown", label: "Medium Brown", color: "#8D5524", image: skinMediumBrown },
-{ id: "deep-brown", label: "Deep Brown", color: "#5C3317", image: skinDeepBrown },
-{ id: "rich-brown", label: "Rich Brown", color: "#3B1E08", image: skinRichBrown },
-{ id: "full-brown", label: "Full Brown", color: "#2A1505" }] as
-const;
 
-const LIP_TONE_ROWS = [
-{ id: "mostly-pink", label: "Mostly Pink", images: [ltMostlyPink1, ltMostlyPink2, ltMostlyPink3, ltMostlyPink4] },
-{ id: "beige", label: "Beige", images: [ltBeige1, ltBeige2, ltBeige3, ltBeige4] },
-{ id: "chestnut", label: "Chestnut", images: [ltChestnut1, ltChestnut2, ltChestnut3, ltChestnut4] },
-{ id: "mauve", label: "Mauve", images: [ltMauve1, ltMauve2, ltMauve3, ltMauve4] },
-{ id: "brown-rose", label: "Brown Rose", images: [ltBrownRose1, ltBrownRose2, ltBrownRose3, ltBrownRose4] },
-{ id: "grey-rose", label: "Grey Rose", images: [ltGreyRose1, ltGreyRose2, ltGreyRose3, ltGreyRose4] },
-{ id: "deep-brown-rose", label: "Deep Brown Rose", images: [ltDeepBrownRose1, ltDeepBrownRose2, ltDeepBrownRose3, ltDeepBrownRose4] },
-{ id: "mostly-light-brown", label: "Mostly Light Brown", images: [ltMostlyLightBrown1, ltMostlyLightBrown2, ltMostlyLightBrown3, ltMostlyLightBrown4] },
-{ id: "mostly-deep-brown", label: "Mostly Deep Brown", images: [ltMostlyDeepBrown1, ltMostlyDeepBrown2, ltMostlyDeepBrown3, ltMostlyDeepBrown4] },
-{ id: "mostly-purple", label: "Mostly Purple", images: [ltMostlyPurple1, ltMostlyPurple2, ltMostlyPurple3, ltMostlyPurple4] }] as
-const;
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
 const LIPSTICK_LOOKS = [
@@ -698,48 +628,27 @@ const Index = () => {
                     What's your general skintone?
                   </p>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
-                    {SKIN_TONES.map((tone) => {
-                      // MOCKUP: 1×4 horizontal strip of sample photos per skin-tone category.
-                      const SAMPLES: Record<string, string[]> = {
-                        "light-brown": [stSanna, stSaira, stArris, stHareem],
-                        "medium-brown": [stTerushka, stNoreen, stTanvi, stAashi],
-                        "deep-brown": [stCynthia, stDoe, stNero, stAnastasia],
-                        "rich-brown": [stDivya, stAaliyah, stCharithra, stPritt],
-                        "full-brown": [stMaseray, stGeeta, stApoorva, stLakshmi],
-                      };
-                      const samples = SAMPLES[tone.id] ?? [];
-                      return (
-                        <button
-                          key={tone.id}
-                          onClick={() => { setSkinTone(tone.id); trackEvent("skin_tone_selected", { skin_tone: tone.id }); setState("lip-tone"); }}
-                          className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
-                            skinTone === tone.id ? "ring-2 ring-foreground" : ""
-                          }`}
-                        >
-                          {samples.length === 4 ? (
-                            <div className="w-full grid grid-cols-4">
-                              {samples.map((src, i) => (
-                                src ? (
-                                  <img
-                                    key={i}
-                                    src={src}
-                                    alt={`${tone.label} sample ${i + 1}`}
-                                    className="w-full aspect-[4/5] object-cover"
-                                  />
-                                ) : (
-                                  <div key={i} className="w-full aspect-[4/5] bg-muted" />
-                                )
-                              ))}
-                            </div>
-                          ) : 'image' in tone && tone.image ? (
-                            <img src={tone.image} alt={tone.label} className="w-full aspect-[4/5] object-cover" />
-                          ) : (
-                            <div className="w-full aspect-square" style={{ backgroundColor: tone.color }} />
-                          )}
-                          <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
-                        </button>
-                      );
-                    })}
+                    {SKIN_TONES.map((tone) => (
+                      <button
+                        key={tone.id}
+                        onClick={() => { setSkinTone(tone.id); trackEvent("skin_tone_selected", { skin_tone: tone.id }); setState("lip-tone"); }}
+                        className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
+                          skinTone === tone.id ? "ring-2 ring-foreground" : ""
+                        }`}
+                      >
+                        <div className="w-full grid grid-cols-4">
+                          {tone.samples.map((src, i) => (
+                            <img
+                              key={i}
+                              src={src}
+                              alt={`${tone.label} sample ${i + 1}`}
+                              className="w-full aspect-[4/5] object-cover"
+                            />
+                          ))}
+                        </div>
+                        <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
+                      </button>
+                    ))}
                   </div>
                   <div className="mt-8 flex gap-3 justify-center">
                     <Button
@@ -843,7 +752,7 @@ const Index = () => {
                             Myself!
                           </p>
                           <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                            Upload a selfie, preferably in front of a window
+                            Upload a selfie, preferably taken in front of a window
                           </p>
                         </div>
                       </div>
@@ -934,7 +843,7 @@ const Index = () => {
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
                           <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                            Teak can save my pic for brown skin research
+                            Add my pic to the <span className="underline">Brown Skin Tones Project</span>
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
                             Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity).
@@ -945,13 +854,13 @@ const Index = () => {
                         <input
                           id="user-email"
                           type="email"
-                          aria-label="Enter email to receive a 10% discount code in return"
+                          aria-label="Enter email for 10% off as a thank you!"
                           value={userEmail}
                           onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
                           className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
                         {!userEmail && (
                           <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
-                            Enter email to receive a <span className="text-green-700">10% discount code</span> in return
+                            Enter email for <span className="text-green-700">10% off</span> as a thank you!
                           </span>
                         )}
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
