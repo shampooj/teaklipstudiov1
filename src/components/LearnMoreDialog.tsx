@@ -82,8 +82,9 @@ const LearnMoreDialog = ({ open, onOpenChange }: Props) => (
           </p>
           <p>
             Your email is used to send your discount code, to invite you (with an unsubscribe
-            option in every message) to share feedback on your experience, and to locate your
-            image if you ask us to delete it.
+            option in every message) to share feedback on your experience or review Teak
+            products you've purchased — we may connect your quiz responses with your order
+            history for this — and to locate your image if you ask us to delete it.
           </p>
         </Section>
         <Section title="What we never do">

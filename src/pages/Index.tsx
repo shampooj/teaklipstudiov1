@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Copy, Share2 } from "lucide-react";
+import { Check, Share2 } from "lucide-react";
 import { Upload, Download, RotateCcw, ArrowRight, ArrowLeft, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -439,7 +439,7 @@ const Index = () => {
    
   const [userEmail, setUserEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
+  const [discountEmail, setDiscountEmail] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const mobile = useMemo(isMobileDevice, []);
@@ -595,7 +595,7 @@ const Index = () => {
     setAnalysisDone(false);
     setUserEmail("");
     setEmailError(false);
-    setDiscountCode(null);
+    setDiscountEmail(null);
   };
 
 
@@ -922,6 +922,9 @@ const Index = () => {
                           </span>
                         )}
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
+                        <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
+                          Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
+                        </p>
                       </div>
                     </div>
                     </>
@@ -1033,39 +1036,17 @@ const Index = () => {
                       if (error) console.error("Failed to save research selections:", error);
                     });
 
-                      // Await discount creation from Shopify — only show code if confirmed
-                      try {
-                        const edgeFunctionUrl = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/generate-discount`;
-                        console.log("[discount] calling:", edgeFunctionUrl);
-                        const discountRes = await fetch(edgeFunctionUrl, {
-                          method: "POST",
-                          headers: {
-                            "Content-Type": "application/json",
-                            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-                            "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-                          },
-                          body: JSON.stringify({ skinTone, lipTone }),
+                      // The code is emailed via Klaviyo rather than shown
+                      // on-screen — a real address gets the reward, a mistyped
+                      // one silently doesn't.
+                      setDiscountEmail(trimmedEmail);
+                      supabase.functions
+                        .invoke("send-discount-email", {
+                          body: { email: trimmedEmail, skinTone, lipTone, source: "quiz" },
+                        })
+                        .then(({ error }) => {
+                          if (error) console.error("[discount] email dispatch failed:", error);
                         });
-                        console.log("[discount] status:", discountRes.status);
-                        const discountText = await discountRes.text();
-                        console.log("[discount] raw response:", discountText);
-                        
-                        let discountData;
-                        try {
-                          discountData = JSON.parse(discountText);
-                        } catch (parseErr) {
-                          console.error("[discount] JSON parse error:", parseErr);
-                        }
-
-                        if (discountRes.ok && discountData?.code) {
-                          setDiscountCode(discountData.code);
-                          console.log("[discount] code set:", discountData.code);
-                        } else {
-                          console.error("[discount] generation failed:", discountData);
-                        }
-                      } catch (discountErr) {
-                        console.error("[discount] fetch error:", discountErr);
-                      }
                     } else {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
@@ -1144,21 +1125,14 @@ const Index = () => {
 
 
 
-                  {discountCode && (
+                  {discountEmail && (
                     <div className="flex gap-3">
                       <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
-                        <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-[18px] leading-[18px] text-primary tracking-normal">{discountCode}</p>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(discountCode); }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Copy code"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Expires in 7 days · Apply at checkout</p>
+                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal">
+                          On its way to <span className="text-green-700">{discountEmail}</span>
+                        </p>
+                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
                       </div>
                       <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
