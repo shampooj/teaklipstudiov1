@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Camera, ArrowRight, Copy } from "lucide-react";
+import { Camera, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
@@ -41,7 +41,6 @@ const BrownSkinArchive = () => {
   const [consentChecked, setConsentChecked] = useState(false);
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
-  const [discountCode, setDiscountCode] = useState<string | null>(null);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Archive pics must be taken in the moment: camera-only, mobile-only.
@@ -134,27 +133,15 @@ const BrownSkinArchive = () => {
       }
     })();
 
-    // Await discount creation from Shopify — only show code if confirmed
-    try {
-      const edgeFunctionUrl = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/generate-discount`;
-      const discountRes = await fetch(edgeFunctionUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ skinTone, lipTone }),
+    // The code is emailed via Klaviyo rather than shown on-screen — a real
+    // address gets the reward, a mistyped one silently doesn't.
+    supabase.functions
+      .invoke("send-discount-email", {
+        body: { email: trimmedEmail, skinTone, lipTone, source: "archive" },
+      })
+      .then(({ error }) => {
+        if (error) console.error("[discount] email dispatch failed:", error);
       });
-      const discountData = await discountRes.json().catch(() => null);
-      if (discountRes.ok && discountData?.code) {
-        setDiscountCode(discountData.code);
-      } else {
-        console.error("[discount] generation failed:", discountData);
-      }
-    } catch (discountErr) {
-      console.error("[discount] fetch error:", discountErr);
-    }
 
     setStep("done");
   };
@@ -167,7 +154,6 @@ const BrownSkinArchive = () => {
     setConsentChecked(false);
     setEmail("");
     setEmailError(false);
-    setDiscountCode(null);
   };
 
   return (
@@ -467,6 +453,9 @@ const BrownSkinArchive = () => {
                               </span>
                             )}
                             {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
+                            <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
+                              Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
+                            </p>
                           </div>
                           <div className="mt-6 flex items-center justify-end gap-3">
                             <button type="button" onClick={() => setLearnMoreOpen(true)} className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
@@ -533,22 +522,13 @@ const BrownSkinArchive = () => {
                       </a>{" "}
                       to delete it at any time.
                     </p>
-                    {discountCode && (
-                      <div className="w-full max-w-sm bg-background border-2 border-foreground p-4 text-center">
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
-                        <div className="flex items-center justify-center gap-2">
-                          <p className="font-display text-[18px] leading-[18px] text-primary tracking-normal">{discountCode}</p>
-                          <button
-                            onClick={() => { navigator.clipboard.writeText(discountCode); }}
-                            className="text-muted-foreground hover:text-foreground transition-colors"
-                            title="Copy code"
-                          >
-                            <Copy size={14} />
-                          </button>
-                        </div>
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Expires in 7 days · Apply at checkout</p>
-                      </div>
-                    )}
+                    <div className="w-full max-w-sm bg-background border-2 border-foreground p-4 text-center">
+                      <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
+                      <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal">
+                        On its way to <span className="text-green-700">{email.trim()}</span>
+                      </p>
+                      <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
+                    </div>
                     <Button
                       onClick={() => { resetFlow(); setView("archive"); }}
                       size="lg"
