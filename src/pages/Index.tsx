@@ -19,6 +19,7 @@ import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
+import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
 import teakLogo from "@/assets/teak-logo.png";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import nero from "@/assets/nero.jpg";
@@ -463,9 +464,28 @@ const Index = () => {
     setCartStates((prev) => ({ ...prev, [variantId]: success ? "added" : "error" }));
   }, [trackEvent, sessionId]);
 
-  const recommendations = useRecommendations(skinTone, lipTone);
+  // When a model avatar is chosen, its admin-labeled tones drive the results
+  // (recommendations, Banuba settings, complexion number) instead of the
+  // quiz-taker's own selections — the face on screen matches the shades shown.
+  const [modelTones, setModelTones] = useState<{ skin: string; lip: string } | null>(null);
+  const effectiveSkinTone = modelTones?.skin ?? skinTone;
+  const effectiveLipTone = modelTones?.lip ?? lipTone;
+  const { data: quizModels } = useDisplayedQuizModels();
+
+  // Admin-curated model roster; falls back to the built-in set (which carries
+  // no tone labels, so results follow the quiz-taker's own selections) until
+  // models are configured in /admin.
+  const avatarOptions = useMemo(
+    () =>
+      quizModels && quizModels.length > 0
+        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone }))
+        : AVATAR_OPTIONS.map((a) => ({ id: a.id, url: a.url as string, skin: null as string | null, lip: null as string | null })),
+    [quizModels],
+  );
+
+  const recommendations = useRecommendations(effectiveSkinTone, effectiveLipTone);
   // Same query key as the unified try-on card, so its data is warm at reveal.
-  const { data: shadeSettings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
+  const { data: shadeSettings } = useShadeSettings(ALL_VARIANT_NAMES, effectiveSkinTone, effectiveLipTone);
 
   const shadeSpecs = useMemo<ShadeSnapshotSpec[]>(
     () => {
@@ -542,6 +562,8 @@ const Index = () => {
     reader.onload = async (e) => {
       const base64 = e.target?.result as string;
       setOriginalImage(base64);
+      // A selfie is the quiz-taker's own face — results follow their selections
+      setModelTones(null);
       setFreshMobileCapture(takenJustNow);
       // Every new photo starts with fresh, unchecked consents
       setBiometricChecked(false);
@@ -592,6 +614,7 @@ const Index = () => {
     setNoStoreChecked(false);
     setBiometricChecked(false);
     setFreshMobileCapture(false);
+    setModelTones(null);
     setAnalysisDone(false);
     setUserEmail("");
     setEmailError(false);
@@ -810,13 +833,17 @@ const Index = () => {
                         </div>
                       </div>
                     </div>
-                    {AVATAR_OPTIONS.map((avatar) => (
+                    {avatarOptions.map((avatar) => (
                       <button
                         key={avatar.id}
                         type="button"
                         onClick={() => {
+                          const tones = avatar.skin && avatar.lip ? { skin: avatar.skin, lip: avatar.lip } : null;
+                          setModelTones(tones);
+                          const effSkin = tones?.skin ?? skinTone;
+                          const effLip = tones?.lip ?? lipTone;
                           setOriginalImage(avatar.url);
-                          trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), skipped_selfie: true, avatar: avatar.id });
+                          trackEvent("results_viewed", { skin_tone: effSkin, lip_tone: effLip, user_skin_tone: skinTone, user_lip_tone: lipTone, complexion_type: getComplexionType(effSkin, effLip), skipped_selfie: true, avatar: avatar.id });
                           setState("analyzing");
                           setAnalysisDone(true);
                         }}
@@ -1051,7 +1078,7 @@ const Index = () => {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
 
-                    trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone) });
+                    trackEvent("results_viewed", { skin_tone: effectiveSkinTone, lip_tone: effectiveLipTone, complexion_type: getComplexionType(effectiveSkinTone, effectiveLipTone) });
                     setAnalysisDone(true);
                   }}
                   size="lg"
@@ -1111,15 +1138,15 @@ const Index = () => {
                   {originalImage && (
                     <TryOnOtherShades
                       userFace={originalImage!}
-                      skinTone={skinTone}
-                      lipTone={lipTone}
+                      skinTone={effectiveSkinTone}
+                      lipTone={effectiveLipTone}
                       sessionId={sessionId}
                       trackEvent={trackEvent}
                       embedded={embedded}
                       cartStates={cartStates}
                       addToCart={addToCart}
                       recommendations={recommendations}
-                      complexionType={getComplexionType(skinTone, lipTone)}
+                      complexionType={getComplexionType(effectiveSkinTone, effectiveLipTone)}
                     />
                   )}
 

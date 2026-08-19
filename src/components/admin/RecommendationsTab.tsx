@@ -15,6 +15,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import QuizModelsSection from "@/components/admin/QuizModelsSection";
 
 const SKIN_TONE_LABELS: Record<string, string> = {
   "light-brown": "Light Brown",
@@ -220,6 +221,8 @@ export default function RecommendationsTab() {
       <Button onClick={handleSave} disabled={saving} className="text-xs">
         {saving ? "Saving…" : "Save changes"}
       </Button>
+
+      <QuizModelsSection />
     </div>
   );
 }
