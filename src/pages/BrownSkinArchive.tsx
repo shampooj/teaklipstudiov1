@@ -9,6 +9,7 @@ import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { isMobileDevice } from "@/lib/device";
 import { isEmbedded } from "@/lib/cartAdd";
 import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
+import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 
 // Seed content: Teak's curated lip-tone photography. Community photos join
@@ -65,6 +66,31 @@ const BrownSkinArchive = () => {
   const [emailError, setEmailError] = useState(false);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Transparency preview: the same lip-crop detection the admin review uses,
+  // run at submission time, so people see exactly what's stored (full pic,
+  // private) versus what could ever be displayed (the lip crop, post-review).
+  const [lipPreview, setLipPreview] = useState<LipCropResult | null>(null);
+  const [lipPreviewLoading, setLipPreviewLoading] = useState(false);
+  useEffect(() => {
+    setLipPreview(null);
+    if (!photo) return;
+    let cancelled = false;
+    setLipPreviewLoading(true);
+    detectLipCrop(photo)
+      .then((crop) => {
+        if (!cancelled) setLipPreview(crop);
+      })
+      .catch((err) => {
+        console.error("Lip crop preview failed:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setLipPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [photo]);
   // Archive pics must be taken in the moment: camera-only, mobile-only.
   const mobile = useMemo(isMobileDevice, []);
 
@@ -442,9 +468,34 @@ const BrownSkinArchive = () => {
                       </>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className="w-80 aspect-[3/4] mx-auto overflow-hidden relative">
-                          <img src={photo} alt="Your selfie" className="w-full h-full object-cover" />
-                        </div>
+                        <figure className="w-80 mx-auto">
+                          <figcaption className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center mb-1.5">
+                            The full pic — stored privately for research
+                          </figcaption>
+                          <div className="aspect-[3/4] overflow-hidden relative">
+                            <img src={photo} alt="Your selfie" className="w-full h-full object-cover" />
+                          </div>
+                        </figure>
+                        <figure className="w-80 mx-auto mt-4">
+                          <figcaption className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center mb-1.5">
+                            The lip crop — the only part ever displayed, after review
+                          </figcaption>
+                          {lipPreview ? (
+                            <img
+                              src={lipPreview.dataUrl}
+                              alt="Lip crop preview"
+                              className="w-full aspect-[3/2] object-cover"
+                            />
+                          ) : (
+                            <div className="w-full aspect-[3/2] border border-border flex items-center justify-center px-4">
+                              <p className={`font-display text-[12px] leading-[16px] text-muted-foreground text-center ${lipPreviewLoading ? "animate-pulse" : ""}`}>
+                                {lipPreviewLoading
+                                  ? "Finding your lips…"
+                                  : "We couldn't spot lips in this pic — try retaking with your face in view."}
+                              </p>
+                            </div>
+                          )}
+                        </figure>
                         <div className="mt-3 flex items-center justify-center gap-4">
                           <button
                             onClick={() => { setPhoto(null); setConsentChecked(false); }}
