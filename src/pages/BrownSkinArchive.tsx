@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Camera, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -31,8 +32,27 @@ const NAV: { id: View; label: string }[] = [
 const pillButton =
   "font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background";
 
+// Admin-approved community lip crops: the labeling dashboard publishes a 3:2
+// crop per approved submission into the public lip-crops bucket; listing it
+// is the whole feed. Newest first, shown ahead of the seed photography.
+const useApprovedLipCrops = () =>
+  useQuery({
+    queryKey: ["archive-lip-crops"],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage
+        .from("lip-crops")
+        .list("", { limit: 500, sortBy: { column: "created_at", order: "desc" } });
+      if (error) throw error;
+      return (data ?? [])
+        .filter((f) => f.name.endsWith(".jpg"))
+        .map((f) => supabase.storage.from("lip-crops").getPublicUrl(f.name).data.publicUrl);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
 const BrownSkinArchive = () => {
   const [view, setView] = useState<View>("archive");
+  const { data: approvedCrops } = useApprovedLipCrops();
 
   // Submission flow: the quiz's skin-tone, lip-tone, and upload steps, minus
   // the try-on — submissions land in the same storage as quiz consent uploads.
@@ -201,9 +221,9 @@ const BrownSkinArchive = () => {
           <div className="flex-1 min-w-0">
             {view === "archive" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {PORTRAITS.map((src, i) => (
+                {[...(approvedCrops ?? []), ...PORTRAITS].map((src, i) => (
                   <img
-                    key={i}
+                    key={src}
                     src={src}
                     alt={`Natural lip tone ${i + 1}`}
                     loading={i < 8 ? "eager" : "lazy"}
