@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Camera, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { isMobileDevice } from "@/lib/device";
+import { isEmbedded } from "@/lib/cartAdd";
+import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 
 // Seed content: Teak's curated lip-tone photography. Community photos join
@@ -45,6 +47,15 @@ const BrownSkinArchive = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   // Archive pics must be taken in the moment: camera-only, mobile-only.
   const mobile = useMemo(isMobileDevice, []);
+
+  // Framed on the storefront: report content height so the theme sizes the
+  // iframe to fit; ask the parent to scroll up when the view or step changes.
+  const embedded = useMemo(isEmbedded, []);
+  useEmbedAutoHeight(embedded);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (embedded) postEmbedScrollTop();
+  }, [view, step, embedded]);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {

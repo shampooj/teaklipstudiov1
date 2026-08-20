@@ -20,6 +20,7 @@ import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
+import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 import teakLogo from "@/assets/teak-logo.png";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import nero from "@/assets/nero.jpg";
@@ -536,10 +537,40 @@ const Index = () => {
     trackEvent("quiz_started", {}, true);
   }, [trackEvent]);
 
-  // Each quiz step should open at the top of the page
+  // Warm the NEXT step's images while the user reads the current one, so the
+  // tone pages appear fully rendered instead of trickling in on mobile. The
+  // short delay lets the current page's own images claim bandwidth first.
+  const prefetchedUrls = useRef(new Set<string>());
+  useEffect(() => {
+    const urls: string[] =
+      state === "landing"
+        ? SKIN_TONES.flatMap((t) => [...t.samples])
+        : state === "skin-tone"
+        ? LIP_TONE_ROWS.flatMap((t) => [...t.images])
+        : state === "lip-tone"
+        ? avatarOptions.map((a) => a.url)
+        : [];
+    const timer = window.setTimeout(() => {
+      for (const url of urls) {
+        if (prefetchedUrls.current.has(url)) continue;
+        prefetchedUrls.current.add(url);
+        const img = new Image();
+        img.src = url;
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [state, avatarOptions]);
+
+  // Framed on the storefront: report content height so the theme sizes the
+  // iframe to fit and all scrolling happens on the parent page.
+  useEmbedAutoHeight(embedded);
+
+  // Each quiz step should open at the top of the page. Embedded, the inner
+  // page has no scroll position — ask the parent to scroll to the iframe top.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [state]);
+    if (embedded) postEmbedScrollTop();
+  }, [state, embedded]);
 
   // Selfies require the biometric consent checkbox before results (face
   // mapping only runs on the results screen); stock avatars skip the review
@@ -817,6 +848,12 @@ const Index = () => {
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
+                        // On iOS, `multiple` skips the Photo Library / Take
+                        // Photo / Choose File sheet and opens the Photo Library
+                        // directly (the camera has its own tile). Only the
+                        // first selected file is used. Desktop keeps the
+                        // normal single-select dialog.
+                        multiple={mobile}
                         className="hidden"
                         onChange={handleInputChange} />
                       <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
