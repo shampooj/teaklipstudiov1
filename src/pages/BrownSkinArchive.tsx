@@ -10,6 +10,7 @@ import { isMobileDevice } from "@/lib/device";
 import { isEmbedded } from "@/lib/cartAdd";
 import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
+import { recordImageColorimetry } from "@/lib/colorimetry";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 
 // Seed content: Teak's curated lip-tone photography. Community photos join
@@ -177,6 +178,7 @@ const BrownSkinArchive = () => {
 
         if (!insertError) {
           if (submissionId) {
+            void recordImageColorimetry(submissionId, sourceImage);
             const c = document.createElement("canvas");
             c.width = Math.min(img.width, 1024);
             c.height = Math.round(img.height * (c.width / img.width));
