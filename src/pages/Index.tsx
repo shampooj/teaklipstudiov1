@@ -20,6 +20,7 @@ import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
+import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 import teakLogo from "@/assets/teak-logo.png";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import nero from "@/assets/nero.jpg";
@@ -536,16 +537,48 @@ const Index = () => {
     trackEvent("quiz_started", {}, true);
   }, [trackEvent]);
 
-  // Each quiz step should open at the top of the page
+  // Warm the NEXT step's images while the user reads the current one, so the
+  // tone pages appear fully rendered instead of trickling in on mobile. The
+  // short delay lets the current page's own images claim bandwidth first.
+  const prefetchedUrls = useRef(new Set<string>());
+  useEffect(() => {
+    const urls: string[] =
+      state === "landing"
+        ? SKIN_TONES.flatMap((t) => [...t.samples])
+        : state === "skin-tone"
+        ? LIP_TONE_ROWS.flatMap((t) => [...t.images])
+        : state === "lip-tone"
+        ? avatarOptions.map((a) => a.url)
+        : [];
+    const timer = window.setTimeout(() => {
+      for (const url of urls) {
+        if (prefetchedUrls.current.has(url)) continue;
+        prefetchedUrls.current.add(url);
+        const img = new Image();
+        img.src = url;
+      }
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [state, avatarOptions]);
+
+  // Framed on the storefront: report content height so the theme sizes the
+  // iframe to fit and all scrolling happens on the parent page.
+  useEmbedAutoHeight(embedded);
+
+  // Each quiz step should open at the top of the page. Embedded, the inner
+  // page has no scroll position — ask the parent to scroll to the iframe top.
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [state]);
+    if (embedded) postEmbedScrollTop();
+  }, [state, embedded]);
 
   // Selfies require the biometric consent checkbox before results (face
   // mapping only runs on the results screen); stock avatars skip the review
   // page entirely and carry no user biometrics.
   const handleFile = useCallback((file: File, source: "camera" | "library") => {
-    if (!file.type.startsWith("image/")) {
+    // Some mobile camera captures arrive with an empty MIME type — treat
+    // typeless files as images rather than rejecting the capture.
+    if (file.type && !file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
@@ -571,6 +604,9 @@ const Index = () => {
       setNoStoreChecked(false);
       setState("idle");
       trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow, source }, true);
+    };
+    reader.onerror = () => {
+      toast.error("Couldn't read that photo — please try again");
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -799,9 +835,12 @@ const Index = () => {
                           <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                           <div>
                             <p className="font-display text-[18px] leading-[18px] text-foreground">
-                              Take a selfie now!
+                              Myself!
                             </p>
                             <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              Take a selfie now!
+                            </p>
+                            <p className="mt-1 font-display text-[12px] leading-[16px] text-foreground">
                               Opens your camera — best in front of a window
                             </p>
                           </div>
@@ -817,15 +856,26 @@ const Index = () => {
                         ref={fileInputRef}
                         type="file"
                         accept="image/*"
+                        // On iOS, `multiple` skips the Photo Library / Take
+                        // Photo / Choose File sheet and opens the Photo Library
+                        // directly (the camera has its own tile). Only the
+                        // first selected file is used. Desktop keeps the
+                        // normal single-select dialog.
+                        multiple={mobile}
                         className="hidden"
                         onChange={handleInputChange} />
                       <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
-                            {mobile ? "Upload a pic" : "Myself!"}
+                            Myself!
                           </p>
-                          <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                          {mobile && (
+                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              Upload a pic
+                            </p>
+                          )}
+                          <p className={`${mobile ? "mt-1" : "mt-2"} font-display text-[12px] leading-[16px] text-foreground`}>
                             {mobile
                               ? "Choose one from your photos"
                               : "Upload a selfie, preferably taken in front of a window"}
@@ -928,26 +978,43 @@ const Index = () => {
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
                           <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                            Add my pic to the <span className="underline">Brown Skin Tones Project</span>
+                            Add my pic to{" "}
+                            <a
+                              href="https://teakbeauty.com/pages/the-brown-skin-archive"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline hover:text-muted-foreground transition-colors"
+                              // New tab + no propagation: following the link must
+                              // neither toggle the consent checkbox nor lose the
+                              // quiz-taker's progress.
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              The Brown Skin Archive
+                            </a>
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
                             Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity).
                           </span>
                         </span>
                       </label>
-                      <div className="mt-5 ml-8 relative">
-                        <input
-                          id="user-email"
-                          type="email"
-                          aria-label="Enter email for 10% off as a thank you!"
-                          value={userEmail}
-                          onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
-                          className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
-                        {!userEmail && (
-                          <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
-                            Enter email for <span className="text-green-700">10% off</span> as a thank you!
-                          </span>
-                        )}
+                      <div className="mt-5 ml-8">
+                        {/* The placeholder overlay centers against this wrapper,
+                            so it must contain ONLY the input — text below it
+                            would pull the overlay out of the field. */}
+                        <div className="relative">
+                          <input
+                            id="user-email"
+                            type="email"
+                            aria-label="Enter email for 10% off as a thank you!"
+                            value={userEmail}
+                            onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
+                            className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
+                          {!userEmail && (
+                            <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
+                              Enter email for <span className="text-green-700">10% off</span> as a thank you!
+                            </span>
+                          )}
+                        </div>
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                         <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
                           Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
@@ -1153,15 +1220,17 @@ const Index = () => {
 
 
                   {discountEmail && (
-                    <div className="flex gap-3">
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
+                    // Stacked full-width on mobile; equal halves from sm up
+                    // (min-w-0 stops the long email from stealing width).
+                    <div className="flex flex-col sm:flex-row sm:items-stretch gap-3">
+                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 text-center flex flex-col items-center justify-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
-                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal">
+                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal break-words w-full">
                           On its way to <span className="text-green-700">{discountEmail}</span>
                         </p>
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
                       </div>
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
+                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>

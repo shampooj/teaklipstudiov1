@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Camera, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,6 +7,9 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { isMobileDevice } from "@/lib/device";
+import { isEmbedded } from "@/lib/cartAdd";
+import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
+import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 
 // Seed content: Teak's curated lip-tone photography. Community photos join
@@ -29,8 +33,27 @@ const NAV: { id: View; label: string }[] = [
 const pillButton =
   "font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background";
 
+// Admin-approved community lip crops: the labeling dashboard publishes a 3:2
+// crop per approved submission into the public lip-crops bucket; listing it
+// is the whole feed. Newest first, shown ahead of the seed photography.
+const useApprovedLipCrops = () =>
+  useQuery({
+    queryKey: ["archive-lip-crops"],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage
+        .from("lip-crops")
+        .list("", { limit: 500, sortBy: { column: "created_at", order: "desc" } });
+      if (error) throw error;
+      return (data ?? [])
+        .filter((f) => f.name.endsWith(".jpg"))
+        .map((f) => supabase.storage.from("lip-crops").getPublicUrl(f.name).data.publicUrl);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
 const BrownSkinArchive = () => {
   const [view, setView] = useState<View>("archive");
+  const { data: approvedCrops } = useApprovedLipCrops();
 
   // Submission flow: the quiz's skin-tone, lip-tone, and upload steps, minus
   // the try-on — submissions land in the same storage as quiz consent uploads.
@@ -43,11 +66,47 @@ const BrownSkinArchive = () => {
   const [emailError, setEmailError] = useState(false);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Transparency preview: the same lip-crop detection the admin review uses,
+  // run at submission time, so people see exactly what's stored (full pic,
+  // private) versus what could ever be displayed (the lip crop, post-review).
+  const [lipPreview, setLipPreview] = useState<LipCropResult | null>(null);
+  const [lipPreviewLoading, setLipPreviewLoading] = useState(false);
+  useEffect(() => {
+    setLipPreview(null);
+    if (!photo) return;
+    let cancelled = false;
+    setLipPreviewLoading(true);
+    detectLipCrop(photo)
+      .then((crop) => {
+        if (!cancelled) setLipPreview(crop);
+      })
+      .catch((err) => {
+        console.error("Lip crop preview failed:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setLipPreviewLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [photo]);
   // Archive pics must be taken in the moment: camera-only, mobile-only.
   const mobile = useMemo(isMobileDevice, []);
 
+  // Framed on the storefront: report content height so the theme sizes the
+  // iframe to fit; ask the parent to scroll up when the view or step changes.
+  const embedded = useMemo(isEmbedded, []);
+  useEmbedAutoHeight(embedded);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (embedded) postEmbedScrollTop();
+  }, [view, step, embedded]);
+
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) {
+    // Some mobile camera captures arrive with an empty MIME type — treat
+    // typeless files as images rather than rejecting the capture.
+    if (file.type && !file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
@@ -60,6 +119,9 @@ const BrownSkinArchive = () => {
       setPhoto(e.target?.result as string);
       // Every new photo starts with a fresh, unchecked consent
       setConsentChecked(false);
+    };
+    reader.onerror = () => {
+      toast.error("Couldn't read that photo — please try again");
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -157,7 +219,10 @@ const BrownSkinArchive = () => {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    // min-h-screen only standalone: inside the auto-height iframe, 100vh IS
+    // the iframe height, so a viewport-height floor would ratchet the iframe
+    // to its tallest-ever view and never let it shrink back.
+    <div className={embedded ? "bg-background" : "bg-background min-h-screen"}>
       <main className="mx-auto w-full max-w-5xl px-4 pt-10 pb-16">
         <h1 className="font-display text-[28px] leading-[29px] text-foreground text-center">
           The Brown Skin Archive
@@ -190,9 +255,9 @@ const BrownSkinArchive = () => {
           <div className="flex-1 min-w-0">
             {view === "archive" && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {PORTRAITS.map((src, i) => (
+                {[...(approvedCrops ?? []), ...PORTRAITS].map((src, i) => (
                   <img
-                    key={i}
+                    key={src}
                     src={src}
                     alt={`Natural lip tone ${i + 1}`}
                     loading={i < 8 ? "eager" : "lazy"}
@@ -408,9 +473,34 @@ const BrownSkinArchive = () => {
                       </>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className="w-80 aspect-[3/4] mx-auto overflow-hidden relative">
-                          <img src={photo} alt="Your selfie" className="w-full h-full object-cover" />
-                        </div>
+                        <figure className="w-80 mx-auto">
+                          <figcaption className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center mb-1.5">
+                            The full pic — stored privately for research
+                          </figcaption>
+                          <div className="aspect-[3/4] overflow-hidden relative">
+                            <img src={photo} alt="Your selfie" className="w-full h-full object-cover" />
+                          </div>
+                        </figure>
+                        <figure className="w-80 mx-auto mt-4">
+                          <figcaption className="font-sans font-medium text-[9px] uppercase tracking-normal text-muted-foreground text-center mb-1.5">
+                            The lip crop — the only part ever displayed, after review
+                          </figcaption>
+                          {lipPreview ? (
+                            <img
+                              src={lipPreview.dataUrl}
+                              alt="Lip crop preview"
+                              className="w-full aspect-[3/2] object-cover"
+                            />
+                          ) : (
+                            <div className="w-full aspect-[3/2] border border-border flex items-center justify-center px-4">
+                              <p className={`font-display text-[12px] leading-[16px] text-muted-foreground text-center ${lipPreviewLoading ? "animate-pulse" : ""}`}>
+                                {lipPreviewLoading
+                                  ? "Finding your lips…"
+                                  : "We couldn't spot lips in this pic — try retaking with your face in view."}
+                              </p>
+                            </div>
+                          )}
+                        </figure>
                         <div className="mt-3 flex items-center justify-center gap-4">
                           <button
                             onClick={() => { setPhoto(null); setConsentChecked(false); }}
@@ -439,19 +529,23 @@ const BrownSkinArchive = () => {
                               </span>
                             </span>
                           </label>
-                          <div className="mt-5 ml-8 relative">
-                            <input
-                              id="archive-email"
-                              type="email"
-                              aria-label="Enter email for 10% off as a thank you!"
-                              value={email}
-                              onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-                              className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
-                            {!email && (
-                              <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
-                                Enter email for <span className="text-green-700">10% off</span> as a thank you!
-                              </span>
-                            )}
+                          <div className="mt-5 ml-8">
+                            {/* The placeholder overlay centers against this
+                                wrapper, so it must contain ONLY the input. */}
+                            <div className="relative">
+                              <input
+                                id="archive-email"
+                                type="email"
+                                aria-label="Enter email for 10% off as a thank you!"
+                                value={email}
+                                onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
+                                className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
+                              {!email && (
+                                <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
+                                  Enter email for <span className="text-green-700">10% off</span> as a thank you!
+                                </span>
+                              )}
+                            </div>
                             {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                             <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
                               Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.

@@ -217,8 +217,11 @@ const TryOnOtherShades = ({
           >
             <a
               href={productUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              // Same-window navigation: embedded, escape the iframe and take
+              // the whole store page to the product (Back restores the quiz
+              // via the browser's back/forward cache); standalone, navigate in
+              // place. No new windows — disorienting on mobile.
+              target={embedded ? "_top" : undefined}
               className="truncate"
               onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "unified_try_on", product_handle: activeImg?.productHandle })}
             >

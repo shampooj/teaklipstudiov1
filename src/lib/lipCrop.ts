@@ -79,11 +79,12 @@ export const detectLipCrop = async (imageUrl: string): Promise<LipCropResult | n
   }
   if (!Number.isFinite(minX)) return null;
 
-  // Frame the lips with breathing room at the archive grid's 3:2 aspect.
+  // Frame like the src/assets/lip-tone reference crops: lips spanning most of
+  // the 3:2 frame with a slim skin margin — not a nose-to-chin view.
   const lipW = maxX - minX;
   const cx = (minX + maxX) / 2;
   const cy = (minY + maxY) / 2;
-  let cropW = Math.min(iw, lipW * 2.1);
+  let cropW = Math.min(iw, lipW * 1.35);
   let cropH = Math.min(ih, (cropW * 2) / 3);
   cropW = (cropH * 3) / 2;
   const x = Math.min(Math.max(cx - cropW / 2, 0), iw - cropW);

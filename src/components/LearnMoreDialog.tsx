@@ -1,5 +1,7 @@
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { isEmbedded } from "@/lib/cartAdd";
+import { postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 
 interface Props {
   open: boolean;
@@ -17,9 +19,22 @@ const Section = ({ title, children }: { title: string; children: ReactNode }) =>
   </div>
 );
 
-const LearnMoreDialog = ({ open, onOpenChange }: Props) => (
+const LearnMoreDialog = ({ open, onOpenChange }: Props) => {
+  // In the auto-height storefront iframe, viewport-centered positioning would
+  // put the dialog in the middle of the full content height — likely
+  // off-screen. Pin it near the iframe top instead and bring the parent there.
+  const embedded = useMemo(isEmbedded, []);
+  useEffect(() => {
+    if (open && embedded) postEmbedScrollTop();
+  }, [open, embedded]);
+
+  return (
   <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-md rounded-none sm:rounded-none border border-foreground bg-background max-h-[85vh] overflow-y-auto">
+    <DialogContent
+      className={`max-w-md rounded-none sm:rounded-none border border-foreground bg-background overflow-y-auto ${
+        embedded ? "top-6 translate-y-0 max-h-[560px]" : "max-h-[85vh]"
+      }`}
+    >
       <DialogHeader>
         <DialogTitle className="font-display font-normal text-[18px] leading-[18px] text-left tracking-normal">
           How Teak handles your data
@@ -137,6 +152,7 @@ const LearnMoreDialog = ({ open, onOpenChange }: Props) => (
       </div>
     </DialogContent>
   </Dialog>
-);
+  );
+};
 
 export default LearnMoreDialog;

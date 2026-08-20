@@ -382,6 +382,20 @@ const Dashboard = () => {
       toast.error("Failed to save label");
       console.error(error);
     } else {
+      // Publish the approved crop to the public lip-crops bucket — the
+      // archive page lists that bucket, so the upload IS the publication.
+      if (displayLipCrop && lipCrop) {
+        try {
+          const blob = await (await fetch(lipCrop.dataUrl)).blob();
+          const { error: cropError } = await supabase.storage
+            .from("lip-crops")
+            .upload(`${currentImage.id}.jpg`, blob, { contentType: "image/jpeg", upsert: true });
+          if (cropError) throw cropError;
+        } catch (e) {
+          console.error("Failed to publish lip crop:", e);
+          toast.error("Label saved, but publishing the lip crop failed");
+        }
+      }
       await (supabase.from as any)("customer_submissions")
         .update({ is_labeled: true })
         .eq("id", currentImage.id);
@@ -405,6 +419,8 @@ const Dashboard = () => {
       await (supabase.from as any)("customer_submissions")
         .update({ is_labeled: false })
         .eq("id", submissionId);
+      // Un-labeling unpublishes any crop from the archive page.
+      await supabase.storage.from("lip-crops").remove([`${submissionId}.jpg`]);
     }
     if (error) {
       toast.error("Failed to reset label");
