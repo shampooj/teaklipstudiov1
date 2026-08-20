@@ -11,13 +11,7 @@ import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner";
-import { isEmbedded } from "./lib/cartAdd";
-
 const queryClient = new QueryClient();
-
-// Embedded: the banner flows inline above the app (no viewport to pin it to
-// inside an auto-height iframe). Standalone: fixed to the viewport bottom.
-const embedded = isEmbedded();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,7 +19,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        {embedded && <AnalyticsConsentBanner />}
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/brownskinarchive" element={<BrownSkinArchive />} />
@@ -49,7 +42,7 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        {!embedded && <AnalyticsConsentBanner />}
+        <AnalyticsConsentBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
