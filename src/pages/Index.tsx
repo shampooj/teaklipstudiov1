@@ -576,7 +576,9 @@ const Index = () => {
   // mapping only runs on the results screen); stock avatars skip the review
   // page entirely and carry no user biometrics.
   const handleFile = useCallback((file: File, source: "camera" | "library") => {
-    if (!file.type.startsWith("image/")) {
+    // Some mobile camera captures arrive with an empty MIME type — treat
+    // typeless files as images rather than rejecting the capture.
+    if (file.type && !file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
@@ -602,6 +604,9 @@ const Index = () => {
       setNoStoreChecked(false);
       setState("idle");
       trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow, source }, true);
+    };
+    reader.onerror = () => {
+      toast.error("Couldn't read that photo — please try again");
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";

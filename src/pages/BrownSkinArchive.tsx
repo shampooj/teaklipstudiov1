@@ -104,7 +104,9 @@ const BrownSkinArchive = () => {
   }, [view, step, embedded]);
 
   const handleFile = useCallback((file: File) => {
-    if (!file.type.startsWith("image/")) {
+    // Some mobile camera captures arrive with an empty MIME type — treat
+    // typeless files as images rather than rejecting the capture.
+    if (file.type && !file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
@@ -117,6 +119,9 @@ const BrownSkinArchive = () => {
       setPhoto(e.target?.result as string);
       // Every new photo starts with a fresh, unchecked consent
       setConsentChecked(false);
+    };
+    reader.onerror = () => {
+      toast.error("Couldn't read that photo — please try again");
     };
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
