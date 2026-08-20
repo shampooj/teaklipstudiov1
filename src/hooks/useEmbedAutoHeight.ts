@@ -11,7 +11,10 @@ export function useEmbedAutoHeight(enabled: boolean) {
     if (!enabled) return;
     let lastHeight = 0;
     const post = () => {
-      const height = Math.ceil(document.documentElement.scrollHeight);
+      // Box height, NOT scrollHeight: scrollHeight is floored at the viewport,
+      // and the iframe viewport is whatever height we last posted — measuring
+      // it would ratchet upward forever. The html box height follows content.
+      const height = Math.ceil(document.documentElement.getBoundingClientRect().height);
       if (Math.abs(height - lastHeight) < 2) return;
       lastHeight = height;
       window.parent?.postMessage({ type: "embed-resize", height }, "*");

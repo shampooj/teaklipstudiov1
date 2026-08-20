@@ -188,7 +188,10 @@ const BrownSkinArchive = () => {
   };
 
   return (
-    <div className="bg-background min-h-screen">
+    // min-h-screen only standalone: inside the auto-height iframe, 100vh IS
+    // the iframe height, so a viewport-height floor would ratchet the iframe
+    // to its tallest-ever view and never let it shrink back.
+    <div className={embedded ? "bg-background" : "bg-background min-h-screen"}>
       <main className="mx-auto w-full max-w-5xl px-4 pt-10 pb-16">
         <h1 className="font-display text-[28px] leading-[29px] text-foreground text-center">
           The Brown Skin Archive
