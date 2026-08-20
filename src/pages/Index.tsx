@@ -830,9 +830,12 @@ const Index = () => {
                           <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                           <div>
                             <p className="font-display text-[18px] leading-[18px] text-foreground">
-                              Take a selfie now!
+                              Myself!
                             </p>
                             <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              Take a selfie now!
+                            </p>
+                            <p className="mt-1 font-display text-[12px] leading-[16px] text-foreground">
                               Opens your camera — best in front of a window
                             </p>
                           </div>
@@ -860,9 +863,14 @@ const Index = () => {
                         <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                         <div>
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
-                            {mobile ? "Upload a pic" : "Myself!"}
+                            Myself!
                           </p>
-                          <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                          {mobile && (
+                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              Upload a pic
+                            </p>
+                          )}
+                          <p className={`${mobile ? "mt-1" : "mt-2"} font-display text-[12px] leading-[16px] text-foreground`}>
                             {mobile
                               ? "Choose one from your photos"
                               : "Upload a selfie, preferably taken in front of a window"}
