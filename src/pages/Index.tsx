@@ -1215,15 +1215,17 @@ const Index = () => {
 
 
                   {discountEmail && (
-                    <div className="flex gap-3">
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 text-center">
+                    // Stacked full-width on mobile; equal halves from sm up
+                    // (min-w-0 stops the long email from stealing width).
+                    <div className="flex flex-col sm:flex-row sm:items-stretch gap-3">
+                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 text-center flex flex-col items-center justify-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
-                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal">
+                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal break-words w-full">
                           On its way to <span className="text-green-700">{discountEmail}</span>
                         </p>
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
                       </div>
-                      <div className="flex-1 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
+                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>
