@@ -450,19 +450,23 @@ const BrownSkinArchive = () => {
                               </span>
                             </span>
                           </label>
-                          <div className="mt-5 ml-8 relative">
-                            <input
-                              id="archive-email"
-                              type="email"
-                              aria-label="Enter email for 10% off as a thank you!"
-                              value={email}
-                              onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
-                              className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
-                            {!email && (
-                              <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
-                                Enter email for <span className="text-green-700">10% off</span> as a thank you!
-                              </span>
-                            )}
+                          <div className="mt-5 ml-8">
+                            {/* The placeholder overlay centers against this
+                                wrapper, so it must contain ONLY the input. */}
+                            <div className="relative">
+                              <input
+                                id="archive-email"
+                                type="email"
+                                aria-label="Enter email for 10% off as a thank you!"
+                                value={email}
+                                onChange={(e) => { setEmail(e.target.value); setEmailError(false); }}
+                                className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
+                              {!email && (
+                                <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
+                                  Enter email for <span className="text-green-700">10% off</span> as a thank you!
+                                </span>
+                              )}
+                            </div>
                             {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
                             <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
                               Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
