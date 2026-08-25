@@ -18,7 +18,8 @@ export interface LipCropResult {
 
 let landmarkerPromise: Promise<FaceLandmarker> | null = null;
 
-const getLandmarker = (): Promise<FaceLandmarker> => {
+// Shared with colorimetry.ts so the wasm/model loads once per session.
+export const getLandmarker = (): Promise<FaceLandmarker> => {
   if (!landmarkerPromise) {
     landmarkerPromise = (async () => {
       const fileset = await FilesetResolver.forVisionTasks(

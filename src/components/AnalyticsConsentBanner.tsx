@@ -8,9 +8,9 @@ const buttonClass =
 
 const AnalyticsConsentBanner = () => {
   const [visible, setVisible] = useState(() => getAnalyticsConsent() === null);
-  // Inside the auto-height storefront iframe there is no viewport to fix to —
-  // a fixed-bottom bar would render thousands of pixels down. Flow inline
-  // instead (App renders it above the routes when embedded).
+  // Inside the auto-height storefront iframe there is no viewport to fix to,
+  // so the banner flows inline after the app content — the bottom of the
+  // embed. Standalone keeps the viewport-fixed bottom bar.
   const embedded = useMemo(isEmbedded, []);
 
   if (!visible) return null;
@@ -24,7 +24,7 @@ const AnalyticsConsentBanner = () => {
     <div
       className={
         embedded
-          ? "bg-card border-b border-foreground px-4 py-3"
+          ? "bg-card border-t border-foreground px-4 py-3"
           : "fixed bottom-0 inset-x-0 z-50 bg-card border-t border-foreground px-4 py-3"
       }
     >
