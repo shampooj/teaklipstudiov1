@@ -7,7 +7,7 @@ export function useBanubaSnapshots(imageUrl: string | null, shades: ShadeSnapsho
   const [snapshots, setSnapshots] = useState<Record<string, string | null>>({});
 
   const shadesKey = useMemo(
-    () => shades.map((s) => `${s.key}|${s.hex}|${s.finish}|${s.opacity}`).join(";"),
+    () => shades.map((s) => `${s.key}|${s.hex}|${s.finish}|${s.opacity}|${s.gloss ?? 0}`).join(";"),
     [shades],
   );
 

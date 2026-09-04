@@ -1,7 +1,7 @@
-import { zipSync, strToU8 } from "fflate";
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
 import { resolveBanubaFinish } from "@/lib/banubaFinish";
+import { buildEffectZip, clampGloss } from "@/lib/banubaEffect";
 
 // One shared Banuba player renders every shade sequentially and hands callers
 // static snapshots. Mobile tabs cannot afford a WASM face tracker per product
@@ -13,41 +13,13 @@ export interface ShadeSnapshotSpec {
   hex: string;
   finish: string;
   opacity: number;
+  /** makeup_lipsgloss alpha, 0..1; 0 = off */
+  gloss?: number;
 }
 
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
 const MAX_INPUT_DIM = 1280;
 const SNAPSHOT_TIMEOUT_MS = 20_000;
-
-function hexToRgbString(hex: string) {
-  const normalized = hex.trim().replace(/^#/, "");
-  const value = normalized.length === 3
-    ? normalized.split("").map((c) => `${c}${c}`).join("")
-    : normalized;
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
-  const channels = [0, 2, 4].map((s) => parseInt(value.slice(s, s + 2), 16) / 255);
-  return channels.map((c) => Number(c.toFixed(4))).join(" ");
-}
-
-function buildEffectZip(color: string, finish: string, coverage: number) {
-  const config = {
-    scene: "teak-lipstick-preview",
-    version: "2.0.0",
-    camera: {},
-    faces: [
-      {
-        makeup_lipstick: {
-          color: hexToRgbString(color),
-          finish: resolveBanubaFinish(finish),
-          coverage,
-        },
-      },
-    ],
-  };
-  const archive = zipSync({ "config.json": strToU8(JSON.stringify(config)) });
-  const bytes = new Uint8Array(archive);
-  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
-}
 
 interface EngineCtx {
   sdk: any;
@@ -159,7 +131,7 @@ let lastCaptureSignature: string | null = null;
 async function renderSnapshot(imageUrl: string, spec: ShadeSnapshotSpec): Promise<string> {
   const { sdk, player, capture } = await getEngine();
   const file = await getInputFile(imageUrl);
-  const effect = new sdk.Effect(buildEffectZip(spec.hex, spec.finish, spec.opacity));
+  const effect = new sdk.Effect(buildEffectZip(spec));
   await player.applyEffect(effect);
   await player.use(new sdk.Image(file));
   player.play({ pauseOnEmpty: false });
@@ -195,7 +167,7 @@ let queue: Promise<unknown> = Promise.resolve();
 export function snapshotShade(imageUrl: string, spec: ShadeSnapshotSpec): Promise<string> {
   // Key on the resolved finish so legacy aliases share a cache entry with
   // their canonical preset instead of re-rendering an identical frame.
-  const cacheKey = `${imageUrl}|${spec.hex}|${resolveBanubaFinish(spec.finish)}|${spec.opacity}`;
+  const cacheKey = `${imageUrl}|${spec.hex}|${resolveBanubaFinish(spec.finish)}|${spec.opacity}|${clampGloss(spec.gloss)}`;
   const hit = snapshotCache.get(cacheKey);
   if (hit) return hit;
 

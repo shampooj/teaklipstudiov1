@@ -77,6 +77,7 @@ const TryOnOtherShades = ({
           hex: details?.color ?? "#000000",
           finish: "satin",
           opacity: 0.8,
+          gloss: 0,
         },
       };
     }
@@ -107,7 +108,7 @@ const TryOnOtherShades = ({
   const activeSpecs = useMemo<ShadeSnapshotSpec[]>(
     () =>
       active
-        ? [{ key: active.name, hex: active.setting.hex, finish: active.setting.finish, opacity: active.setting.opacity }]
+        ? [{ key: active.name, hex: active.setting.hex, finish: active.setting.finish, opacity: active.setting.opacity, gloss: active.setting.gloss }]
         : [],
     [active],
   );

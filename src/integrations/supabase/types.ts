@@ -172,6 +172,7 @@ export type Database = {
       lipstick_shade_settings: {
         Row: {
           finish: string
+          gloss: number
           hex: string
           id: string
           lip_tone: string
@@ -183,6 +184,7 @@ export type Database = {
         }
         Insert: {
           finish?: string
+          gloss?: number
           hex?: string
           id?: string
           lip_tone: string
@@ -194,6 +196,7 @@ export type Database = {
         }
         Update: {
           finish?: string
+          gloss?: number
           hex?: string
           id?: string
           lip_tone?: string

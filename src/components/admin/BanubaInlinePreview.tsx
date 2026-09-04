@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { zipSync, strToU8 } from "fflate";
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
-import { resolveBanubaFinish } from "@/lib/banubaFinish";
+import { buildEffectZip } from "@/lib/banubaEffect";
 
 interface Props {
   lipToneLabel: string;
@@ -10,49 +9,12 @@ interface Props {
   hex: string;
   finish: string;
   opacity: number;
+  gloss?: number;
   scale?: number;
 }
 
 const SDK_BASE = BANUBA_SDK_BASE;
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
-
-function buildConfig(color: string, finish: string, opacity: number) {
-  return {
-    scene: "teak-lipstick-preview",
-    version: "2.0.0",
-    camera: {},
-    faces: [
-      {
-        makeup_lipstick: {
-          color: hexToRgbString(color),
-          finish: resolveBanubaFinish(finish),
-          coverage: opacity,
-        },
-      },
-    ],
-  };
-}
-
-
-function hexToRgbString(hex: string) {
-  const normalized = hex.trim().replace(/^#/, "");
-  const value = normalized.length === 3
-    ? normalized.split("").map((char) => `${char}${char}`).join("")
-    : normalized;
-
-  if (!/^[0-9a-fA-F]{6}$/.test(value)) return "0 0 0";
-
-  const channels = [0, 2, 4].map((start) => parseInt(value.slice(start, start + 2), 16) / 255);
-  return channels.map((channel) => Number(channel.toFixed(4))).join(" ");
-}
-
-function buildEffectZip(color: string, finish: string, coverage: number) {
-  const archive = zipSync({
-    "config.json": strToU8(JSON.stringify(buildConfig(color, finish, coverage), null, 2)),
-  });
-  const bytes = new Uint8Array(archive);
-  return new Blob([bytes.buffer as ArrayBuffer], { type: "application/zip" });
-}
 
 async function cropImageFile(file: File, scale: number): Promise<File> {
   return new Promise((resolve, reject) => {
@@ -96,7 +58,7 @@ async function cropImageFile(file: File, scale: number): Promise<File> {
 
 
 
-const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity, scale = 1 }: Props) => {
+const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity, gloss = 0, scale = 1 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const sdkRef = useRef<any>(null);
@@ -152,7 +114,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
         );
 
         setStatus("Applying effect…");
-        const effectZip = buildEffectZip(hex, finish, opacity);
+        const effectZip = buildEffectZip({ hex, finish, opacity, gloss });
         const initialEffect = new Effect(effectZip);
         await player.applyEffect(initialEffect);
         activeEffectRef.current = initialEffect;
@@ -220,7 +182,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        const nextEffect = new sdk.Effect(buildEffectZip(hex, finish, opacity));
+        const nextEffect = new sdk.Effect(buildEffectZip({ hex, finish, opacity, gloss }));
         await p.applyEffect(nextEffect);
         activeEffectRef.current = nextEffect;
         if (cancelled || updateSeqRef.current !== seq) return;
@@ -239,7 +201,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [hex, finish, opacity, ready]);
+  }, [hex, finish, opacity, gloss, ready]);
 
 
 
@@ -268,7 +230,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
       </div>
       <p className="text-[10px] text-muted-foreground">
         {status} · Hex <span className="font-mono">{hex}</span> · Finish {finish} · Opacity{" "}
-        {opacity.toFixed(2)}
+        {opacity.toFixed(2)} · Gloss {gloss.toFixed(2)}
       </p>
     </div>
   );
