@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
-import { buildEffectZip } from "@/lib/banubaEffect";
+import { buildEffectZip, type ShineSpec } from "@/lib/banubaEffect";
 
 interface Props {
   lipToneLabel: string;
@@ -10,6 +10,7 @@ interface Props {
   finish: string;
   opacity: number;
   gloss?: number;
+  shine?: ShineSpec | null;
   scale?: number;
 }
 
@@ -58,7 +59,7 @@ async function cropImageFile(file: File, scale: number): Promise<File> {
 
 
 
-const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity, gloss = 0, scale = 1 }: Props) => {
+const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity, gloss = 0, shine = null, scale = 1 }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const sdkRef = useRef<any>(null);
@@ -114,7 +115,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
         );
 
         setStatus("Applying effect…");
-        const effectZip = buildEffectZip({ hex, finish, opacity, gloss });
+        const effectZip = buildEffectZip({ hex, finish, opacity, gloss, shine });
         const initialEffect = new Effect(effectZip);
         await player.applyEffect(initialEffect);
         activeEffectRef.current = initialEffect;
@@ -182,7 +183,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
     const t = window.setTimeout(async () => {
       try {
         setStatus("Updating preview…");
-        const nextEffect = new sdk.Effect(buildEffectZip({ hex, finish, opacity, gloss }));
+        const nextEffect = new sdk.Effect(buildEffectZip({ hex, finish, opacity, gloss, shine }));
         await p.applyEffect(nextEffect);
         activeEffectRef.current = nextEffect;
         if (cancelled || updateSeqRef.current !== seq) return;
@@ -201,7 +202,8 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
       cancelled = true;
       window.clearTimeout(t);
     };
-  }, [hex, finish, opacity, gloss, ready]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hex, finish, opacity, gloss, shine ? JSON.stringify(shine) : null, ready]);
 
 
 
@@ -231,6 +233,7 @@ const BanubaInlinePreview = ({ lipToneLabel, lipToneImage, hex, finish, opacity,
       <p className="text-[10px] text-muted-foreground">
         {status} · Hex <span className="font-mono">{hex}</span> · Finish {finish} · Opacity{" "}
         {opacity.toFixed(2)} · Gloss {gloss.toFixed(2)}
+        {shine && shine.intensity > 0 ? ` · Shine ${shine.intensity.toFixed(2)} / scale ${shine.scale.toFixed(2)}` : ""}
       </p>
     </div>
   );
