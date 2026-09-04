@@ -229,9 +229,11 @@ const BrownSkinArchive = () => {
         <h1 className="font-display text-[28px] leading-[29px] lg:text-[40px] lg:leading-[42px] text-foreground text-center">
           The Brown Skin Archive
         </h1>
-        <p className="mt-4 font-display text-[18px] leading-[22px] lg:text-[24px] lg:leading-[30px] text-foreground text-center max-w-lg lg:max-w-2xl mx-auto">
-          A growing archive of brown skin and lips: to observe, to appreciate, and to study.
-        </p>
+        {view !== "submit" && (
+          <p className="mt-4 font-display text-[18px] leading-[22px] lg:text-[24px] lg:leading-[30px] text-foreground text-center max-w-lg lg:max-w-2xl mx-auto">
+            A growing archive of brown skin and lips: to observe, to appreciate, and to study.
+          </p>
+        )}
 
         <div className="mt-10 flex flex-col sm:flex-row gap-8">
           <nav className="shrink-0 sm:w-44">
@@ -358,7 +360,7 @@ const BrownSkinArchive = () => {
               <div className="w-full">
                 {step === "skin" && (
                   <div className="text-center w-full">
-                    <p className="font-display text-[12px] leading-[16px] lg:text-[15px] lg:leading-[21px] text-foreground max-w-md lg:max-w-xl mx-auto mb-8">
+                    <p className="font-display text-[12px] leading-[16px] lg:text-[18px] lg:leading-[25px] text-foreground max-w-md lg:max-w-xl mx-auto mb-8">
                       Want your skin tone represented in the archive? Answer the
                       questions below to submit your pictures.
                     </p>
@@ -384,7 +386,7 @@ const BrownSkinArchive = () => {
                               />
                             ))}
                           </div>
-                          <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
+                          <span className="font-sans text-[9px] lg:text-[12px] uppercase text-foreground pb-2">{tone.label}</span>
                         </button>
                       ))}
                     </div>
@@ -416,7 +418,7 @@ const BrownSkinArchive = () => {
                               <img key={i} src={src} alt={`${tone.label} sample ${i + 1}`} className="w-full aspect-[3/2] object-cover" />
                             ))}
                           </div>
-                          <span className="font-sans text-[9px] uppercase text-foreground pb-2">{tone.label}</span>
+                          <span className="font-sans text-[9px] lg:text-[12px] uppercase text-foreground pb-2">{tone.label}</span>
                         </button>
                       ))}
                     </div>

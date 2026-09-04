@@ -17,6 +17,7 @@ export const VARIANT_MAP: Record<string, string> = {
   "Karina": "45733638537369",
   "Pooja": "45820766159001",
   "Aaliyah": "45733638307993",
+  "Sonia": "45917084745881",
 };
 
 // Product details for each variant name
@@ -38,6 +39,7 @@ export const PRODUCT_DETAILS: Record<string, { label: string; description: strin
   "Shivani": { label: "Color Study Demi-Satin in Shivani", description: "Muted mauve with earthy undertones", color: "#8a6070" },
   "Nyla": { label: "Color Study Demi-Satin in Nyla", description: "Warm cinnamon-brown with a smooth satin finish", color: "#8b5a3a" },
   "Karina": { label: "Color Study Demi-Satin in Karina", description: "Cool-toned berry with a sophisticated edge", color: "#7a3050" },
+  "Sonia": { label: "Color Study Demi-Satin in Sonia", description: "Dark pomegranate red with a juicy berry bite", color: "#8f2839" },
 };
 
 export type RecommendationCategory = "MLBB" | "RED" | "DAY" | "EVENING";

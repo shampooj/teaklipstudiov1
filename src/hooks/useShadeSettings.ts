@@ -8,6 +8,7 @@ export interface ShadeSetting {
   hex: string;
   finish: string;
   opacity: number;
+  gloss: number;
 }
 
 export function useShadeSettings(
@@ -22,14 +23,16 @@ export function useShadeSettings(
     staleTime: 60_000,
     queryFn: async () => {
       const { data, error } = await (supabase.from as any)("lipstick_shade_settings")
-        .select("variant_name, skin_tone, lip_tone, hex, finish, opacity")
+        // "*" rather than a column list so a client deployed ahead of the
+        // gloss migration (Vercel preview vs. CI db push) still reads rows.
+        .select("*")
         .eq("skin_tone", skinTone)
         .eq("lip_tone", lipTone)
         .in("variant_name", variantNames);
       if (error) throw error;
       const map: Record<string, ShadeSetting> = {};
       for (const row of (data ?? []) as ShadeSetting[]) {
-        map[row.variant_name] = { ...row, opacity: Number(row.opacity) };
+        map[row.variant_name] = { ...row, opacity: Number(row.opacity), gloss: Number(row.gloss ?? 0) };
       }
       return map;
     },

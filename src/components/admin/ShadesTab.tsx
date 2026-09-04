@@ -98,6 +98,8 @@ interface Setting {
   hex: string;
   finish: Finish;
   opacity: number;
+  /** makeup_lipsgloss alpha, 0..1; 0 = off */
+  gloss: number;
 }
 
 
@@ -118,7 +120,7 @@ const ShadesTab = () => {
   const fetchSettings = async () => {
     setLoading(true);
     const { data, error } = await (supabase.from as any)("lipstick_shade_settings")
-      .select("variant_name, skin_tone, lip_tone, hex, finish, opacity")
+      .select("*")
       .eq("variant_name", selectedShade)
       .eq("skin_tone", DEFAULT_SKIN_TONE);
     if (error) {
@@ -134,6 +136,7 @@ const ShadesTab = () => {
         ? {
             ...existing,
             opacity: Number(existing.opacity),
+            gloss: Number(existing.gloss ?? 0),
             // rows saved before the full preset list used matte/satin/glossy
             finish: resolveBanubaFinish(existing.finish),
           }
@@ -144,6 +147,7 @@ const ShadesTab = () => {
             hex: defaultColor,
             finish: "satin",
             opacity: 0.8,
+            gloss: 0,
           };
     });
     setRows(map);
@@ -167,6 +171,7 @@ const ShadesTab = () => {
       hex: r.hex,
       finish: r.finish,
       opacity: r.opacity,
+      gloss: r.gloss,
       updated_at: new Date().toISOString(),
     }));
 
@@ -237,6 +242,7 @@ const ShadesTab = () => {
                   <th className="py-2 pr-3 font-normal">Hex</th>
                   <th className="py-2 pr-3 font-normal">Finish</th>
                   <th className="py-2 pr-3 font-normal w-44">Opacity</th>
+                  <th className="py-2 pr-3 font-normal w-44">Gloss</th>
                   <th className="py-2 pr-3 font-normal w-24"></th>
                   <th className="py-2 pr-3 font-normal w-12"></th>
                 </tr>
@@ -323,6 +329,34 @@ const ShadesTab = () => {
                         </div>
                       </td>
                       <td className="py-2 pr-3">
+                        {/* Banuba makeup_lipsgloss alpha: a specular highlight
+                            layered over the lipstick. 0 omits the layer. */}
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min={0}
+                            max={1}
+                            step={0.05}
+                            value={row.gloss}
+                            onChange={(e) =>
+                              updateRow(t.id, { gloss: Number(e.target.value) })
+                            }
+                            className="flex-1 accent-foreground"
+                          />
+                          <Input
+                            type="number"
+                            min={0}
+                            max={1}
+                            step={0.05}
+                            value={row.gloss}
+                            onChange={(e) =>
+                              updateRow(t.id, { gloss: Number(e.target.value) })
+                            }
+                            className="h-7 w-16 text-[10px] rounded-md"
+                          />
+                        </div>
+                      </td>
+                      <td className="py-2 pr-3">
                         <Button
                           type="button"
                           onClick={() => handleSaveRow(t.id)}
@@ -352,7 +386,7 @@ const ShadesTab = () => {
                     </tr>
                     {previewTone?.id === t.id && (
                       <tr key={`${t.id}-preview`} className="bg-muted/30">
-                        <td colSpan={7} className="py-4 px-3">
+                        <td colSpan={8} className="py-4 px-3">
                           <ErrorBoundary>
                             <BanubaInlinePreview
                               lipToneLabel={t.label}
@@ -360,6 +394,7 @@ const ShadesTab = () => {
                               hex={row.hex}
                               finish={row.finish}
                               opacity={row.opacity}
+                              gloss={row.gloss}
                               scale={false ? 1.5 : 1}
                             />
                           </ErrorBoundary>
