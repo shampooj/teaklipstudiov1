@@ -496,7 +496,17 @@ const Index = () => {
       // these preloads are cache hits when the card renders.
       return recommendations.map((rec) => {
         const s = shadeSettings[rec.variantName];
-        if (s) return { key: rec.variantName, hex: s.hex, finish: s.finish, opacity: s.opacity, gloss: s.gloss };
+        if (s) {
+          return {
+            key: rec.variantName,
+            hex: s.hex,
+            finish: s.finish,
+            opacity: s.opacity,
+            gloss: s.gloss,
+            shineIntensity: s.shine_intensity,
+            shineScale: s.shine_scale,
+          };
+        }
         const details = PRODUCT_DETAILS[rec.variantName];
         return { key: rec.variantName, hex: details?.color ?? "#000000", finish: "satin", opacity: 0.8, gloss: 0 };
       });

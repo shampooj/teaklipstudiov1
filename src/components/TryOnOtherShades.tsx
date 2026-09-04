@@ -78,6 +78,8 @@ const TryOnOtherShades = ({
           finish: "satin",
           opacity: 0.8,
           gloss: 0,
+          shine_intensity: 0,
+          shine_scale: 1,
         },
       };
     }
@@ -108,7 +110,15 @@ const TryOnOtherShades = ({
   const activeSpecs = useMemo<ShadeSnapshotSpec[]>(
     () =>
       active
-        ? [{ key: active.name, hex: active.setting.hex, finish: active.setting.finish, opacity: active.setting.opacity, gloss: active.setting.gloss }]
+        ? [{
+            key: active.name,
+            hex: active.setting.hex,
+            finish: active.setting.finish,
+            opacity: active.setting.opacity,
+            gloss: active.setting.gloss,
+            shineIntensity: active.setting.shine_intensity,
+            shineScale: active.setting.shine_scale,
+          }]
         : [],
     [active],
   );

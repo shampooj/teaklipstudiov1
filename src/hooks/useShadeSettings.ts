@@ -9,6 +9,8 @@ export interface ShadeSetting {
   finish: string;
   opacity: number;
   gloss: number;
+  shine_intensity: number;
+  shine_scale: number;
 }
 
 export function useShadeSettings(
@@ -32,7 +34,13 @@ export function useShadeSettings(
       if (error) throw error;
       const map: Record<string, ShadeSetting> = {};
       for (const row of (data ?? []) as ShadeSetting[]) {
-        map[row.variant_name] = { ...row, opacity: Number(row.opacity), gloss: Number(row.gloss ?? 0) };
+        map[row.variant_name] = {
+          ...row,
+          opacity: Number(row.opacity),
+          gloss: Number(row.gloss ?? 0),
+          shine_intensity: Number(row.shine_intensity ?? 0),
+          shine_scale: Number(row.shine_scale ?? 1),
+        };
       }
       return map;
     },

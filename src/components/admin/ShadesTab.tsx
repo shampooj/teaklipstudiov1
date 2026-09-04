@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_DETAILS, getComplexionType } from "@/data/lipstickRecommendations";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ import {
   finishLabel,
   resolveBanubaFinish,
 } from "@/lib/banubaFinish";
+import { SHINE_DEFAULT_SCALE, SHINE_SCALE_MAX, shineFrom } from "@/lib/banubaEffect";
 
 const AVATAR_IMAGES = [
   nero,
@@ -83,6 +84,55 @@ const LIP_TONES = [
 
 type Finish = BanubaFinish;
 
+// Labelled control cell for the per-tone card grid.
+const Field = ({ label, children }: { label: string; children: ReactNode }) => (
+  <label className="block space-y-1">
+    <span className="block text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
+    {children}
+  </label>
+);
+
+const SliderField = ({
+  label,
+  value,
+  onChange,
+  max = 1,
+  step = 0.05,
+  disabled = false,
+}: {
+  label: string;
+  value: number;
+  onChange: (v: number) => void;
+  max?: number;
+  step?: number;
+  disabled?: boolean;
+}) => (
+  <Field label={label}>
+    <div className="flex items-center gap-2">
+      <input
+        type="range"
+        min={0}
+        max={max}
+        step={step}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="flex-1 min-w-0 accent-foreground disabled:opacity-40"
+      />
+      <Input
+        type="number"
+        min={0}
+        max={max}
+        step={step}
+        value={value}
+        disabled={disabled}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="h-7 w-16 shrink-0 text-[10px] rounded-md"
+      />
+    </div>
+  </Field>
+);
+
 const SKIN_TONES = [
   { id: "light-brown", label: "Light Brown" },
   { id: "medium-brown", label: "Medium Brown" },
@@ -100,6 +150,10 @@ interface Setting {
   opacity: number;
   /** makeup_lipsgloss alpha, 0..1; 0 = off */
   gloss: number;
+  /** makeup_lipsshine alpha, 0..1; 0 = off */
+  shine_intensity: number;
+  /** makeup_lipsshine scale; Banuba's shine preset is 1 */
+  shine_scale: number;
 }
 
 
@@ -137,6 +191,8 @@ const ShadesTab = () => {
             ...existing,
             opacity: Number(existing.opacity),
             gloss: Number(existing.gloss ?? 0),
+            shine_intensity: Number(existing.shine_intensity ?? 0),
+            shine_scale: Number(existing.shine_scale ?? SHINE_DEFAULT_SCALE),
             // rows saved before the full preset list used matte/satin/glossy
             finish: resolveBanubaFinish(existing.finish),
           }
@@ -148,6 +204,8 @@ const ShadesTab = () => {
             finish: "satin",
             opacity: 0.8,
             gloss: 0,
+            shine_intensity: 0,
+            shine_scale: SHINE_DEFAULT_SCALE,
           };
     });
     setRows(map);
@@ -172,6 +230,8 @@ const ShadesTab = () => {
       finish: r.finish,
       opacity: r.opacity,
       gloss: r.gloss,
+      shine_intensity: r.shine_intensity,
+      shine_scale: r.shine_scale,
       updated_at: new Date().toISOString(),
     }));
 
@@ -233,179 +293,123 @@ const ShadesTab = () => {
         {loading ? (
           <p className="text-muted-foreground text-xs text-center py-8">Loading…</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-[10px]">
-              <thead>
-                <tr className="text-left text-muted-foreground uppercase tracking-widest text-[9px]">
-                  <th className="py-2 pr-3 font-normal w-40">Preview</th>
-                  <th className="py-2 pr-3 font-normal">Lip Tone</th>
-                  <th className="py-2 pr-3 font-normal">Hex</th>
-                  <th className="py-2 pr-3 font-normal">Finish</th>
-                  <th className="py-2 pr-3 font-normal w-44">Opacity</th>
-                  <th className="py-2 pr-3 font-normal w-44">Gloss</th>
-                  <th className="py-2 pr-3 font-normal w-24"></th>
-                  <th className="py-2 pr-3 font-normal w-12"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {LIP_TONES.map((t, tIdx) => {
-                  const row = rows[t.id];
-                  if (!row) return null;
-                  const avatarImg = avatarFor(t.id, tIdx);
-                  return (
-                    <Fragment key={t.id}>
-                    <tr className="border-t border-border">
-                      <td className="py-2 pr-3">
-                        <div className="relative w-36 h-36 rounded-lg overflow-hidden border border-border bg-muted">
-                          <img
-                            src={avatarImg}
-                            alt={t.label}
-                            className={`absolute inset-0 w-full h-full object-cover ${
-                              false
-                                ? "scale-150"
-                                : ""
-                            }`}
-                          />
-                        </div>
+          <div className="space-y-3">
+            {LIP_TONES.map((t, tIdx) => {
+              const row = rows[t.id];
+              if (!row) return null;
+              const avatarImg = avatarFor(t.id, tIdx);
+              const isOpen = previewTone?.id === t.id;
+              return (
+                <div key={t.id} className="border border-border rounded-xl p-3 sm:p-4 space-y-3">
+                  {/* Header: avatar, tone name, actions. Wraps on narrow screens. */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-16 h-16 sm:w-24 sm:h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
+                      <img src={avatarImg} alt={t.label} className="absolute inset-0 w-full h-full object-cover" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium truncate">{t.label}</p>
+                      <p className="text-[9px] text-muted-foreground truncate">{t.id}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Button
+                        type="button"
+                        onClick={() => handleSaveRow(t.id)}
+                        disabled={savingRow === t.id}
+                        className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
+                      >
+                        {savingRow === t.id ? "Saving…" : "Save"}
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewTone((cur) => (cur?.id === t.id ? null : t))}
+                        className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors"
+                        aria-label={`Preview ${t.label} with Banuba`}
+                        title={isOpen ? "Close preview" : "Preview with Banuba"}
+                      >
+                        {isOpen ? <X className="w-3.5 h-3.5" /> : <Pencil className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
 
-                      </td>
-                      <td className="py-2 pr-3 font-medium">{t.label}</td>
-                      <td className="py-2 pr-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={row.hex}
-                            onChange={(e) => updateRow(t.id, { hex: e.target.value })}
-                            className="h-7 w-10 rounded border border-border cursor-pointer bg-transparent"
-                          />
-                          <Input
-                            value={row.hex}
-                            onChange={(e) => updateRow(t.id, { hex: e.target.value })}
-                            className="h-7 w-24 text-[10px] rounded-md"
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2 pr-3">
-                        <Select
-                          value={row.finish}
-                          onValueChange={(v) => updateRow(t.id, { finish: v as Finish })}
-                        >
-                          <SelectTrigger className="h-7 w-44 text-[10px] rounded-md border-foreground/20">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent className="rounded-2xl max-h-72">
-                            {BANUBA_FINISHES.map((f) => (
-                              <SelectItem key={f} value={f} className="text-[10px]">
-                                {finishLabel(f)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="py-2 pr-3">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min={0}
-                            max={1}
-                            step={0.05}
-                            value={row.opacity}
-                            onChange={(e) =>
-                              updateRow(t.id, { opacity: Number(e.target.value) })
-                            }
-                            className="flex-1 accent-foreground"
-                          />
-                          <Input
-                            type="number"
-                            min={0}
-                            max={1}
-                            step={0.05}
-                            value={row.opacity}
-                            onChange={(e) =>
-                              updateRow(t.id, { opacity: Number(e.target.value) })
-                            }
-                            className="h-7 w-16 text-[10px] rounded-md"
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2 pr-3">
-                        {/* Banuba makeup_lipsgloss alpha: a specular highlight
-                            layered over the lipstick. 0 omits the layer. */}
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="range"
-                            min={0}
-                            max={1}
-                            step={0.05}
-                            value={row.gloss}
-                            onChange={(e) =>
-                              updateRow(t.id, { gloss: Number(e.target.value) })
-                            }
-                            className="flex-1 accent-foreground"
-                          />
-                          <Input
-                            type="number"
-                            min={0}
-                            max={1}
-                            step={0.05}
-                            value={row.gloss}
-                            onChange={(e) =>
-                              updateRow(t.id, { gloss: Number(e.target.value) })
-                            }
-                            className="h-7 w-16 text-[10px] rounded-md"
-                          />
-                        </div>
-                      </td>
-                      <td className="py-2 pr-3">
-                        <Button
-                          type="button"
-                          onClick={() => handleSaveRow(t.id)}
-                          disabled={savingRow === t.id}
-                          className="rounded-full bg-foreground text-background hover:bg-foreground/85 text-[9px] px-3 h-7"
-                        >
-                          {savingRow === t.id ? "Saving…" : "Save"}
-                        </Button>
-                      </td>
-                      <td className="py-2 pr-3">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setPreviewTone((cur) => (cur?.id === t.id ? null : t))
-                          }
-                          className="h-7 w-7 inline-flex items-center justify-center rounded-full border border-border hover:bg-muted transition-colors"
-                          aria-label={`Preview ${t.label} with Banuba`}
-                          title={previewTone?.id === t.id ? "Close preview" : "Preview with Banuba"}
-                        >
-                          {previewTone?.id === t.id ? (
-                            <X className="w-3.5 h-3.5" />
-                          ) : (
-                            <Pencil className="w-3.5 h-3.5" />
-                          )}
-                        </button>
-                      </td>
-                    </tr>
-                    {previewTone?.id === t.id && (
-                      <tr key={`${t.id}-preview`} className="bg-muted/30">
-                        <td colSpan={8} className="py-4 px-3">
-                          <ErrorBoundary>
-                            <BanubaInlinePreview
-                              lipToneLabel={t.label}
-                              lipToneImage={avatarImg}
-                              hex={row.hex}
-                              finish={row.finish}
-                              opacity={row.opacity}
-                              gloss={row.gloss}
-                              scale={false ? 1.5 : 1}
-                            />
-                          </ErrorBoundary>
-                        </td>
-                      </tr>
-                    )}
-                  </Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
+                  {/* Controls: one column on phones, two on tablets, three on wide screens. */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-3 text-[10px]">
+                    <Field label="Hex">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="color"
+                          value={row.hex}
+                          onChange={(e) => updateRow(t.id, { hex: e.target.value })}
+                          className="h-7 w-10 shrink-0 rounded border border-border cursor-pointer bg-transparent"
+                        />
+                        <Input
+                          value={row.hex}
+                          onChange={(e) => updateRow(t.id, { hex: e.target.value })}
+                          className="h-7 w-full text-[10px] rounded-md"
+                        />
+                      </div>
+                    </Field>
+                    <Field label="Finish">
+                      <Select
+                        value={row.finish}
+                        onValueChange={(v) => updateRow(t.id, { finish: v as Finish })}
+                      >
+                        <SelectTrigger className="h-7 w-full text-[10px] rounded-md border-foreground/20">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-2xl max-h-72">
+                          {BANUBA_FINISHES.map((f) => (
+                            <SelectItem key={f} value={f} className="text-[10px]">
+                              {finishLabel(f)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Field>
+                    <SliderField
+                      label="Opacity"
+                      value={row.opacity}
+                      onChange={(v) => updateRow(t.id, { opacity: v })}
+                    />
+                    {/* Banuba makeup_lipsgloss alpha: a specular highlight
+                        layered over the lipstick. 0 omits the layer. */}
+                    <SliderField
+                      label="Gloss"
+                      value={row.gloss}
+                      onChange={(v) => updateRow(t.id, { gloss: v })}
+                    />
+                    {/* Banuba makeup_lipsshine: wet-look overlay. 0 omits the layer. */}
+                    <SliderField
+                      label="Shine intensity"
+                      value={row.shine_intensity}
+                      onChange={(v) => updateRow(t.id, { shine_intensity: v })}
+                    />
+                    <SliderField
+                      label="Shine scale"
+                      value={row.shine_scale}
+                      max={SHINE_SCALE_MAX}
+                      disabled={row.shine_intensity <= 0}
+                      onChange={(v) => updateRow(t.id, { shine_scale: v })}
+                    />
+                  </div>
+
+                  {isOpen && (
+                    <div className="rounded-lg bg-muted/30 p-3">
+                      <ErrorBoundary>
+                        <BanubaInlinePreview
+                          lipToneLabel={t.label}
+                          lipToneImage={avatarImg}
+                          hex={row.hex}
+                          finish={row.finish}
+                          opacity={row.opacity}
+                          gloss={row.gloss}
+                          shine={shineFrom(row.shine_intensity, row.shine_scale)}
+                        />
+                      </ErrorBoundary>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

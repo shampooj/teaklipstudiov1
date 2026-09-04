@@ -1,7 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { BANUBA_SDK_BASE, locateBanubaFile } from "@/lib/banubaAssets";
 import { resolveBanubaFinish } from "@/lib/banubaFinish";
-import { buildEffectZip, clampGloss } from "@/lib/banubaEffect";
+import { buildEffectZip, clampGloss, shineFrom } from "@/lib/banubaEffect";
 
 // One shared Banuba player renders every shade sequentially and hands callers
 // static snapshots. Mobile tabs cannot afford a WASM face tracker per product
@@ -15,6 +15,10 @@ export interface ShadeSnapshotSpec {
   opacity: number;
   /** makeup_lipsgloss alpha, 0..1; 0 = off */
   gloss?: number;
+  /** makeup_lipsshine alpha, 0..1; 0 = off */
+  shineIntensity?: number;
+  /** makeup_lipsshine scale; preset 1 */
+  shineScale?: number;
 }
 
 const MODULE_IDS = ["face_tracker", "lips", "skin", "makeup"];
@@ -131,7 +135,9 @@ let lastCaptureSignature: string | null = null;
 async function renderSnapshot(imageUrl: string, spec: ShadeSnapshotSpec): Promise<string> {
   const { sdk, player, capture } = await getEngine();
   const file = await getInputFile(imageUrl);
-  const effect = new sdk.Effect(buildEffectZip(spec));
+  const effect = new sdk.Effect(
+    buildEffectZip({ ...spec, shine: shineFrom(spec.shineIntensity, spec.shineScale) }),
+  );
   await player.applyEffect(effect);
   await player.use(new sdk.Image(file));
   player.play({ pauseOnEmpty: false });
@@ -167,7 +173,9 @@ let queue: Promise<unknown> = Promise.resolve();
 export function snapshotShade(imageUrl: string, spec: ShadeSnapshotSpec): Promise<string> {
   // Key on the resolved finish so legacy aliases share a cache entry with
   // their canonical preset instead of re-rendering an identical frame.
-  const cacheKey = `${imageUrl}|${spec.hex}|${resolveBanubaFinish(spec.finish)}|${spec.opacity}|${clampGloss(spec.gloss)}`;
+  const shine = shineFrom(spec.shineIntensity, spec.shineScale);
+  const shineKey = shine ? `${shine.intensity}:${shine.scale}` : "0";
+  const cacheKey = `${imageUrl}|${spec.hex}|${resolveBanubaFinish(spec.finish)}|${spec.opacity}|${clampGloss(spec.gloss)}|${shineKey}`;
   const hit = snapshotCache.get(cacheKey);
   if (hit) return hit;
 
