@@ -63,11 +63,11 @@ import ltMostlyPink3 from "@/assets/lip-tone/web/mostly-pink-3.jpg";
 import ltMostlyPink4 from "@/assets/lip-tone/web/mostly-pink-4.jpg";
 
 export const SKIN_TONES = [
-  { id: "light-brown", label: "Light Brown", color: "#C68642", samples: [stSanna, stSaira, stArris, stHareem] },
+  { id: "light-brown", label: "Light Brown", color: "#D9B48F", samples: [stSanna, stSaira, stArris, stHareem] },
   { id: "medium-brown", label: "Medium Brown", color: "#8D5524", samples: [stTerushka, stNoreen, stTanvi, stAashi] },
-  { id: "deep-brown", label: "Deep Brown", color: "#5C3317", samples: [stCynthia, stDoe, stNero, stAnastasia] },
-  { id: "rich-brown", label: "Rich Brown", color: "#3B1E08", samples: [stDivya, stAaliyah, stCharithra, stPritt] },
-  { id: "full-brown", label: "Full Brown", color: "#2A1505", samples: [stMaseray, stGeeta, stApoorva, stLakshmi] },
+  { id: "deep-brown", label: "Deep Brown", color: "#7B4722", samples: [stCynthia, stDoe, stNero, stAnastasia] },
+  { id: "rich-brown", label: "Rich Brown", color: "#6A3C1C", samples: [stDivya, stAaliyah, stCharithra, stPritt] },
+  { id: "full-brown", label: "Full Brown", color: "#5C3317", samples: [stMaseray, stGeeta, stApoorva, stLakshmi] },
 ] as const;
 
 export const LIP_TONE_ROWS = [
