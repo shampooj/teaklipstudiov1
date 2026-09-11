@@ -5,6 +5,7 @@ import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation } from "@/data/lipstickRec
 import { shareLook, downloadLook } from "@/lib/shareLook";
 import teakLogo from "@/assets/teak-logo.png";
 import { useShadeSettings, ShadeSetting } from "@/hooks/useShadeSettings";
+import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import { useVariantImages } from "@/hooks/useVariantImages";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
@@ -55,6 +56,7 @@ const TryOnOtherShades = ({
   complexionType,
 }: Props) => {
   const { data: settings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
+  const { data: swatches } = useShadeSwatches();
   const variantImages = useVariantImages(ALL_VARIANT_IDS);
 
   const shadesByName = useMemo(() => {
@@ -65,7 +67,7 @@ const TryOnOtherShades = ({
       map[name] = {
         name,
         variantId: VARIANT_MAP[name],
-        color: details?.color ?? "#000",
+        color: swatchColor(name, swatches),
         label: details?.label ?? name,
         formula: extractFormula(details?.label ?? name),
         // Founder-tuned setting for this complexion when one exists,
@@ -84,7 +86,7 @@ const TryOnOtherShades = ({
       };
     }
     return map;
-  }, [settings, skinTone, lipTone]);
+  }, [settings, swatches, skinTone, lipTone]);
 
   const pickNames = useMemo(() => {
     const seen = new Set<string>();
@@ -96,6 +98,16 @@ const TryOnOtherShades = ({
     () => ALL_VARIANT_NAMES.filter((n) => !pickNames.includes(n)),
     [pickNames],
   );
+  // Category title(s) for each pick, e.g. "A Statement Red". A shade
+  // recommended in two categories lists both.
+  const categoryByName = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const r of recommendations) {
+      const list = (map[r.variantName] ??= []);
+      if (!list.includes(r.categoryLabel)) list.push(r.categoryLabel);
+    }
+    return map;
+  }, [recommendations]);
 
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
@@ -161,38 +173,64 @@ const TryOnOtherShades = ({
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-2.5 bg-background border border-foreground p-4">
       <span className="mt-1 mb-2.5 font-display text-[28px] leading-[29px] text-foreground text-center">
-        You are{" "}
+        Top Recs for{" "}
         {complexionType !== null ? (
           <span className="text-green-700">Complexion {complexionType}</span>
         ) : (
-          "Unique"
+          "You"
         )}
       </span>
 
       <div className="w-full flex flex-col gap-4 px-1">
         {pickNames.length > 0 && (
-          <div className="border-t border-foreground/20 pt-3.5">
-            <p className="font-display text-[18px] leading-[18px] tracking-normal text-foreground text-center mb-2.5">
-              Top Recs for Your Complexion
-            </p>
+          <div>
             <div className="flex flex-wrap items-start justify-center gap-x-2.5 gap-y-2">
               {pickNames.map((name) => swatch(name))}
             </div>
+            {/* Title of the category the shade on the lips was picked for;
+                blank (but space held) while a non-pick shade is selected. */}
+            <p className="mt-2.5 min-h-[13px] font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
+              {activeName ? (categoryByName[activeName] ?? []).join(" · ") : ""}
+            </p>
           </div>
         )}
         <div className="border-t border-foreground/20 pt-3.5">
+          <p className="font-display text-[18px] leading-[18px] tracking-normal text-foreground text-center mb-2.5">
+            Other Shades to Try
+          </p>
           <div className="flex flex-wrap items-start justify-center gap-x-2.5 gap-y-2">
             {restNames.map((name) => swatch(name))}
           </div>
         </div>
       </div>
 
-      <div className="w-full aspect-[3/4] rounded-md overflow-hidden bg-muted relative mx-auto max-w-sm">
-        <img
-          src={activeSnapshot ?? userFace}
-          alt={`${active.label} on your photo`}
-          className="w-full h-full object-cover"
-        />
+      {/* Photo plus the same branded bar composeBrandedImage draws on the
+          downloaded/shared file, so what's on screen is what gets saved.
+          Every dimension is a % of the image width (cqw), mirroring the
+          canvas proportions in src/lib/shareLook.ts. */}
+      <div className="w-full mx-auto max-w-sm" style={{ containerType: "inline-size" }}>
+        <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
+          <img
+            src={activeSnapshot ?? userFace}
+            alt={`${active.label} on your photo`}
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div
+          className="w-full bg-white text-black flex items-start justify-between font-display leading-none"
+          style={{ height: "19cqw", padding: "4.56cqw 5cqw 0" }}
+        >
+          <div>
+            <img src={teakLogo} alt="TEAK" style={{ height: "5cqw", width: "auto" }} />
+            <p style={{ fontSize: "2.8cqw", marginTop: "1.8cqw" }}>Virtual Lip Studio</p>
+          </div>
+          <div className="text-right">
+            <p style={{ fontSize: "4.2cqw" }}>{active.name}</p>
+            <p style={{ fontSize: "2.6cqw", marginTop: "1.6cqw", color: "#595959" }}>
+              {activeImg?.productTitle ?? active.formula}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col items-center gap-1">
@@ -273,6 +311,20 @@ const TryOnOtherShades = ({
             <Download className="w-2.5 h-2.5" />
           </Button>
         </div>
+        <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
+          Buy 2+ Lipsticks for Free U.S. Standard Shipping
+        </p>
+        <p className="w-full mt-2.5 pt-3.5 border-t border-foreground/20 font-display text-[12px] leading-[15px] tracking-normal text-foreground text-center">
+          Feeling unsure? Email a selfie to{" "}
+          <a
+            href="mailto:hello@teakbeauty.com"
+            className="underline hover:text-muted-foreground transition-colors"
+            onClick={() => trackEvent("concierge_email_clicked", { variant_name: active.name, source: "unified_try_on" })}
+          >
+            hello@teakbeauty.com
+          </a>{" "}
+          for shade recs from trained color specialists at Teak's free Color Concierge
+        </p>
       </div>
     </div>
   );

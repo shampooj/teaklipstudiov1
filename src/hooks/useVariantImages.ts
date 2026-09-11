@@ -50,6 +50,7 @@ export interface VariantImageData {
   imageUrl: string | null;
   altText: string | null;
   price: string | null;
+  currencyCode: string | null;
   productTitle: string | null;
   productHandle: string | null;
   metaImages: MetaImage[];
@@ -131,6 +132,7 @@ export function useVariantImages(variantIds: string[]): Record<string, VariantIm
             imageUrl: node.image?.url ?? null,
             altText: node.image?.altText ?? null,
             price: node.price?.amount ?? null,
+            currencyCode: node.price?.currencyCode ?? null,
             productTitle: node.product?.title ?? null,
             productHandle: node.product?.handle ?? null,
             metaImages,

@@ -1,0 +1,71 @@
+<!--
+  Lip Studio embed: the COMPLETE contents of the Custom Liquid section on
+  teakbeauty.com/pages/r-d (Shopify "Be Yours" theme). Not part of this app;
+  this file is the versioned copy. Paste the whole thing over that section
+  when it changes. The iframe must stay: it is the quiz.
+
+  The listener handles "cart-add" from the Add to Cart button inside the
+  iframe: adds the variant, tags the cart with quiz_session_id (checkout/order
+  webhooks read it), REPAINTS the theme's cart drawer + header badges, and
+  opens the drawer. Without the repaint the add succeeds silently: the drawer
+  keeps saying "Your cart is currently empty" until the page reloads.
+
+  The iframe height / scroll-to-top listener lives elsewhere in the theme.
+-->
+<iframe
+  src="https://lipstudio.teakbeauty.com"
+  title="TEAK Virtual Lip Studio"
+  style="width: 100%; height: 90vh; border: 0; display: block;"
+  allow="camera; web-share"
+  loading="lazy"
+></iframe>
+
+<script>
+  window.addEventListener("message", async (event) => {
+    if (event.origin !== "https://lipstudio.teakbeauty.com") return;
+    if (event.data?.type !== "cart-add") return;
+
+    // The Be Yours <mini-cart> element repaints these sections from the HTML
+    // Shopify returns alongside the add, then opens the drawer.
+    const miniCart = document.querySelector("mini-cart");
+    const sections = miniCart && typeof miniCart.getSectionsToRender === "function"
+      ? miniCart.getSectionsToRender().map((s) => s.section).join(",")
+      : "mini-cart,cart-icon-bubble,mobile-cart-icon-bubble";
+
+    try {
+      const res = await fetch("/cart/add.js", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: event.data.variantId,
+          quantity: event.data.quantity || 1,
+          sections,
+          sections_url: window.location.pathname,
+        }),
+      });
+      const state = res.ok ? await res.json() : null;
+
+      if (res.ok && event.data.quizSessionId) {
+        await fetch("/cart/update.js", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ attributes: { quiz_session_id: event.data.quizSessionId } }),
+        });
+      }
+
+      if (state && state.sections && miniCart && typeof miniCart.renderContents === "function") {
+        miniCart.renderContents(state);
+      }
+      if (res.ok) {
+        document.dispatchEvent(new CustomEvent("cart:updated", { detail: { cart: state } }));
+        if (typeof publish === "function" && typeof PUB_SUB_EVENTS !== "undefined") {
+          publish(PUB_SUB_EVENTS.cartUpdate, { source: "lip-studio" });
+        }
+      }
+
+      event.source.postMessage({ type: "cart-add-response", success: res.ok }, event.origin);
+    } catch (e) {
+      event.source.postMessage({ type: "cart-add-response", success: false }, event.origin);
+    }
+  });
+</script>

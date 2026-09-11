@@ -22,7 +22,22 @@ export interface QuizModelRow {
 
 export interface QuizModel extends QuizModelRow {
   url: string;
+  /** Short caption shown on the model's tile in the quiz, or null for none. */
+  label: string | null;
 }
+
+// Bundled model photos that are AI-generated rather than photographed. The
+// quiz tile carries a caption so quiz-takers know. Keyed by filename, the
+// same key quiz_models rows use.
+export const AI_MODEL_IMAGE_KEYS = new Set([
+  "skin_tone_apoorva.jpg",
+  "skin_tone_charithra.jpg",
+  "skin_tone_geeta.jpg",
+  "skin_tone_lakshmi.jpg",
+]);
+
+export const modelLabel = (row: Pick<QuizModelRow, "image_key">): string | null =>
+  row.image_key && AI_MODEL_IMAGE_KEYS.has(row.image_key) ? "AI model" : null;
 
 export const resolveModelUrl = (row: QuizModelRow): string | null => {
   if (row.image_key) return BUNDLED_MODEL_IMAGES[row.image_key] ?? null;
@@ -34,7 +49,7 @@ export const resolveModelUrl = (row: QuizModelRow): string | null => {
 
 const toModels = (rows: QuizModelRow[]): QuizModel[] =>
   rows
-    .map((row) => ({ ...row, url: resolveModelUrl(row) }))
+    .map((row) => ({ ...row, url: resolveModelUrl(row), label: modelLabel(row) }))
     .filter((m): m is QuizModel => !!m.url);
 
 // Quiz-facing: only displayed models (anon RLS enforces the same filter).

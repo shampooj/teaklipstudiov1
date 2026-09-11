@@ -50,6 +50,22 @@ import aaliyah from "@/assets/aaliyah.jpg";
 import nupoora from "@/assets/nupoora.jpg";
 import tanvi from "@/assets/tanvi.jpg";
 
+// Fallback roster entries whose photos are AI-generated (see AI_MODEL_IMAGE_KEYS).
+const FALLBACK_AI_AVATAR_IDS = new Set(["avatar-geeta", "avatar-apoorva"]);
+// Top-of-step Back control. Lives above each step's title so it is never
+// pushed below the fold on long mobile pages.
+const BackButton = ({ onClick }: { onClick: () => void }) => (
+  <div className="w-full flex justify-start">
+    <Button
+      onClick={onClick}
+      size="lg"
+      variant="outline"
+      className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+      <ArrowLeft className="w-3 h-3" /> Back
+    </Button>
+  </div>
+);
+
 const AVATAR_OPTIONS = [
   { id: "avatar-6", url: stMaseray },
   { id: "skin-rich-brown", url: stAaliyah },
@@ -79,10 +95,10 @@ const SHIRT_OPTIONS = [
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
 const LIPSTICK_LOOKS = [
-{ id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
-{ id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
-{ id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
-{ id: "coral-sunset", label: "Color Study Demi-Satin in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
+{ id: "nude-rose", label: "Demi-Satin Color Study Lipstick in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
+{ id: "deep-terracotta", label: "Demi-Satin Color Study Lipstick in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
+{ id: "classic-red", label: "Demi-Satin Color Study Lipstick in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
+{ id: "coral-sunset", label: "Demi-Satin Color Study Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
 { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b", variantId: "45733508546713" }] as
 const;
 
@@ -480,8 +496,14 @@ const Index = () => {
   const avatarOptions = useMemo(
     () =>
       quizModels && quizModels.length > 0
-        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone }))
-        : AVATAR_OPTIONS.map((a) => ({ id: a.id, url: a.url as string, skin: null as string | null, lip: null as string | null })),
+        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone, label: m.label }))
+        : AVATAR_OPTIONS.map((a) => ({
+            id: a.id,
+            url: a.url as string,
+            skin: null as string | null,
+            lip: null as string | null,
+            label: FALLBACK_AI_AVATAR_IDS.has(a.id) ? "AI model" : null,
+          })),
     [quizModels],
   );
 
@@ -670,7 +692,11 @@ const Index = () => {
 
 
   return (
-    <div className="bg-background flex flex-col">
+    // quiz-zoom: the quiz is a single ~512px column, which reads fine as a
+    // standalone tab but tiny inside the store's 1275px-wide embed. On wide
+    // viewports the whole column is scaled up (see index.css) rather than
+    // re-laid out, so every step keeps its proportions.
+    <div className="bg-background flex flex-col quiz-zoom">
       {/* Main Content */}
       <main className="flex-1 flex items-start justify-center px-4 pt-10 pb-16">
         <div className="w-full max-w-2xl">
@@ -690,7 +716,10 @@ const Index = () => {
                   The Virtual Lip Studio
                 </h1>
                 <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
-                  In just 3 questions, discover our top lip color recs for your unique brown skin tone and lip tone. Use our Virtual Try On, custom built for brown skin, to see how they might look on.
+                  Select your skin + lip tone | Get lip color recs | Use the Virtual Try On
+                </p>
+                <p className="mt-2 font-display text-[12px] leading-[13px] text-foreground max-w-lg mx-auto">
+                  Custom built for brown skin by the founders of Teak themselves
                 </p>
               </div>
               <div className="w-full max-w-lg grid grid-cols-3">
@@ -717,7 +746,7 @@ const Index = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
-              
+                <BackButton onClick={() => setState("landing")} />
                 <div className="text-center w-full">
                   <p className="font-display text-[28px] leading-[29px] text-foreground">
                     What's your general skintone?
@@ -745,15 +774,6 @@ const Index = () => {
                       </button>
                     ))}
                   </div>
-                  <div className="mt-8 flex gap-3 justify-center">
-                    <Button
-                    onClick={() => setState("landing")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
-                      Back
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             }
@@ -772,7 +792,7 @@ const Index = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
-              
+                <BackButton onClick={() => setState("skin-tone")} />
                 <div className="text-center w-full">
                   <p className="font-display text-[18px] leading-[18px] text-foreground">
                     Take a look in the mirror!
@@ -800,15 +820,6 @@ const Index = () => {
                       </button>
                   )}
                   </div>
-                  <div className="mt-8 flex gap-3 justify-center">
-                    <Button
-                    onClick={() => setState("skin-tone")}
-                    size="lg"
-                    variant="outline"
-                    className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
-                      Back
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             }
@@ -821,7 +832,9 @@ const Index = () => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}>
-              
+                <div className="mb-6">
+                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }} />
+                </div>
                 {!originalImage ?
               <>
                 <h2 className="font-display text-[28px] leading-[29px] text-foreground text-center mb-6">
@@ -849,10 +862,7 @@ const Index = () => {
                               Myself!
                             </p>
                             <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                              Take a selfie now!
-                            </p>
-                            <p className="mt-1 font-display text-[12px] leading-[16px] text-foreground">
-                              Opens your camera — best in front of a window
+                              Take a selfie in front of a window
                             </p>
                           </div>
                         </div>
@@ -881,14 +891,9 @@ const Index = () => {
                           <p className="font-display text-[18px] leading-[18px] text-foreground">
                             Myself!
                           </p>
-                          {mobile && (
-                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                              Upload a pic
-                            </p>
-                          )}
-                          <p className={`${mobile ? "mt-1" : "mt-2"} font-display text-[12px] leading-[16px] text-foreground`}>
+                          <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
                             {mobile
-                              ? "Choose one from your photos"
+                              ? "Upload a pic from my files"
                               : "Upload a selfie, preferably taken in front of a window"}
                           </p>
                         </div>
@@ -916,6 +921,11 @@ const Index = () => {
                           loading="lazy"
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
+                        {avatar.label && (
+                          <span className="absolute bottom-1.5 left-1.5 rounded-sm bg-black/25 px-1.5 py-[2px] font-sans font-medium text-[8px] uppercase tracking-normal text-white/85 backdrop-blur-[2px] pointer-events-none">
+                            {avatar.label}
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>
@@ -1046,16 +1056,8 @@ const Index = () => {
                 </div>
               )}
 
-              {/* Bottom action bar */}
-              <div className={`mt-8 flex items-center ${originalImage ? "justify-between" : "justify-center"} max-w-md mx-auto w-full`}>
-                <Button
-                  onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }}
-                  size="lg"
-                  variant="outline"
-                  className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
-                  Back
-                </Button>
-
+              {/* Bottom action bar: only the primary action; Back lives at the top. */}
+              <div className="mt-8 flex items-center justify-center max-w-md mx-auto w-full">
 {originalImage && (
                 <Button
                   onClick={async () => {
@@ -1194,11 +1196,8 @@ const Index = () => {
                     className="text-foreground font-display text-[18px] leading-[18px]"
                     animate={{ opacity: [0.5, 1, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                    Gathering our lipstick recommendations for you…
+                    Gathering lip recommendations...
                   </motion.p>
-                  <p className="text-muted-foreground font-sans font-medium text-[9px] uppercase tracking-normal">
-                    This won't take long
-                  </p>
                 </div>
               </motion.div>
             }
@@ -1212,7 +1211,9 @@ const Index = () => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
               className="flex flex-col items-center gap-8">
-              
+                <div className="w-full max-w-lg">
+                  <BackButton onClick={() => {setOriginalImage(null);setState("idle");}} />
+                </div>
                 <div className="w-full max-w-lg flex flex-col gap-5">
                   {originalImage && (
                     <TryOnOtherShades
@@ -1242,17 +1243,15 @@ const Index = () => {
                         </p>
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
                       </div>
-                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 flex items-center justify-center text-center">
+                      {/* Hidden on phones: the results card already carries the
+                          free-shipping line, so this box only earns its space
+                          side by side with the code on wider screens. */}
+                      <div className="hidden sm:flex flex-1 min-w-0 bg-background border-2 border-foreground p-4 items-center justify-center text-center">
                         <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
                       </div>
                     </div>
                   )}
 
-                  <div className="flex gap-3 justify-center pt-2">
-                    <Button onClick={() => {setOriginalImage(null);setState("idle");}} size="lg" variant="outline" className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
-                      Back
-                    </Button>
-                  </div>
                 </div>
               </motion.div>
             }

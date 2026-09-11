@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import {
   PRODUCT_DETAILS,
   CATEGORY_ORDER,
@@ -60,6 +61,7 @@ interface Row {
 
 export default function RecommendationsTab() {
   const qc = useQueryClient();
+  const { data: swatches } = useShadeSwatches();
   const [skinTone, setSkinTone] = useState<string>(SKIN_TONE_IDS[0]);
   const [lipTone, setLipTone] = useState<string>(FRONTEND_LIP_TONE_IDS[0]);
   const [slots, setSlots] = useState<Record<RecommendationCategory, string>>({
@@ -183,7 +185,7 @@ export default function RecommendationsTab() {
                 </div>
                 <div
                   className="w-6 h-6 rounded-full border border-border shrink-0"
-                  style={{ backgroundColor: selectedDetails?.color ?? "transparent" }}
+                  style={{ backgroundColor: selected ? swatchColor(selected, swatches) : "transparent" }}
                 />
                 <div className="flex-1">
                   <Select
@@ -193,13 +195,12 @@ export default function RecommendationsTab() {
                     <SelectTrigger className="text-xs"><SelectValue placeholder="Choose product…" /></SelectTrigger>
                     <SelectContent>
                       {variantOptions.map((name) => {
-                        const d = PRODUCT_DETAILS[name];
                         return (
                           <SelectItem key={name} value={name} className="text-xs">
                             <span className="inline-flex items-center gap-2">
                               <span
                                 className="w-3 h-3 rounded-full border border-border inline-block"
-                                style={{ backgroundColor: d.color }}
+                                style={{ backgroundColor: swatchColor(name, swatches) }}
                               />
                               {name}
                             </span>

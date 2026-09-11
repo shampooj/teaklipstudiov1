@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import { Pencil, X } from "lucide-react";
 import BanubaInlinePreview from "./BanubaInlinePreview";
 import ErrorBoundary from "./ErrorBoundary";
+import SwatchColorPicker from "./SwatchColorPicker";
+import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
+import { VARIANT_MAP } from "@/data/lipstickRecommendations";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import nero from "@/assets/nero.jpg";
 import cynthia from "@/assets/cynthia.jpg";
@@ -170,6 +173,7 @@ const ShadesTab = () => {
   const [loading, setLoading] = useState(true);
   const [savingRow, setSavingRow] = useState<string | null>(null);
   const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
+  const { data: swatches } = useShadeSwatches();
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -268,7 +272,7 @@ const ShadesTab = () => {
                   <span className="inline-flex items-center gap-2">
                     <span
                       className="w-3 h-3 rounded-full border border-border"
-                      style={{ backgroundColor: s.color }}
+                      style={{ backgroundColor: swatchColor(s.name, swatches) }}
                     />
                     {s.name} — {s.label}
                   </span>
@@ -283,6 +287,14 @@ const ShadesTab = () => {
       </div>
 
 
+
+      {selectedShade && VARIANT_MAP[selectedShade] && (
+        <SwatchColorPicker
+          variantName={selectedShade}
+          variantId={VARIANT_MAP[selectedShade]}
+          savedHex={swatches?.[selectedShade]}
+        />
+      )}
 
       <div className="border border-border rounded-2xl p-5 space-y-4">
         <p className="text-[9px] uppercase tracking-widest text-muted-foreground">
