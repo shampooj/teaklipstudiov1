@@ -1,0 +1,31 @@
+<!--
+  "Why It Works" embed: contents of a Custom Liquid section on the store
+  page that replaces teakbeauty.com/pages/color-theory. The page itself is
+  served by this app at https://lipstudio.teakbeauty.com/whyitworks.
+
+  The app reports its own height ("embed-resize"), so the iframe grows to
+  fit and the store page scrolls as one. The R&D page's theme code already
+  contains this listener; if the theme has it globally (theme.liquid) the
+  copy below is harmless, it just sets the same height twice.
+-->
+<iframe
+  src="https://lipstudio.teakbeauty.com/whyitworks"
+  title="Why It Works: Color Theory at TEAK"
+  style="width: 100%; height: 90vh; border: 0; display: block;"
+  loading="lazy"
+></iframe>
+
+<script>
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://lipstudio.teakbeauty.com") return;
+    const iframe = [...document.querySelectorAll("iframe")].find((f) => f.contentWindow === event.source);
+    if (!iframe) return;
+    if (event.data?.type === "embed-resize" && typeof event.data.height === "number") {
+      iframe.style.height = Math.max(400, event.data.height) + "px";
+    }
+    if (event.data?.type === "embed-scroll-top") {
+      const top = iframe.getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+    }
+  });
+</script>
