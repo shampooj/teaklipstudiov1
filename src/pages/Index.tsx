@@ -50,6 +50,8 @@ import aaliyah from "@/assets/aaliyah.jpg";
 import nupoora from "@/assets/nupoora.jpg";
 import tanvi from "@/assets/tanvi.jpg";
 
+// Fallback roster entries whose photos are AI-generated (see AI_MODEL_IMAGE_KEYS).
+const FALLBACK_AI_AVATAR_IDS = new Set(["avatar-geeta", "avatar-apoorva"]);
 const AVATAR_OPTIONS = [
   { id: "avatar-6", url: stMaseray },
   { id: "skin-rich-brown", url: stAaliyah },
@@ -79,10 +81,10 @@ const SHIRT_OPTIONS = [
 
 // LIPSTICK_LOOKS kept as fallback but recommendations now drive the UI
 const LIPSTICK_LOOKS = [
-{ id: "nude-rose", label: "Color Study Demi-Satin in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
-{ id: "deep-terracotta", label: "Color Study Demi-Satin in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
-{ id: "classic-red", label: "Color Study Demi-Satin in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
-{ id: "coral-sunset", label: "Color Study Demi-Satin in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
+{ id: "nude-rose", label: "Demi-Satin Color Study Lipstick in Amira", description: "Soft mauve-brown nude with a natural demi-satin finish", color: "#b5837a", variantId: "45733638209689" },
+{ id: "deep-terracotta", label: "Demi-Satin Color Study Lipstick in Amrit", description: "Deep rich terracotta-brick with chocolate undertones", color: "#8b4533", variantId: "45733638340761" },
+{ id: "classic-red", label: "Demi-Satin Color Study Lipstick in Jiya", description: "Timeless, bold red — think Old Hollywood glamour", color: "#b91c1c", variantId: "45733638373529" },
+{ id: "coral-sunset", label: "Demi-Satin Color Study Lipstick in Riya", description: "Warm terracotta-brown matte with a 90s supermodel vibe", color: "#a0522d", variantId: "45733638275225" },
 { id: "berry-wine", label: "Sheer Lipstick Balm in Neha", description: "Deep berry-plum with a luxurious, moody vibe", color: "#7c2d4b", variantId: "45733508546713" }] as
 const;
 
@@ -480,8 +482,14 @@ const Index = () => {
   const avatarOptions = useMemo(
     () =>
       quizModels && quizModels.length > 0
-        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone }))
-        : AVATAR_OPTIONS.map((a) => ({ id: a.id, url: a.url as string, skin: null as string | null, lip: null as string | null })),
+        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone, label: m.label }))
+        : AVATAR_OPTIONS.map((a) => ({
+            id: a.id,
+            url: a.url as string,
+            skin: null as string | null,
+            lip: null as string | null,
+            label: FALLBACK_AI_AVATAR_IDS.has(a.id) ? "AI model" : null,
+          })),
     [quizModels],
   );
 
@@ -690,7 +698,10 @@ const Index = () => {
                   The Virtual Lip Studio
                 </h1>
                 <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
-                  In just 3 questions, discover our top lip color recs for your unique brown skin tone and lip tone. Use our Virtual Try On, custom built for brown skin, to see how they might look on.
+                  Select your skin + lip tone | Get lip color recs | Use the Virtual Try On
+                </p>
+                <p className="mt-2 font-display text-[12px] leading-[13px] text-foreground max-w-lg mx-auto">
+                  Custom built for brown skin by the founders of Teak themselves
                 </p>
               </div>
               <div className="w-full max-w-lg grid grid-cols-3">
@@ -916,6 +927,11 @@ const Index = () => {
                           loading="lazy"
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
+                        {avatar.label && (
+                          <span className="absolute bottom-2 left-2 bg-background/90 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground">
+                            {avatar.label}
+                          </span>
+                        )}
                       </button>
                     ))}
                   </div>

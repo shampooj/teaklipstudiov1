@@ -30,6 +30,19 @@ function extractFormula(label: string): string {
   return idx > 0 ? label.slice(0, idx) : label;
 }
 
+// Shopify returns the amount as a decimal string ("28.0"); show it as a
+// proper currency figure, falling back to a bare "$" when the code is missing.
+function formatPrice(amount: string | null | undefined, currencyCode: string | null | undefined): string | null {
+  if (!amount) return null;
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return null;
+  try {
+    return new Intl.NumberFormat("en-US", { style: "currency", currency: currencyCode || "USD" }).format(n);
+  } catch {
+    return `$${n.toFixed(2)}`;
+  }
+}
+
 interface Shade {
   name: string;
   variantId: string;
@@ -196,6 +209,16 @@ const TryOnOtherShades = ({
       </div>
 
       <div className="flex flex-col items-center gap-1">
+        {/* Formula + price for the shade on screen, e.g. "Demi-Satin Color Study Lipstick · $28.00". */}
+        {(() => {
+          const price = formatPrice(activeImg?.price, activeImg?.currencyCode);
+          return (
+            <p className="w-full mb-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
+              {active.formula}
+              {price ? ` · ${price}` : ""}
+            </p>
+          );
+        })()}
         <div className="w-full flex flex-wrap gap-2">
           {embedded && (
             <Button
