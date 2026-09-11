@@ -214,6 +214,24 @@ export type Database = {
         }
         Relationships: []
       }
+      shade_swatches: {
+        Row: {
+          hex: string
+          updated_at: string
+          variant_name: string
+        }
+        Insert: {
+          hex: string
+          updated_at?: string
+          variant_name: string
+        }
+        Update: {
+          hex?: string
+          updated_at?: string
+          variant_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           email: string | null
