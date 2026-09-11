@@ -126,3 +126,17 @@
     @apply bg-background text-foreground font-sans antialiased;
   }
 }
+
+/* Desktop scale-up for the quiz column (Index.tsx). CSS zoom scales layout
+   as well as paint, so the embed's auto-height reporting and Tailwind
+   max-widths follow along; media queries still see the real viewport width. */
+@media (min-width: 1024px) {
+  .quiz-zoom {
+    zoom: 1.25;
+  }
+}
+@media (min-width: 1280px) {
+  .quiz-zoom {
+    zoom: 1.4;
+  }
+}

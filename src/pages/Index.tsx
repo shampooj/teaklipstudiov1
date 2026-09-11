@@ -692,7 +692,11 @@ const Index = () => {
 
 
   return (
-    <div className="bg-background flex flex-col">
+    // quiz-zoom: the quiz is a single ~512px column, which reads fine as a
+    // standalone tab but tiny inside the store's 1275px-wide embed. On wide
+    // viewports the whole column is scaled up (see index.css) rather than
+    // re-laid out, so every step keeps its proportions.
+    <div className="bg-background flex flex-col quiz-zoom">
       {/* Main Content */}
       <main className="flex-1 flex items-start justify-center px-4 pt-10 pb-16">
         <div className="w-full max-w-2xl">
