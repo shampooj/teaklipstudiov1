@@ -214,6 +214,24 @@ export type Database = {
         }
         Relationships: []
       }
+      web_features: {
+        Row: {
+          config: Json
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       shade_swatches: {
         Row: {
           hex: string

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 
-const SHOPIFY_STOREFRONT_URL = "https://nupoora-784.myshopify.com/api/2025-07/graphql.json";
-const SHOPIFY_STOREFRONT_TOKEN = "6a6653dc5956c7f18185083590def26d";
+import { SHOPIFY_STOREFRONT_URL, SHOPIFY_STOREFRONT_TOKEN } from "@/lib/shopify";
 
 const VARIANT_IMAGE_QUERY = `
   query GetVariantImages($ids: [ID!]!) {

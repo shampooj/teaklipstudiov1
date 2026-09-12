@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import teakLogo from "@/assets/teak-logo.png";
 import ShadesTab from "@/components/admin/ShadesTab";
+import WebFeaturesTab from "@/components/admin/WebFeaturesTab";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -463,7 +464,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations">("labeling");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations" | "web-features">("labeling");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
@@ -518,6 +519,12 @@ const Dashboard = () => {
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "recommendations" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               Recommendations
+            </button>
+            <button
+              onClick={() => setActiveTab("web-features")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "web-features" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Web Features
             </button>
             <button
               onClick={() => setActiveTab("data")}
@@ -1070,6 +1077,8 @@ const Dashboard = () => {
         {activeTab === "shades" && <ShadesTab />}
 
         {activeTab === "recommendations" && <RecommendationsTab />}
+
+        {activeTab === "web-features" && <WebFeaturesTab />}
 
         {activeTab === "data" && (
           <>
