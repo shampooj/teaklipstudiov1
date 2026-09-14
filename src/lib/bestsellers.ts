@@ -6,6 +6,9 @@
 // config from Supabase (public read on web_features) so admin edits reach
 // the site without re-pasting. Card styling mirrors the Be Yours theme's
 // featured-collection product cards on teakbeauty.com (measured values).
+// The root forces width:100% / flex:1 1 100% because the theme's Custom
+// Liquid section places its content inside a flex slider row, where a grid
+// would otherwise shrink to the width of its wrapped titles.
 import { SHOP_URL } from "@/lib/shopify";
 
 export const BESTSELLERS_KEY = "homepage_bestsellers";
@@ -48,10 +51,10 @@ export interface SnippetOptions {
 }
 
 const CSS = `
-.teak-bs{font-family:WolpePegasus,"Wolpe Pegasus",Georgia,serif;color:#1a1b18;margin:0;padding:0}
+.teak-bs{font-family:WolpePegasus,"Wolpe Pegasus",Georgia,serif;color:#1a1b18;margin:0;padding:0;display:block;width:100%;min-width:0;flex:1 1 100%;box-sizing:border-box}
 .teak-bs *{box-sizing:border-box}
 .teak-bs__heading{font-family:WolpePegasus,"Wolpe Pegasus",Georgia,serif;font-weight:400;font-size:24px;line-height:1.15;letter-spacing:0;margin:0 0 20px;color:#000}
-.teak-bs__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:15px;row-gap:30px;list-style:none;margin:0;padding:0}
+.teak-bs__grid{display:grid;width:100%;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:15px;row-gap:30px;list-style:none;margin:0;padding:0}
 @media (min-width:750px){.teak-bs__grid{grid-template-columns:repeat(var(--teak-bs-cols,3),minmax(0,1fr));column-gap:25px;row-gap:46px}}
 .teak-bs__item{margin:0;padding:0;min-width:0}
 .teak-bs__card{position:relative;display:block;background:#f3f3f3;border-radius:4px;overflow:hidden;text-decoration:none;color:inherit}
