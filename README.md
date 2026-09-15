@@ -12,7 +12,7 @@ Virtual lipstick try-on for TEAK: customers take a skin-tone quiz, upload a self
 | AI vision | Gemini (`gemini-flash-latest`) via edge functions |
 | Commerce | Shopify Admin API (discounts, OAuth, webhooks) |
 | Hosting | Vercel |
-| Analytics | PostHog |
+| Analytics | First-party quiz events in Supabase (no cookies, no consent banner) |
 
 ## Environments
 

@@ -1,6 +1,5 @@
 import { useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { captureAnalyticsEvent } from "@/lib/analytics";
 
 // In-memory only — no device storage is touched, which keeps the anonymous
 // first-party funnel events outside cookie-consent requirements. The quiz is a
@@ -19,8 +18,6 @@ export const useQuizTracking = () => {
     (eventName: string, eventData: Record<string, unknown> = {}, dedupe = false) => {
       if (dedupe && firedEvents.current.has(eventName)) return;
       if (dedupe) firedEvents.current.add(eventName);
-
-      captureAnalyticsEvent(eventName, { ...eventData, quiz_session_id: sessionIdRef.current });
 
       supabase
         .from("quiz_events" as any)
