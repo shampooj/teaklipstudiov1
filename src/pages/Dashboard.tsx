@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import teakLogo from "@/assets/teak-logo.png";
 import ShadesTab from "@/components/admin/ShadesTab";
 import WebFeaturesTab from "@/components/admin/WebFeaturesTab";
+import ComplexionPie from "@/components/admin/analytics/ComplexionPie";
+import PhotoQualityPanel from "@/components/admin/analytics/PhotoQualityPanel";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -820,7 +822,13 @@ const Dashboard = () => {
                   </div>
                 );
               })()}
+
+              {/* Complexion types reached on the results screen, per session */}
+              <ComplexionPie events={quizEvents} />
             </div>
+
+            {/* Photo quality gate: pass rate, reasons, overrides, source split, per-check drill-down */}
+            <PhotoQualityPanel events={quizEvents} />
           </>
         )}
 

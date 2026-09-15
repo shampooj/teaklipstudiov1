@@ -6,12 +6,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import BrownSkinArchive from "./pages/BrownSkinArchive";
 import WhyItWorks from "./pages/WhyItWorks";
+import PhotoCheckDev from "./pages/PhotoCheckDev";
 import Dashboard from "./pages/Dashboard";
 import ShadePreview from "./pages/ShadePreview";
 import Auth from "./pages/Auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
-import AnalyticsConsentBanner from "./components/AnalyticsConsentBanner";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -24,6 +24,8 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/brownskinarchive" element={<BrownSkinArchive />} />
           <Route path="/whyitworks" element={<WhyItWorks />} />
+          {/* Dev-only: calibration table for the photo quality gate. */}
+          {import.meta.env.DEV && <Route path="/dev/photo-check" element={<PhotoCheckDev />} />}
           <Route path="/login" element={<Auth />} />
           <Route
             path="/admin"
@@ -44,7 +46,6 @@ const App = () => (
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-        <AnalyticsConsentBanner />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

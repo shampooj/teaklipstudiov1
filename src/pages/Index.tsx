@@ -22,6 +22,7 @@ import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
 import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
 import { recordImageColorimetry } from "@/lib/colorimetry";
+import { checkPhotoQuality, type PhotoCheckOutcome } from "@/lib/photoQualityCheck";
 import teakLogo from "@/assets/teak-logo.png";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import nero from "@/assets/nero.jpg";
@@ -465,6 +466,11 @@ const Index = () => {
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
   const [freshMobileCapture, setFreshMobileCapture] = useState(false);
+  // Upload gate: a selfie must pass the photo quality check (face found,
+  // framed, lit) before the consent box and results appear. "Use it anyway"
+  // flips a failed check to passed so nobody is ever stuck.
+  const [photoCheck, setPhotoCheck] = useState<{ status: "idle" | "checking" | "failed" | "passed"; outcome: PhotoCheckOutcome | null }>({ status: "idle", outcome: null });
+  const photoCheckSeq = useRef(0);
   const [analysisDone, setAnalysisDone] = useState(false);
   const [cartStates, setCartStates] = useState<Record<string, "adding" | "added" | "error">>({});
   const embedded = useMemo(isEmbedded, []);
@@ -608,6 +614,13 @@ const Index = () => {
   // Selfies require the biometric consent checkbox before results (face
   // mapping only runs on the results screen); stock avatars skip the review
   // page entirely and carry no user biometrics.
+  useEffect(() => {
+    if (!originalImage) {
+      photoCheckSeq.current++;
+      setPhotoCheck({ status: "idle", outcome: null });
+    }
+  }, [originalImage]);
+
   const handleFile = useCallback((file: File, source: "camera" | "library") => {
     // Some mobile camera captures arrive with an empty MIME type — treat
     // typeless files as images rather than rejecting the capture.
@@ -637,6 +650,23 @@ const Index = () => {
       setNoStoreChecked(false);
       setState("idle");
       trackEvent("selfie_uploaded", { fresh_mobile_capture: takenJustNow, source }, true);
+      // Quality gate. The sequence guard drops a verdict that lands after
+      // the visitor has already retaken or cleared the photo.
+      const seq = ++photoCheckSeq.current;
+      setPhotoCheck({ status: "checking", outcome: null });
+      void checkPhotoQuality(base64, { skinTone }).then((outcome) => {
+        if (photoCheckSeq.current !== seq) return;
+        setPhotoCheck({ status: outcome.pass ? "passed" : "failed", outcome });
+        trackEvent("photo_quality_check", {
+          pass: outcome.pass,
+          skipped: outcome.skipped,
+          reason: outcome.reason,
+          source,
+          skin_tone: skinTone,
+          duration_ms: outcome.durationMs,
+          ...outcome.metrics,
+        });
+      });
     };
     reader.onerror = () => {
       toast.error("Couldn't read that photo — please try again");
@@ -644,7 +674,7 @@ const Index = () => {
     reader.readAsDataURL(file);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (cameraInputRef.current) cameraInputRef.current.value = "";
-  }, [trackEvent]);
+  }, [trackEvent, skinTone]);
 
 
 
@@ -716,7 +746,7 @@ const Index = () => {
                   The Virtual Lip Studio
                 </h1>
                 <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
-                  Select your skin + lip tone | Get lip color recs | Use the Virtual Try On
+                  Select your skin + lip tone | Get recommendations | Use the Virtual Try On
                 </p>
                 <p className="mt-2 font-display text-[12px] leading-[13px] text-foreground max-w-lg mx-auto">
                   Custom built for brown skin by the founders of Teak themselves
@@ -959,7 +989,42 @@ const Index = () => {
               </div>
               }
 
-              {originalImage && (
+              {originalImage && photoCheck.status === "checking" && (
+                <p className="mt-5 text-center font-display text-[12px] leading-[16px] text-muted-foreground">
+                  Checking your photo…
+                </p>
+              )}
+
+              {originalImage && photoCheck.status === "failed" && photoCheck.outcome && (
+                <div className="mt-6 max-w-md mx-auto border border-foreground p-5 text-center">
+                  <p className="font-display text-[18px] leading-[18px] text-foreground tracking-normal">
+                    Let's try another photo
+                  </p>
+                  <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                    {photoCheck.outcome.message}
+                  </p>
+                  <div className="mt-4 flex items-center justify-center gap-4">
+                    <Button
+                      onClick={() => { setOriginalImage(null); setBiometricChecked(false); }}
+                      size="lg"
+                      variant="outline"
+                      className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+                      Retake
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trackEvent("photo_quality_override", { reason: photoCheck.outcome?.reason ?? null });
+                        setPhotoCheck((c) => ({ ...c, status: "passed" }));
+                      }}
+                      className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
+                      Use it anyway
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {originalImage && photoCheck.status === "passed" && (
                   <div className="mt-6 max-w-md mx-auto">
 
                   <div className="border border-foreground p-5">
@@ -1058,7 +1123,7 @@ const Index = () => {
 
               {/* Bottom action bar: only the primary action; Back lives at the top. */}
               <div className="mt-8 flex items-center justify-center max-w-md mx-auto w-full">
-{originalImage && (
+{originalImage && photoCheck.status === "passed" && (
                 <Button
                   onClick={async () => {
                     const trimmedEmail = userEmail.trim();
