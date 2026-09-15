@@ -716,7 +716,7 @@ const Index = () => {
                   The Virtual Lip Studio
                 </h1>
                 <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
-                  Select your skin + lip tone | Get lip color recs | Use the Virtual Try On
+                  Select your skin + lip tone | Get recommendations | Use the Virtual Try On
                 </p>
                 <p className="mt-2 font-display text-[12px] leading-[13px] text-foreground max-w-lg mx-auto">
                   Custom built for brown skin by the founders of Teak themselves
