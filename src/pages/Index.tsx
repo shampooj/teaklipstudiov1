@@ -901,7 +901,7 @@ const Index = () => {
                               Myself!
                             </p>
                             <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                              Take a selfie in front of a window
+                              Take a selfie in front of a window during day for most accurate results
                             </p>
                           </div>
                         </div>
@@ -932,8 +932,8 @@ const Index = () => {
                           </p>
                           <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
                             {mobile
-                              ? "Upload a pic from my files"
-                              : "Upload a selfie, preferably taken in front of a window"}
+                              ? "Upload a well-lit pic from my files"
+                              : "Upload a selfie taken in front of a window during day for accurate results"}
                           </p>
                         </div>
                       </div>
