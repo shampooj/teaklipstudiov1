@@ -65,7 +65,6 @@ const CSS = `
 .teak-bs__info{padding-top:6px;text-align:center}
 .teak-bs__title{display:inline;font-size:15.2px;line-height:16.72px;letter-spacing:.57px;color:#000;text-decoration:none;background-image:linear-gradient(to top,#000 0 0);background-repeat:no-repeat;background-position:right bottom;background-size:0 1px;transition:background-size .3s ease}
 .teak-bs__card-link:hover .teak-bs__title{background-position:left bottom;background-size:100% 1px}
-.teak-bs__variant{display:block;margin-top:2px;font-size:11px;line-height:1.3;letter-spacing:.3px;color:rgba(26,27,24,.7)}
 .teak-bs__price{display:flex;justify-content:center;align-items:baseline;gap:8px;margin-top:4px;font-size:11.9px;letter-spacing:.85px;color:#1a1b18}
 .teak-bs__price bdi{font-size:17.1px;letter-spacing:.85px}
 .teak-bs__price .teak-bs__prefix{font-size:70%;margin:0 .3rem 0 0}
@@ -111,11 +110,10 @@ function render(root, cfg){
     html += '<li class="teak-bs__item"><a class="teak-bs__card-link" href="' + href + '" style="text-decoration:none;color:inherit;display:block">'
       + '<div class="teak-bs__card"><div class="teak-bs__media">'
       + (onSale ? '<span class="teak-bs__badge">Sale</span>' : "")
-      + '<img src="' + esc(it.imageUrl) + '" alt="' + esc(it.productTitle) + '" loading="lazy">'
+      + '<img src="' + esc(it.imageUrl) + '" alt="' + esc(it.productTitle + (it.variantTitle && it.variantTitle !== "Default Title" ? " – " + it.variantTitle : "")) + '" loading="lazy">'
       + '</div></div>'
       + '<div class="teak-bs__info">'
-      + '<span class="teak-bs__title">' + esc(it.productTitle) + '</span>'
-      + (it.variantTitle && it.variantTitle !== "Default Title" ? '<span class="teak-bs__variant">' + esc(it.variantTitle) + '</span>' : "")
+      + '<span class="teak-bs__title">' + esc(it.variantTitle && it.variantTitle !== "Default Title" ? it.variantTitle : it.productTitle) + '</span>'
       + '<div class="teak-bs__price">'
       + (onSale ? '<span class="teak-bs__compare">' + money(it.compareAtPrice, it.currencyCode) + '</span><span class="teak-bs__sale">' + money(it.price, it.currencyCode) + '</span>' : money(it.price, it.currencyCode))
       + '</div>' + stars + '</div></a></li>';
