@@ -30,6 +30,7 @@ import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import landingCynthia from "@/assets/landing/web/cynthia-results.jpg";
 import landingNoreen from "@/assets/landing/web/noreen-results.jpg";
 import landingMaseray from "@/assets/landing/web/maseray-results.jpg";
+import PhotoTipsDialog from "@/components/PhotoTipsDialog";
 import cynthia from "@/assets/cynthia.jpg";
 import anastasia from "@/assets/anastasia.jpg";
 import maseray from "@/assets/maseray.jpg";
@@ -465,6 +466,16 @@ const Index = () => {
   const [discountEmail, setDiscountEmail] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  // Photo tips: shown once per visit before the first camera/file pick;
+  // "Got it!" then opens the picker the visitor asked for.
+  const [photoTipsFor, setPhotoTipsFor] = useState<"camera" | "library" | null>(null);
+  const photoTipsSeen = useRef(false);
+  const openPicker = (kind: "camera" | "library") =>
+    (kind === "camera" ? cameraInputRef : fileInputRef).current?.click();
+  const requestPhoto = (kind: "camera" | "library") => {
+    if (photoTipsSeen.current) openPicker(kind);
+    else setPhotoTipsFor(kind);
+  };
   const mobile = useMemo(isMobileDevice, []);
   const [learnMoreOpen, setLearnMoreOpen] = useState(false);
   const [biometricChecked, setBiometricChecked] = useState(false);
@@ -885,7 +896,7 @@ const Index = () => {
                         camera directly, so this path is fresh by construction. */}
                     {mobile && (
                       <div
-                        onClick={() => cameraInputRef.current?.click()}
+                        onClick={() => requestPhoto("camera")}
                         className="group relative aspect-[4/5] flex cursor-pointer border border-foreground bg-background text-center transition-colors hover:border-foreground/60">
                         <input
                           ref={cameraInputRef}
@@ -910,7 +921,7 @@ const Index = () => {
                     <div
                       onDrop={handleDrop}
                       onDragOver={(e) => e.preventDefault()}
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => requestPhoto("library")}
                       className="group relative aspect-[4/5] flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
                       <input
                         ref={fileInputRef}
@@ -1334,6 +1345,17 @@ const Index = () => {
       </main>
 
       <LearnMoreDialog open={learnMoreOpen} onOpenChange={setLearnMoreOpen} />
+      <PhotoTipsDialog
+        open={photoTipsFor !== null}
+        embedded={embedded}
+        onDismiss={() => setPhotoTipsFor(null)}
+        onGotIt={() => {
+          const kind = photoTipsFor;
+          photoTipsSeen.current = true;
+          setPhotoTipsFor(null);
+          if (kind) openPicker(kind);
+        }}
+      />
     </div>);
 
 };
