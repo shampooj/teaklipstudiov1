@@ -85,7 +85,8 @@ const WhyItWorks = () => {
   // Store pages leave the iframe and take the whole tab; the quiz and shop
   // links only make sense as full store pages. Standalone, same-tab is fine.
   const storeTarget = embedded ? "_top" : undefined;
-  const quizHref = embedded ? `${STORE}/pages/r-d` : "/";
+  // "Find Your Shades" in the store nav is where the quiz lives for shoppers.
+  const quizHref = embedded ? `${STORE}/pages/quiz` : "/";
 
   return (
     <div className={embedded ? "bg-background" : "bg-background min-h-screen"}>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_DETAILS, getComplexionType } from "@/data/lipstickRecommendations";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Pencil, X } from "lucide-react";
 import BanubaInlinePreview from "./BanubaInlinePreview";
 import ErrorBoundary from "./ErrorBoundary";
 import SwatchColorPicker from "./SwatchColorPicker";
+import ShadeRenderGallery, { type GalleryItem } from "./ShadeRenderGallery";
 import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import { VARIANT_MAP } from "@/data/lipstickRecommendations";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
@@ -172,8 +173,57 @@ const ShadesTab = () => {
   const [rows, setRows] = useState<Record<string, Setting>>({});
   const [loading, setLoading] = useState(true);
   const [savingRow, setSavingRow] = useState<string | null>(null);
+  // Saved settings for every shade x lip tone at the default skin tone,
+  // keyed "variant|lipTone": feeds the "one model, every shade" grid.
+  const [allSettings, setAllSettings] = useState<Record<string, Setting>>({});
+  const [galleryTone, setGalleryTone] = useState<(typeof LIP_TONES)[number]["id"]>(LIP_TONES[0].id);
+  const pendingJump = useRef<string | null>(null);
   const [previewTone, setPreviewTone] = useState<(typeof LIP_TONES)[number] | null>(null);
+  // Gallery tile -> that lip tone's card: scroll it into view, open its live
+  // preview, and flash a ring so the eye lands on the right row.
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const [highlightTone, setHighlightTone] = useState<string | null>(null);
+  const jumpToTone = (id: string) => {
+    const tone = LIP_TONES.find((t) => t.id === id);
+    if (!tone) return;
+    setPreviewTone(tone);
+    setHighlightTone(id);
+    cardRefs.current[id]?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => setHighlightTone((cur) => (cur === id ? null : cur)), 1800);
+  };
   const { data: swatches } = useShadeSwatches();
+
+  const fetchAllSettings = async () => {
+    const { data, error } = await (supabase.from as any)("lipstick_shade_settings")
+      .select("*")
+      .eq("skin_tone", DEFAULT_SKIN_TONE);
+    if (error) return;
+    const map: Record<string, Setting> = {};
+    for (const r of (data ?? []) as any[]) {
+      map[`${r.variant_name}|${r.lip_tone}`] = {
+        ...r,
+        opacity: Number(r.opacity),
+        gloss: Number(r.gloss ?? 0),
+        shine_intensity: Number(r.shine_intensity ?? 0),
+        shine_scale: Number(r.shine_scale ?? SHINE_DEFAULT_SCALE),
+        finish: resolveBanubaFinish(r.finish),
+      };
+    }
+    setAllSettings(map);
+  };
+  useEffect(() => {
+    void fetchAllSettings();
+  }, []);
+
+  // A gallery click switches shade first; once that shade's rows are loaded,
+  // jump to the model's card.
+  useEffect(() => {
+    if (!loading && pendingJump.current) {
+      const id = pendingJump.current;
+      pendingJump.current = null;
+      jumpToTone(id);
+    }
+  }, [loading, selectedShade]);
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -250,6 +300,7 @@ const ShadesTab = () => {
       console.error(error);
     } else {
       toast.success(`${r.lip_tone} saved`);
+      setAllSettings((prev) => ({ ...prev, [`${r.variant_name}|${r.lip_tone}`]: r }));
     }
     setSavingRow(null);
   };
@@ -257,8 +308,84 @@ const ShadesTab = () => {
 
   const currentShade = useMemo(() => SHADES.find((s) => s.name === selectedShade), [selectedShade]);
 
+  // Settings to render a given shade on a given lip tone: live edits for the
+  // selected shade, saved values for the rest, catalog defaults otherwise.
+  const settingFor = (variant: string, lipTone: string): Setting => {
+    if (variant === selectedShade && rows[lipTone]) return rows[lipTone];
+    const saved = allSettings[`${variant}|${lipTone}`];
+    if (saved) return saved;
+    return {
+      variant_name: variant,
+      skin_tone: DEFAULT_SKIN_TONE,
+      lip_tone: lipTone,
+      hex: PRODUCT_DETAILS[variant]?.color ?? "#b91c1c",
+      finish: "satin",
+      opacity: 0.8,
+      gloss: 0,
+      shine_intensity: 0,
+      shine_scale: SHINE_DEFAULT_SCALE,
+    };
+  };
+  const galleryToneIdx = LIP_TONES.findIndex((t) => t.id === galleryTone);
+  const galleryToneImage = avatarFor(galleryTone, Math.max(0, galleryToneIdx));
+
   return (
     <div className="space-y-5">
+      <div className="border border-border rounded-2xl p-5 space-y-4">
+        <div>
+          <p className="text-[9px] uppercase tracking-widest text-muted-foreground">One model, every shade</p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Pick a model to see all {SHADES.length} shades on them with their saved settings. Click a shade that looks off to open its settings for this model below.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {LIP_TONES.map((t, i) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setGalleryTone(t.id)}
+              aria-pressed={galleryTone === t.id}
+              title={t.label}
+              className={`flex flex-col items-center gap-1 rounded-md p-1 border transition-colors ${galleryTone === t.id ? "border-foreground" : "border-transparent hover:border-border"}`}
+            >
+              <img src={avatarFor(t.id, i)} alt="" className="w-14 h-[70px] object-cover rounded-sm" />
+              <span className="text-[9px] uppercase tracking-normal text-muted-foreground max-w-[64px] truncate">{t.label}</span>
+            </button>
+          ))}
+        </div>
+        <ShadeRenderGallery
+          layout="grid"
+          title={`${LIP_TONES[galleryToneIdx]?.label ?? ""} in every shade`}
+          hint="Click a shade to load it and jump to this model's settings. Renders use the same pipeline as the quiz results."
+          onSelect={(shade) => {
+            pendingJump.current = galleryTone;
+            if (shade === selectedShade) {
+              pendingJump.current = null;
+              jumpToTone(galleryTone);
+            } else {
+              setSelectedShade(shade);
+            }
+          }}
+          items={SHADES.map((s): GalleryItem => {
+            const st = settingFor(s.name, galleryTone);
+            return {
+              id: s.name,
+              label: s.name,
+              image: galleryToneImage,
+              spec: {
+                key: `${s.name}|${galleryTone}`,
+                hex: st.hex,
+                finish: st.finish,
+                opacity: st.opacity,
+                gloss: st.gloss,
+                shineIntensity: st.shine_intensity,
+                shineScale: st.shine_scale,
+              },
+            };
+          })}
+        />
+      </div>
+
       <div className="border border-border rounded-2xl p-5 space-y-4">
         <div className="space-y-2">
           <p className="text-[9px] uppercase tracking-widest text-muted-foreground">Lipstick Shade</p>
@@ -301,6 +428,29 @@ const ShadesTab = () => {
           Banuba render settings per complexion type
         </p>
 
+        {!loading && (
+          <ShadeRenderGallery
+            onSelect={jumpToTone}
+            items={LIP_TONES.flatMap((t, tIdx): GalleryItem[] => {
+              const row = rows[t.id];
+              if (!row) return [];
+              return [{
+                id: t.id,
+                label: t.label,
+                image: avatarFor(t.id, tIdx),
+                spec: {
+                  key: t.id,
+                  hex: row.hex,
+                  finish: row.finish,
+                  opacity: row.opacity,
+                  gloss: row.gloss,
+                  shineIntensity: row.shine_intensity,
+                  shineScale: row.shine_scale,
+                },
+              }];
+            })}
+          />
+        )}
 
         {loading ? (
           <p className="text-muted-foreground text-xs text-center py-8">Loading…</p>
@@ -312,7 +462,10 @@ const ShadesTab = () => {
               const avatarImg = avatarFor(t.id, tIdx);
               const isOpen = previewTone?.id === t.id;
               return (
-                <div key={t.id} className="border border-border rounded-xl p-3 sm:p-4 space-y-3">
+                <div
+                  key={t.id}
+                  ref={(el) => { cardRefs.current[t.id] = el; }}
+                  className={`border rounded-xl p-3 sm:p-4 space-y-3 scroll-mt-4 transition-shadow ${highlightTone === t.id ? "border-foreground ring-2 ring-foreground/40" : "border-border"}`}>
                   {/* Header: avatar, tone name, actions. Wraps on narrow screens. */}
                   <div className="flex items-center gap-3">
                     <div className="relative w-16 h-16 sm:w-24 sm:h-24 shrink-0 rounded-lg overflow-hidden border border-border bg-muted">
