@@ -25,7 +25,11 @@ import { recordImageColorimetry } from "@/lib/colorimetry";
 import { checkPhotoQuality, type PhotoCheckOutcome } from "@/lib/photoQualityCheck";
 import teakLogo from "@/assets/teak-logo.png";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
-import nero from "@/assets/nero.jpg";
+// Landing strip: three finished results cards (Complexion 12 / 20 / 44) in
+// place of bare model photos, so the first screen shows the payoff.
+import landingCynthia from "@/assets/landing/web/cynthia-results.jpg";
+import landingNoreen from "@/assets/landing/web/noreen-results.jpg";
+import landingMaseray from "@/assets/landing/web/maseray-results.jpg";
 import cynthia from "@/assets/cynthia.jpg";
 import anastasia from "@/assets/anastasia.jpg";
 import maseray from "@/assets/maseray.jpg";
@@ -49,7 +53,6 @@ import terushka from "@/assets/terushka.jpg";
 import aashi from "@/assets/aashi.jpg";
 import aaliyah from "@/assets/aaliyah.jpg";
 import nupoora from "@/assets/nupoora.jpg";
-import tanvi from "@/assets/tanvi.jpg";
 
 // Fallback roster entries whose photos are AI-generated (see AI_MODEL_IMAGE_KEYS).
 const FALLBACK_AI_AVATAR_IDS = new Set(["avatar-geeta", "avatar-apoorva"]);
@@ -743,18 +746,24 @@ const Index = () => {
 
               <div>
                 <h1 className="font-display text-[28px] leading-[29px] text-foreground">
-                  The Virtual Lip Studio
+                  The Lip Studio
                 </h1>
                 <p className="mt-4 font-display text-[18px] leading-[22px] text-foreground max-w-lg mx-auto">
-                  Select your skin + lip tone | Get recommendations | Use the Virtual Try On
+                  Take the Quiz + Use the Virtual Try On
                 </p>
                 <p className="mt-2 font-display text-[12px] leading-[13px] text-foreground max-w-lg mx-auto">
-                  Custom built for brown skin by the founders of Teak themselves
+                  Custom built to actually work on brown skin.
                 </p>
               </div>
-              <div className="w-full max-w-lg grid grid-cols-3">
-                {[tanvi, nero, cynthia].map((src, i) => (
-                  <img key={i} src={src} alt="" className="w-full aspect-[3/4] object-cover" />
+              <div className="w-full max-w-lg grid grid-cols-3 gap-2 sm:gap-3">
+                {[landingCynthia, landingNoreen, landingMaseray].map((src, i) => (
+                  <img
+                    key={i}
+                    src={src}
+                    alt="Example Lip Studio results card: recommended shades and the try-on photo"
+                    className="w-full h-auto"
+                    loading={i === 0 ? "eager" : "lazy"}
+                  />
                 ))}
               </div>
               <Button
