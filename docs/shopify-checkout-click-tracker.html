@@ -5,11 +5,12 @@
   every store page (the cart drawer, and its checkout button, exist on all of
   them). Not a Custom Liquid section: those only render on one page.
 
-  When a shopper presses a checkout button, this reads the cart's
-  quiz_session_id attribute (written by the quiz's add-to-cart listener) and,
-  only if one is present, records a "checkout_clicked" event against that
-  quiz session. Carts that didn't come from the quiz produce nothing. The
-  event is sent with keepalive so it survives the navigation to checkout.
+  The checkout button is a form submit: the page starts navigating the
+  instant it is pressed, which cancels any request started at click time.
+  So the quiz session id is learned AHEAD of the click (from the quiz's own
+  cart-add message, and from /cart.js on load and whenever the cart changes)
+  and the click itself only fires one keepalive request, which survives the
+  navigation. Carts that didn't come from the quiz produce nothing.
 
   Together with the webhook-driven events this gives the Analytics funnel:
     checkout_clicked    pressed a checkout button        (this script)
@@ -20,16 +21,49 @@
 (function () {
   var ENDPOINT = "https://ouoyczbtpbhtwbygpigx.supabase.co/rest/v1/quiz_events";
   var KEY = "sb_publishable_7KFC_TRO0FxJYrX6IsEhyg_x721kjJc";
+  var QUIZ_ORIGIN = "https://lipstudio.teakbeauty.com";
   var SELECTOR = 'button[name="checkout"], input[name="checkout"], a[href^="/checkout"], [data-checkout-button], .cart__checkout-button, .cart-drawer__checkout, .cart__checkout';
-  var sent = false; // one event per page view, however many buttons get pressed
+  var sessionId = null;
+  var sent = false; // one event per page view
 
-  function record(sessionId, source) {
+  function refresh() {
+    try {
+      fetch("/cart.js", { credentials: "same-origin" })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (cart) {
+          var id = cart && cart.attributes && cart.attributes.quiz_session_id;
+          sessionId = id || null;
+        })
+        .catch(function () {});
+    } catch (e) {}
+  }
+
+  // Learn the id ahead of time: on load, whenever the theme reports a cart
+  // change or opens the drawer, and straight from the quiz's add-to-cart
+  // message (same page, so no round trip needed).
+  refresh();
+  document.addEventListener("cart:updated", refresh);
+  document.addEventListener("cartdrawer:opened", refresh);
+  window.addEventListener("message", function (event) {
+    if (event.origin !== QUIZ_ORIGIN) return;
+    if (event.data && event.data.type === "cart-add" && event.data.quizSessionId) {
+      sessionId = String(event.data.quizSessionId);
+    }
+  });
+
+  document.addEventListener("click", function (event) {
+    var target = event.target && event.target.closest ? event.target.closest(SELECTOR) : null;
+    if (!target || sent || !sessionId) return;
+    sent = true;
+    var source = target.closest("cart-drawer, #mini-cart, .cart-drawer, .mini-cart") ? "cart_drawer"
+      : location.pathname.indexOf("/cart") === 0 ? "cart_page" : "other";
     var body = JSON.stringify({
       session_id: sessionId,
       event_name: "checkout_clicked",
       event_data: { source: source, page: location.pathname }
     });
     try {
+      // keepalive: the request completes even though the page is leaving.
       fetch(ENDPOINT, {
         method: "POST",
         keepalive: true,
@@ -37,23 +71,6 @@
         body: body
       }).catch(function () {});
     } catch (e) {}
-  }
-
-  document.addEventListener("click", function (event) {
-    var target = event.target && event.target.closest ? event.target.closest(SELECTOR) : null;
-    if (!target || sent) return;
-    // Which surface: drawer vs cart page vs anything else.
-    var source = target.closest("cart-drawer, #mini-cart, .cart-drawer") ? "cart_drawer"
-      : location.pathname.indexOf("/cart") === 0 ? "cart_page" : "other";
-    fetch("/cart.js", { credentials: "same-origin" })
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (cart) {
-        var sessionId = cart && cart.attributes && cart.attributes.quiz_session_id;
-        if (!sessionId) return;
-        sent = true;
-        record(sessionId, source);
-      })
-      .catch(function () {});
   }, true);
 })();
 </script>
