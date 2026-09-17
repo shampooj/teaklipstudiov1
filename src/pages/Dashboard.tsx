@@ -151,15 +151,31 @@ const Dashboard = () => {
     if (!authReady || !authUserId) return;
 
     setFunnelLoading(true);
-    const { data: events, error } = await (supabase.from as any)("quiz_events")
-      .select("event_name, session_id, created_at, event_data")
-      .gte("created_at", startOfDay(funnelDateFrom).toISOString())
-      .lte("created_at", endOfDay(funnelDateTo).toISOString());
+    // PostgREST caps a query at 1000 rows and says nothing about it. A
+    // month of quiz traffic is well past that, so page through the range
+    // in order until a short page comes back.
+    const PAGE = 1000;
+    const all: { event_name: string; session_id: string; created_at: string; event_data: any }[] = [];
+    let error: any = null;
+    for (let from = 0; ; from += PAGE) {
+      const res = await (supabase.from as any)("quiz_events")
+        .select("event_name, session_id, created_at, event_data")
+        .gte("created_at", startOfDay(funnelDateFrom).toISOString())
+        .lte("created_at", endOfDay(funnelDateTo).toISOString())
+        .order("created_at", { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (res.error) {
+        error = res.error;
+        break;
+      }
+      all.push(...(res.data ?? []));
+      if (!res.data || res.data.length < PAGE) break;
+    }
 
     if (error) {
       console.error("Failed to fetch funnel data:", error);
-    } else if (events) {
-      setQuizEvents(events);
+    } else {
+      setQuizEvents(all);
     }
 
     setFunnelLoading(false);
@@ -173,8 +189,12 @@ const Dashboard = () => {
     { key: "results_viewed", label: "Results Viewed" },
     { key: "product_clicked", label: "Product Clicked" },
     { key: "add_to_cart", label: "Add to Cart" },
-    { key: "checkout_initiated", label: "Checkout Initiated" },
-    { key: "checkout_completed", label: "Checkout Completed" },
+    // From the theme-wide click tracker (docs/shopify-checkout-click-tracker.html)
+    { key: "checkout_clicked", label: "Clicked Checkout" },
+    // From Shopify webhooks: checkouts/create fires once contact info is
+    // entered and continued (not on checkout-page load); orders/create on payment.
+    { key: "checkout_initiated", label: "Started Filling In Checkout" },
+    { key: "checkout_completed", label: "Paid" },
   ];
 
   // Filter data and adminLabels by date range
