@@ -315,9 +315,6 @@ const TryOnOtherShades = ({
           Buy 2+ Lipsticks for Free U.S. Standard Shipping
         </p>
         <p className="w-full mt-2.5 pt-3.5 border-t border-foreground/20 font-display text-[12px] leading-[15px] tracking-normal text-foreground text-center">
-          Use a photo with daytime window lighting for more accurate results
-        </p>
-        <p className="w-full mt-2 font-display text-[12px] leading-[15px] tracking-normal text-foreground text-center">
           Feeling unsure? Email a selfie to{" "}
           <a
             href="mailto:hello@teakbeauty.com"
