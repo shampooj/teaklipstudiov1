@@ -9,6 +9,7 @@ import badPhotoExample from "@/assets/photo-examples/web/bad-photo-example.jpg";
 // file input still opens from a user gesture (iOS requires that).
 
 const EXAMPLES = [
+  // caption is the image alt text only; nothing is printed under the photos
   { src: goodPhotoExample, ok: true, tag: "Use a photo like this", caption: "Daytime window light, evenly lit" },
   { src: badPhotoExample, ok: false, tag: "Not like this", caption: "Indoor lamp light, shadows across the face, warm color cast" },
 ];
@@ -29,12 +30,13 @@ const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
     >
       <DialogHeader>
         <DialogTitle className="font-display font-normal text-[18px] leading-[18px] text-left tracking-normal">
-          Quick tip for an accurate try-on
+          Quick tips for an accurate try-on
         </DialogTitle>
       </DialogHeader>
-      <p className="font-display text-[12px] leading-[15px] text-foreground">
-        The lipstick colors render most accurately on a photo taken in daytime window light.
-      </p>
+      <div className="flex flex-col gap-1.5 font-display text-[12px] leading-[15px] text-foreground">
+        <p>The lipstick colors render most accurately on a photo taken in daytime window light.</p>
+        <p>Make sure to use a pic with no lipstick on, too!</p>
+      </div>
       <div className="grid grid-cols-2 gap-3">
         {EXAMPLES.map((ex) => (
           <figure key={ex.tag}>
@@ -44,7 +46,6 @@ const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
                 {ex.tag}
               </span>
             </div>
-            <figcaption className="mt-1.5 font-display text-[12px] leading-[15px] text-foreground text-center">{ex.caption}</figcaption>
           </figure>
         ))}
       </div>
