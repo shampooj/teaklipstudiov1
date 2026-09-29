@@ -217,14 +217,36 @@ const TryOnOtherShades = ({
   // proportions in src/lib/shareLook.ts.
   // showBar: false shows the photo alone (stacked mode, where the card names
   // the shade itself); downloaded/shared files still get the branded bar.
-  const photoCard = (shade: Shade, className = "w-full max-w-sm", showBar = true) => (
+  // compareBare (v2): hovering, or pressing and holding on touch screens,
+  // fades to the bare photo so the visitor can compare with and without.
+  const photoCard = (shade: Shade, className = "w-full max-w-sm", showBar = true, compareBare = false) => (
     <div className={`mx-auto ${className}`} style={{ containerType: "inline-size" }}>
-      <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
+      <div
+        className={`w-full aspect-[3/4] overflow-hidden bg-muted relative ${compareBare ? "group select-none [-webkit-touch-callout:none]" : ""}`}
+        // An empty touch handler lets iOS Safari apply :active while pressed.
+        onTouchStart={compareBare ? () => {} : undefined}
+        onContextMenu={compareBare ? (e) => e.preventDefault() : undefined}
+      >
         <img
           src={snapshotFor(shade) ?? userFace}
           alt={`${shade.label} on your photo`}
+          draggable={compareBare ? false : undefined}
           className="w-full h-full object-cover"
         />
+        {compareBare && snapshotFor(shade) && (
+          <>
+            <img
+              src={userFace}
+              alt=""
+              aria-hidden="true"
+              draggable={false}
+              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100"
+            />
+            <span className="absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100 pointer-events-none">
+              No lipstick
+            </span>
+          </>
+        )}
       </div>
       {showBar && (
         <div
@@ -279,8 +301,7 @@ const TryOnOtherShades = ({
             />
           )}
         </a>
-        {/* grid, not flex, so the buttons' flex-1 sizing doesn't apply here. */}
-        <div className="absolute inset-x-2 bottom-2 grid gap-1.5">{buyButtons(shade)}</div>
+        <div className="absolute inset-x-2 bottom-2 flex gap-1.5">{buyButtons(shade, true)}</div>
       </div>
     );
   };
@@ -289,15 +310,18 @@ const TryOnOtherShades = ({
     trackEvent("product_clicked", { variant_id: shade.variantId, variant_name: shade.name, source, product_handle: variantImages[shade.variantId]?.productHandle });
 
   // Add to Cart (embedded only) and View Product for one shade.
-  const buyButtons = (shade: Shade) => {
+  // compact: shorter pills with tight padding, so both fit in one row on the
+  // v2 product photo.
+  const buyButtons = (shade: Shade, compact = false) => {
     const productUrl = productUrlFor(shade);
     const cartState = cartStates[shade.variantId];
+    const size = compact ? "h-6 px-2" : "h-7";
     return (
       <>
         {embedded && (
           <Button
             size="sm"
-            className={`h-7 flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
+            className={`${size} flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
               cartState === "added"
                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                 : cartState === "error"
@@ -321,7 +345,7 @@ const TryOnOtherShades = ({
         <Button
           asChild
           size="sm"
-          className="h-7 flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+          className={`${compact ? "h-6 px-2" : "h-7 px-2.5"} flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background`}
         >
           <a
             href={productUrl}
@@ -333,7 +357,9 @@ const TryOnOtherShades = ({
             className="truncate"
             onClick={() => trackProductClick(shade)}
           >
-            View Product
+            {/* Compact (v2) next to Add to Cart: too narrow for the full label, and
+                the product photo it sits on says what's being viewed. */}
+            {compact && embedded ? "View" : "View Product"}
           </a>
         </Button>
       </>
@@ -450,12 +476,9 @@ const TryOnOtherShades = ({
           if (!shade) return null;
           return (
             <div key={name} className="flex flex-col gap-2.5 bg-background border border-foreground p-4">
-              {/* Two-line header: category tag, then shade, formula and price on
-                  one line. Buy buttons sit on the product photo. */}
+              {/* One-line header: shade, formula and price. Buy buttons sit on
+                  the product photo. */}
               <div>
-                <p className="mb-1.5 font-sans font-medium text-[9px] leading-[10.5px] uppercase tracking-normal text-muted-foreground truncate">
-                  {(categoryByName[name] ?? []).join(" · ").replace(/"/g, "")}
-                </p>
                 <div className="flex items-baseline justify-between gap-3">
                   <p className="flex flex-wrap items-baseline gap-x-2 min-w-0">
                     <span className="font-display text-[18px] leading-[18px] text-foreground">{shade.name}</span>
@@ -472,7 +495,7 @@ const TryOnOtherShades = ({
               </div>
               {/* The shade on the visitor's photo, beside the product itself. */}
               <div className="grid grid-cols-2 gap-2">
-                {photoCard(shade, "w-full", false)}
+                {photoCard(shade, "w-full", false, true)}
                 {productImage(shade)}
               </div>
             </div>
