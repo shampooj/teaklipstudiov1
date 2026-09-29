@@ -286,41 +286,38 @@ const TryOnOtherShades = ({
     </div>
   );
 
-  // The shade's product photo from the store, linking to its product page,
-  // with the buy buttons in a row beneath. When the shade has a smear swatch
-  // among its images, the photos split side by side: main photo left, smear
-  // right. The cell stretches to the try-on photo's height (its grid row).
+  // The shade's product photo from the store, linking to its product page.
+  // When the shade has a smear swatch among its images, the photos split side
+  // by side: main photo left, smear right. The cell stretches to the try-on
+  // photo's height (its grid row).
   const productImage = (shade: Shade) => {
     const img = variantImages[shade.variantId];
     const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
     return (
-      <div className="w-full h-full flex flex-col gap-2">
-        <a
-          href={productUrlFor(shade)}
-          target={embedded ? "_top" : undefined}
-          onClick={() => trackProductClick(shade)}
-          aria-label={`View ${shade.label}`}
-          className="flex flex-1 min-h-0 w-full gap-2"
-        >
-          {img?.imageUrl && (
-            <img
-              src={shopifyImg(img.imageUrl, 480)}
-              alt={img.altText ?? shade.label}
-              loading="lazy"
-              className="h-full flex-1 min-w-0 object-cover bg-muted"
-            />
-          )}
-          {smear && (
-            <img
-              src={shopifyImg(smear.url, 480)}
-              alt={smear.altText ?? `${shade.name} swatch`}
-              loading="lazy"
-              className="h-full flex-1 min-w-0 object-cover bg-muted"
-            />
-          )}
-        </a>
-        <div className="flex gap-2">{buyButtons(shade, true)}</div>
-      </div>
+      <a
+        href={productUrlFor(shade)}
+        target={embedded ? "_top" : undefined}
+        onClick={() => trackProductClick(shade)}
+        aria-label={`View ${shade.label}`}
+        className="flex w-full h-full gap-2"
+      >
+        {img?.imageUrl && (
+          <img
+            src={shopifyImg(img.imageUrl, 480)}
+            alt={img.altText ?? shade.label}
+            loading="lazy"
+            className="h-full flex-1 min-w-0 object-cover bg-muted"
+          />
+        )}
+        {smear && (
+          <img
+            src={shopifyImg(smear.url, 480)}
+            alt={smear.altText ?? `${shade.name} swatch`}
+            loading="lazy"
+            className="h-full flex-1 min-w-0 object-cover bg-muted"
+          />
+        )}
+      </a>
     );
   };
 
@@ -328,19 +325,15 @@ const TryOnOtherShades = ({
     trackEvent("product_clicked", { variant_id: shade.variantId, variant_name: shade.name, source, product_handle: variantImages[shade.variantId]?.productHandle });
 
   // Add to Cart (embedded only) and View Product for one shade.
-  // compact (v2): the row under the product photos. Each pill takes its label's
-  // width plus even padding (flex-auto) rather than an equal share, so the
-  // longer "Add to Cart" gets the room it needs.
-  const buyButtons = (shade: Shade, compact = false) => {
+  const buyButtons = (shade: Shade) => {
     const productUrl = productUrlFor(shade);
     const cartState = cartStates[shade.variantId];
-    const size = compact ? "h-7 px-2 flex-auto" : "h-7 flex-1";
     return (
       <>
         {embedded && (
           <Button
             size="sm"
-            className={`${size} min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
+            className={`h-7 flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
               cartState === "added"
                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                 : cartState === "error"
@@ -364,7 +357,7 @@ const TryOnOtherShades = ({
         <Button
           asChild
           size="sm"
-          className={`${compact ? "h-7 px-2 flex-auto" : "h-7 px-2.5 flex-1"} min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background`}
+          className="h-7 flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
         >
           <a
             href={productUrl}
@@ -376,9 +369,7 @@ const TryOnOtherShades = ({
             className="truncate"
             onClick={() => trackProductClick(shade)}
           >
-            {/* Compact (v2) next to Add to Cart: too narrow for the full label, and
-                the product photo it sits on says what's being viewed. */}
-            {compact && embedded ? "View" : "View Product"}
+            View Product
           </a>
         </Button>
       </>
@@ -513,12 +504,14 @@ const TryOnOtherShades = ({
                 </div>
               </div>
               {/* The shade on the visitor's photo, beside the product itself. */}
-              {/* The try-on gets the larger share (and a taller 2:3 crop); the
-                  product column stays wide enough for its button row. */}
+              {/* The try-on gets the larger share and a tall 9:16 crop; the
+                  product photos stretch to its height. */}
               <div className="grid grid-cols-[11fr_9fr] gap-2">
-                {photoCard(shade, "w-full", false, true, "aspect-[2/3]")}
+                {photoCard(shade, "w-full", false, true, "aspect-[9/16]")}
                 {productImage(shade)}
               </div>
+              {/* Buy buttons in a full-width row under all three images. */}
+              <div className="flex gap-2">{buyButtons(shade)}</div>
             </div>
           );
         })}
