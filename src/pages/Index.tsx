@@ -89,19 +89,23 @@ const BackButton = ({ onClick, inline = false }: { onClick: () => void; inline?:
   );
 
 const AVATAR_OPTIONS = [
-  { id: "avatar-6", url: stMaseray },
-  { id: "skin-rich-brown", url: stAaliyah },
-  { id: "avatar-3", url: stNero },
-  { id: "avatar-4", url: stCynthia },
-  { id: "avatar-5", url: stAnastasia },
-  { id: "avatar-mauve-model", url: stTanvi },
-  { id: "skin-medium-brown", url: stTerushka },
-  { id: "skin-light-brown", url: stSanna },
-  { id: "avatar-geeta", url: stGeeta },
-  { id: "avatar-apoorva", url: stApoorva },
-  { id: "avatar-aashi", url: stAashi },
-  { id: "avatar-divya", url: stDivya },
+  { id: "avatar-6", name: "maseray", url: stMaseray },
+  { id: "skin-rich-brown", name: "aaliyah", url: stAaliyah },
+  { id: "avatar-3", name: "nero", url: stNero },
+  { id: "avatar-4", name: "cynthia", url: stCynthia },
+  { id: "avatar-5", name: "anastasia", url: stAnastasia },
+  { id: "avatar-mauve-model", name: "tanvi", url: stTanvi },
+  { id: "skin-medium-brown", name: "terushka", url: stTerushka },
+  { id: "skin-light-brown", name: "sanna", url: stSanna },
+  { id: "avatar-geeta", name: "geeta", url: stGeeta },
+  { id: "avatar-apoorva", name: "apoorva", url: stApoorva },
+  { id: "avatar-aashi", name: "aashi", url: stAashi },
+  { id: "avatar-divya", name: "divya", url: stDivya },
 ] as const;
+
+// Model name from a roster image key, e.g. "skin_tone_tanvi.jpg" -> "tanvi".
+const modelNameFromKey = (key: string | null): string | null =>
+  key?.match(/^skin_tone_(.+)\.[a-z]+$/i)?.[1].toLowerCase() ?? null;
 
 type AppState = "landing" | "skin-tone" | "lip-tone" | "lip-shape" | "color-look" | "idle" | "analyzing" | "uploaded";
 
@@ -472,6 +476,8 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // askColorLook. Each one is only left by picking an answer. stackedResults
 // shows each top rec as its own card, stacked, with no "Other Shades to Try".
 // inlineBack puts each question step's Back button level with its title.
+// modelNames limits the model tiles to these roster models (by name); the
+// admin roster's Display switch still applies on top.
 // discountConsentTitle frames the optional archive opt-in around the
 // discount: "Get 10% off" as its headline instead of naming The Brown Skin
 // Archive, a shorter email prompt, and no note under the field. The consent
@@ -482,12 +488,14 @@ const Index = ({
   stackedResults = false,
   inlineBack = false,
   discountConsentTitle = false,
+  modelNames,
 }: {
   askLipShape?: boolean;
   askColorLook?: boolean;
   stackedResults?: boolean;
   inlineBack?: boolean;
   discountConsentTitle?: boolean;
+  modelNames?: readonly string[];
 }) => {
   // Title padding that keeps centered text clear of an inline Back button.
   const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
@@ -557,19 +565,24 @@ const Index = ({
   // Admin-curated model roster; falls back to the built-in set (which carries
   // no tone labels, so results follow the quiz-taker's own selections) until
   // models are configured in /admin.
-  const avatarOptions = useMemo(
-    () =>
+  const avatarOptions = useMemo(() => {
+    const all =
       quizModels && quizModels.length > 0
-        ? quizModels.map((m) => ({ id: m.id, url: m.url, skin: m.skin_tone, lip: m.lip_tone, label: m.label }))
+        ? quizModels.map((m) => ({ id: m.id, name: modelNameFromKey(m.image_key), url: m.url, skin: m.skin_tone, lip: m.lip_tone, label: m.label }))
         : AVATAR_OPTIONS.map((a) => ({
             id: a.id,
+            name: a.name as string | null,
             url: a.url as string,
             skin: null as string | null,
             lip: null as string | null,
             label: FALLBACK_AI_AVATAR_IDS.has(a.id) ? "AI model" : null,
-          })),
-    [quizModels],
-  );
+          }));
+    if (!modelNames) return all;
+    const allowed = new Set(modelNames);
+    const picked = all.filter((a) => a.name && allowed.has(a.name));
+    // Never leave the step without models (e.g. all of them switched off in admin).
+    return picked.length > 0 ? picked : all;
+  }, [quizModels, modelNames]);
 
   const recommendations = useRecommendations(effectiveSkinTone, effectiveLipTone);
   // Results put Back level with the "Top Recs" title only in the stacked

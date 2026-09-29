@@ -11,9 +11,12 @@ import {
 // The quiz route. Picks this visitor's version from the admin's on/off switches
 // and traffic weights, then renders that version's page. Every tracked event is
 // tagged with the version (see useQuizTracking).
+// Model tiles Version 2 offers (roster image names).
+const V2_MODELS = ["aashi", "charithra", "cynthia", "maseray", "nero", "sanna", "tanvi", "terushka"] as const;
+
 const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,
-  v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle />,
+  v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelNames={V2_MODELS} />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed
