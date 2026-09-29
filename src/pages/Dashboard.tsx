@@ -10,6 +10,7 @@ import ComplexionPie from "@/components/admin/analytics/ComplexionPie";
 import PhotoQualityPanel from "@/components/admin/analytics/PhotoQualityPanel";
 import TryOnMethodPanel from "@/components/admin/analytics/TryOnMethodPanel";
 import LipShapePanel from "@/components/admin/analytics/LipShapePanel";
+import ColorLookPanel from "@/components/admin/analytics/ColorLookPanel";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import QuizVersionsTab from "@/components/admin/QuizVersionsTab";
 import { DEFAULT_QUIZ_VERSION, QUIZ_VERSIONS } from "@/lib/quizVersions";
@@ -891,8 +892,9 @@ const Dashboard = () => {
             {/* Model image vs live selfie vs uploaded photo, per session */}
             <TryOnMethodPanel events={versionEvents} />
 
-            {/* Lip shape answers (quiz v2); hidden when there are none */}
+            {/* Quiz v2 answers: lip shape and color look; each hidden when there are none */}
             <LipShapePanel events={versionEvents} />
+            <ColorLookPanel events={versionEvents} />
 
             {/* Photo quality gate: pass rate, reasons, overrides, source split, per-check drill-down */}
             <PhotoQualityPanel events={versionEvents} />

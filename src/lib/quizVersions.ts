@@ -18,8 +18,11 @@ export const QUIZ_VERSIONS: QuizVersionDef[] = [
   {
     key: "v2",
     label: "Version 2",
-    description: "Version 1 plus a required lip shape question (Shape A–C) after lip tone.",
-    extraFunnelSteps: [{ key: "lip_shape_selected", label: "Lip Shape Selected", after: "lip_tone_selected" }],
+    description: "Version 1 plus two required questions after lip tone: lip shape (Shape A–C), then preferred color look.",
+    extraFunnelSteps: [
+      { key: "lip_shape_selected", label: "Lip Shape Selected", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", after: "lip_shape_selected" },
+    ],
   },
 ];
 

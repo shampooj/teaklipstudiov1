@@ -19,6 +19,7 @@ import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
 import LipShapeSketch, { LIP_SHAPES, type LipShape } from "@/components/LipShapeSketch";
+import { COLOR_LOOKS, type ColorLook } from "@/data/colorLooks";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
 import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
@@ -87,7 +88,7 @@ const AVATAR_OPTIONS = [
   { id: "avatar-divya", url: stDivya },
 ] as const;
 
-type AppState = "landing" | "skin-tone" | "lip-tone" | "lip-shape" | "idle" | "analyzing" | "uploaded";
+type AppState = "landing" | "skin-tone" | "lip-tone" | "lip-shape" | "color-look" | "idle" | "analyzing" | "uploaded";
 
 const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
 
@@ -452,12 +453,17 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 // library picks qualify when the file's lastModified is within this window.
 const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 
-// askLipShape: quiz v2 adds a required lip shape question after lip tone.
-const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
+// Quiz v2 adds two required questions after lip tone: askLipShape, then
+// askColorLook. Each one is only left by picking an answer.
+const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: boolean; askColorLook?: boolean }) => {
   const [state, setState] = useState<AppState>("landing");
   const [skinTone, setSkinTone] = useState<string>("");
   const [lipTone, setLipTone] = useState<string>("");
   const [lipShape, setLipShape] = useState<LipShape | "">("");
+  const [colorLook, setColorLook] = useState<ColorLook | "">("");
+  // The step right before the photo step, and the one after lip tone.
+  const stepBeforeUpload: AppState = askColorLook ? "color-look" : askLipShape ? "lip-shape" : "lip-tone";
+  const stepAfterLipShape: AppState = askColorLook ? "color-look" : "idle";
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
@@ -603,7 +609,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
         ? SKIN_TONES.flatMap((t) => [...t.samples])
         : state === "skin-tone"
         ? LIP_TONE_ROWS.flatMap((t) => [...t.images])
-        : state === (askLipShape ? "lip-shape" : "lip-tone")
+        : state === stepBeforeUpload
         ? avatarOptions.map((a) => a.url)
         : [];
     const timer = window.setTimeout(() => {
@@ -615,7 +621,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [state, avatarOptions, askLipShape]);
+  }, [state, avatarOptions, stepBeforeUpload]);
 
   // Framed on the storefront: report content height so the theme sizes the
   // iframe to fit and all scrolling happens on the parent page.
@@ -725,6 +731,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
     setSkinTone("");
     setLipTone("");
     setLipShape("");
+    setColorLook("");
     setOriginalImage(null);
     setSelectedLook("classic-red");
     setConsentChecked(false);
@@ -861,7 +868,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
                     {LIP_TONE_ROWS.map((tone) =>
                   <button
                     key={tone.id}
-                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState(askLipShape ? "lip-shape" : "idle"); }}
+                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState(askLipShape ? "lip-shape" : stepAfterLipShape); }}
                     className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                     lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
                     }>
@@ -896,7 +903,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
                     {LIP_SHAPES.map((shape) =>
                   <button
                     key={shape.id}
-                    onClick={() => { setLipShape(shape.id); trackEvent("lip_shape_selected", { lip_shape: shape.id }); setState("idle"); }}
+                    onClick={() => { setLipShape(shape.id); trackEvent("lip_shape_selected", { lip_shape: shape.id }); setState(stepAfterLipShape); }}
                     className={`group flex flex-col items-center gap-1.5 border border-border transition-all duration-200 hover:border-foreground ${
                     lipShape === shape.id ? "ring-2 ring-foreground" : ""}`
                     }>
@@ -904,6 +911,37 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
                           <LipShapeSketch shape={shape.id} className="w-full" />
                         </div>
                         <span className="font-sans text-[9px] uppercase text-foreground pb-2">{shape.label}</span>
+                      </button>
+                  )}
+                  </div>
+                </div>
+              </motion.div>
+            }
+
+            {/* Step 2c (quiz v2): Preferred color look. Required, single choice. */}
+            {state === "color-look" &&
+            <motion.div
+              key="color-look"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+                <BackButton onClick={() => setState(askLipShape ? "lip-shape" : "lip-tone")} />
+                <div className="text-center w-full">
+                  <p className="font-display text-[28px] leading-[29px] text-foreground">
+                    What is your preferred lipstick color look?
+                  </p>
+                  <div className="mt-8 flex flex-col gap-3 w-full max-w-md mx-auto">
+                    {COLOR_LOOKS.map((look) =>
+                  <button
+                    key={look.id}
+                    onClick={() => { setColorLook(look.id); trackEvent("color_look_selected", { color_look: look.id }); setState("idle"); }}
+                    className={`flex flex-col gap-2 border border-foreground px-5 py-4 text-left transition-colors hover:bg-foreground/5 ${
+                    colorLook === look.id ? "ring-1 ring-foreground" : ""}`
+                    }>
+                        <span className="font-display text-[18px] leading-[18px] text-foreground">{look.title}</span>
+                        <span className="font-display text-[12px] leading-[13px] text-foreground">{look.detail}</span>
                       </button>
                   )}
                   </div>
@@ -920,7 +958,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}>
                 <div className="mb-6">
-                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState(askLipShape ? "lip-shape" : "lip-tone"); } }} />
+                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState(stepBeforeUpload); } }} />
                 </div>
                 {!originalImage ?
               <>
@@ -996,7 +1034,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
                           const effSkin = tones?.skin ?? skinTone;
                           const effLip = tones?.lip ?? lipTone;
                           setOriginalImage(avatar.url);
-                          trackEvent("results_viewed", { skin_tone: effSkin, lip_tone: effLip, user_skin_tone: skinTone, user_lip_tone: lipTone, complexion_type: getComplexionType(effSkin, effLip), skipped_selfie: true, avatar: avatar.id, ...(lipShape && { lip_shape: lipShape }) });
+                          trackEvent("results_viewed", { skin_tone: effSkin, lip_tone: effLip, user_skin_tone: skinTone, user_lip_tone: lipTone, complexion_type: getComplexionType(effSkin, effLip), skipped_selfie: true, avatar: avatar.id, ...(lipShape && { lip_shape: lipShape }), ...(colorLook && { color_look: colorLook }) });
                           setState("analyzing");
                           setAnalysisDone(true);
                         }}
@@ -1281,7 +1319,7 @@ const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
 
-                    trackEvent("results_viewed", { skin_tone: effectiveSkinTone, lip_tone: effectiveLipTone, complexion_type: getComplexionType(effectiveSkinTone, effectiveLipTone), ...(lipShape && { lip_shape: lipShape }) });
+                    trackEvent("results_viewed", { skin_tone: effectiveSkinTone, lip_tone: effectiveLipTone, complexion_type: getComplexionType(effectiveSkinTone, effectiveLipTone), ...(lipShape && { lip_shape: lipShape }), ...(colorLook && { color_look: colorLook }) });
                     setAnalysisDone(true);
                   }}
                   size="lg"
