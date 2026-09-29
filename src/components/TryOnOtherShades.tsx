@@ -287,37 +287,40 @@ const TryOnOtherShades = ({
   );
 
   // The shade's product photo from the store, linking to its product page.
-  // When the shade has a smear swatch among its images, the photos split side
-  // by side: main photo left, smear right. The cell stretches to the try-on
-  // photo's height (its grid row).
+  // When the shade has a smear swatch among its images, the photos stack:
+  // main photo on top, smear below. The photos are laid out absolutely so
+  // they fill exactly the try-on photo's height (the grid row) instead of
+  // stretching the row with their own heights.
   const productImage = (shade: Shade) => {
     const img = variantImages[shade.variantId];
     const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
     return (
-      <a
-        href={productUrlFor(shade)}
-        target={embedded ? "_top" : undefined}
-        onClick={() => trackProductClick(shade)}
-        aria-label={`View ${shade.label}`}
-        className="flex w-full h-full gap-2"
-      >
-        {img?.imageUrl && (
-          <img
-            src={shopifyImg(img.imageUrl, 480)}
-            alt={img.altText ?? shade.label}
-            loading="lazy"
-            className="h-full flex-1 min-w-0 object-cover bg-muted"
-          />
-        )}
-        {smear && (
-          <img
-            src={shopifyImg(smear.url, 480)}
-            alt={smear.altText ?? `${shade.name} swatch`}
-            loading="lazy"
-            className="h-full flex-1 min-w-0 object-cover bg-muted"
-          />
-        )}
-      </a>
+      <div className="relative w-full h-full">
+        <a
+          href={productUrlFor(shade)}
+          target={embedded ? "_top" : undefined}
+          onClick={() => trackProductClick(shade)}
+          aria-label={`View ${shade.label}`}
+          className="absolute inset-0 flex flex-col gap-2"
+        >
+          {img?.imageUrl && (
+            <img
+              src={shopifyImg(img.imageUrl, 480)}
+              alt={img.altText ?? shade.label}
+              loading="lazy"
+              className="w-full flex-1 min-h-0 object-cover bg-muted"
+            />
+          )}
+          {smear && (
+            <img
+              src={shopifyImg(smear.url, 480)}
+              alt={smear.altText ?? `${shade.name} swatch`}
+              loading="lazy"
+              className="w-full flex-1 min-h-0 object-cover bg-muted"
+            />
+          )}
+        </a>
+      </div>
     );
   };
 
