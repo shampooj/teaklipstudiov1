@@ -18,6 +18,7 @@ import { useShadeSettings } from "@/hooks/useShadeSettings";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
 import TryOnOtherShades from "@/components/TryOnOtherShades";
+import LipShapeSketch, { LIP_SHAPES, type LipShape } from "@/components/LipShapeSketch";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
 import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
@@ -86,7 +87,7 @@ const AVATAR_OPTIONS = [
   { id: "avatar-divya", url: stDivya },
 ] as const;
 
-type AppState = "landing" | "skin-tone" | "lip-tone" | "idle" | "analyzing" | "uploaded";
+type AppState = "landing" | "skin-tone" | "lip-tone" | "lip-shape" | "idle" | "analyzing" | "uploaded";
 
 const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
 
@@ -451,10 +452,12 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 // library picks qualify when the file's lastModified is within this window.
 const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 
-const Index = () => {
+// askLipShape: quiz v2 adds a required lip shape question after lip tone.
+const Index = ({ askLipShape = false }: { askLipShape?: boolean }) => {
   const [state, setState] = useState<AppState>("landing");
   const [skinTone, setSkinTone] = useState<string>("");
   const [lipTone, setLipTone] = useState<string>("");
+  const [lipShape, setLipShape] = useState<LipShape | "">("");
   const [shirt, setShirt] = useState<string>("");
   const [originalImage, setOriginalImage] = useState<string | null>(null);
   const [selectedLook, setSelectedLook] = useState<LookId>("classic-red");
@@ -600,7 +603,7 @@ const Index = () => {
         ? SKIN_TONES.flatMap((t) => [...t.samples])
         : state === "skin-tone"
         ? LIP_TONE_ROWS.flatMap((t) => [...t.images])
-        : state === "lip-tone"
+        : state === (askLipShape ? "lip-shape" : "lip-tone")
         ? avatarOptions.map((a) => a.url)
         : [];
     const timer = window.setTimeout(() => {
@@ -612,7 +615,7 @@ const Index = () => {
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [state, avatarOptions]);
+  }, [state, avatarOptions, askLipShape]);
 
   // Framed on the storefront: report content height so the theme sizes the
   // iframe to fit and all scrolling happens on the parent page.
@@ -721,6 +724,7 @@ const Index = () => {
     setState("landing");
     setSkinTone("");
     setLipTone("");
+    setLipShape("");
     setOriginalImage(null);
     setSelectedLook("classic-red");
     setConsentChecked(false);
@@ -857,7 +861,7 @@ const Index = () => {
                     {LIP_TONE_ROWS.map((tone) =>
                   <button
                     key={tone.id}
-                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState("idle"); }}
+                    onClick={() => { setLipTone(tone.id); trackEvent("lip_tone_selected", { lip_tone: tone.id }); setState(askLipShape ? "lip-shape" : "idle"); }}
                     className={`group flex flex-col items-center gap-1.5 transition-all duration-200 overflow-hidden ${
                     lipTone === tone.id ? "ring-2 ring-foreground" : ""}`
                     }>
@@ -874,6 +878,39 @@ const Index = () => {
               </motion.div>
             }
 
+            {/* Step 2b (quiz v2): Lip Shape. Required: picking a shape is the only way forward. */}
+            {state === "lip-shape" &&
+            <motion.div
+              key="lip-shape"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+              className="flex flex-col items-center gap-8">
+                <BackButton onClick={() => setState("lip-tone")} />
+                <div className="text-center w-full">
+                  <p className="font-display text-[28px] leading-[29px] text-foreground">
+                    What is your lip shape?
+                  </p>
+                  <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
+                    {LIP_SHAPES.map((shape) =>
+                  <button
+                    key={shape.id}
+                    onClick={() => { setLipShape(shape.id); trackEvent("lip_shape_selected", { lip_shape: shape.id }); setState("idle"); }}
+                    className={`group flex flex-col items-center gap-1.5 border border-border transition-all duration-200 hover:border-foreground ${
+                    lipShape === shape.id ? "ring-2 ring-foreground" : ""}`
+                    }>
+                        <div className="w-full aspect-[4/3] flex items-center justify-center px-3 text-foreground">
+                          <LipShapeSketch shape={shape.id} className="w-full" />
+                        </div>
+                        <span className="font-sans text-[9px] uppercase text-foreground pb-2">{shape.label}</span>
+                      </button>
+                  )}
+                  </div>
+                </div>
+              </motion.div>
+            }
+
             {/* Step 3: Upload */}
             {state === "idle" &&
             <motion.div
@@ -883,7 +920,7 @@ const Index = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}>
                 <div className="mb-6">
-                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState("lip-tone"); } }} />
+                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState(askLipShape ? "lip-shape" : "lip-tone"); } }} />
                 </div>
                 {!originalImage ?
               <>
@@ -959,7 +996,7 @@ const Index = () => {
                           const effSkin = tones?.skin ?? skinTone;
                           const effLip = tones?.lip ?? lipTone;
                           setOriginalImage(avatar.url);
-                          trackEvent("results_viewed", { skin_tone: effSkin, lip_tone: effLip, user_skin_tone: skinTone, user_lip_tone: lipTone, complexion_type: getComplexionType(effSkin, effLip), skipped_selfie: true, avatar: avatar.id });
+                          trackEvent("results_viewed", { skin_tone: effSkin, lip_tone: effLip, user_skin_tone: skinTone, user_lip_tone: lipTone, complexion_type: getComplexionType(effSkin, effLip), skipped_selfie: true, avatar: avatar.id, ...(lipShape && { lip_shape: lipShape }) });
                           setState("analyzing");
                           setAnalysisDone(true);
                         }}
@@ -1244,7 +1281,7 @@ const Index = () => {
                       await new Promise((resolve) => setTimeout(resolve, 2000));
                     }
 
-                    trackEvent("results_viewed", { skin_tone: effectiveSkinTone, lip_tone: effectiveLipTone, complexion_type: getComplexionType(effectiveSkinTone, effectiveLipTone) });
+                    trackEvent("results_viewed", { skin_tone: effectiveSkinTone, lip_tone: effectiveLipTone, complexion_type: getComplexionType(effectiveSkinTone, effectiveLipTone), ...(lipShape && { lip_shape: lipShape }) });
                     setAnalysisDone(true);
                   }}
                   size="lg"
