@@ -150,6 +150,9 @@ const TryOnOtherShades = ({
   const stacked = stackedProp && pickNames.length > 0;
 
   const [selectedName, setSelectedName] = useState<string | null>(null);
+  // Stacked cards whose try-on is flipped to the bare photo by a tap
+  // (touch screens; mouse users get it on hover instead).
+  const [bareShown, setBareShown] = useState<Record<string, boolean>>({});
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
   const active = activeName ? shadesByName[activeName] : undefined;
 
@@ -217,15 +220,30 @@ const TryOnOtherShades = ({
   // proportions in src/lib/shareLook.ts.
   // showBar: false shows the photo alone (stacked mode, where the card names
   // the shade itself); downloaded/shared files still get the branded bar.
-  // compareBare (v2): hovering, or pressing and holding on touch screens,
-  // fades to the bare photo so the visitor can compare with and without.
-  const photoCard = (shade: Shade, className = "w-full max-w-sm", showBar = true, compareBare = false) => (
+  // compareBare (v2): hovering (mouse), or tapping (touch screens, tap again
+  // to go back), fades to the bare photo to compare with and without.
+  const photoCard = (
+    shade: Shade,
+    className = "w-full max-w-sm",
+    showBar = true,
+    compareBare = false,
+    aspect = "aspect-[3/4]",
+  ) => (
     <div className={`mx-auto ${className}`} style={{ containerType: "inline-size" }}>
       <div
-        className={`w-full aspect-[3/4] overflow-hidden bg-muted relative ${compareBare ? "group select-none [-webkit-touch-callout:none]" : ""}`}
-        // An empty touch handler lets iOS Safari apply :active while pressed.
-        onTouchStart={compareBare ? () => {} : undefined}
-        onContextMenu={compareBare ? (e) => e.preventDefault() : undefined}
+        className={`w-full ${aspect} overflow-hidden bg-muted relative ${compareBare ? "group select-none" : ""}`}
+        onClick={
+          compareBare
+            ? () => {
+                // Touch only: with a mouse, hover already shows the bare photo,
+                // and a click-toggle would leave it stuck after the pointer leaves.
+                if (!window.matchMedia("(hover: none)").matches || !snapshotFor(shade)) return;
+                const next = !bareShown[shade.name];
+                setBareShown((prev) => ({ ...prev, [shade.name]: next }));
+                trackEvent("bare_photo_toggled", { variant_name: shade.name, showing_bare: next, source });
+              }
+            : undefined
+        }
       >
         <img
           src={snapshotFor(shade) ?? userFace}
@@ -240,9 +258,9 @@ const TryOnOtherShades = ({
               alt=""
               aria-hidden="true"
               draggable={false}
-              className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100"
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${bareShown[shade.name] ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100`}
             />
-            <span className="absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-active:opacity-100 pointer-events-none">
+            <span className={`absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground transition-opacity duration-200 ${bareShown[shade.name] ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100 pointer-events-none`}>
               No lipstick
             </span>
           </>
@@ -269,20 +287,20 @@ const TryOnOtherShades = ({
   );
 
   // The shade's product photo from the store, linking to its product page,
-  // with the buy buttons laid over its bottom edge. When the shade has a smear
-  // swatch among its images, the cell splits side by side: main photo left,
-  // smear right.
+  // with the buy buttons in a row beneath. When the shade has a smear swatch
+  // among its images, the photos split side by side: main photo left, smear
+  // right. The cell stretches to the try-on photo's height (its grid row).
   const productImage = (shade: Shade) => {
     const img = variantImages[shade.variantId];
     const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
     return (
-      <div className="relative w-full aspect-[3/4] overflow-hidden">
+      <div className="w-full h-full flex flex-col gap-2">
         <a
           href={productUrlFor(shade)}
           target={embedded ? "_top" : undefined}
           onClick={() => trackProductClick(shade)}
           aria-label={`View ${shade.label}`}
-          className="flex w-full h-full gap-2 bg-background"
+          className="flex flex-1 min-h-0 w-full gap-2"
         >
           {img?.imageUrl && (
             <img
@@ -301,7 +319,7 @@ const TryOnOtherShades = ({
             />
           )}
         </a>
-        <div className="absolute inset-x-2 bottom-2 flex gap-1.5">{buyButtons(shade, true)}</div>
+        <div className="flex gap-2">{buyButtons(shade, true)}</div>
       </div>
     );
   };
@@ -310,18 +328,19 @@ const TryOnOtherShades = ({
     trackEvent("product_clicked", { variant_id: shade.variantId, variant_name: shade.name, source, product_handle: variantImages[shade.variantId]?.productHandle });
 
   // Add to Cart (embedded only) and View Product for one shade.
-  // compact: shorter pills with tight padding, so both fit in one row on the
-  // v2 product photo.
+  // compact (v2): the row under the product photos. Each pill takes its label's
+  // width plus even padding (flex-auto) rather than an equal share, so the
+  // longer "Add to Cart" gets the room it needs.
   const buyButtons = (shade: Shade, compact = false) => {
     const productUrl = productUrlFor(shade);
     const cartState = cartStates[shade.variantId];
-    const size = compact ? "h-6 px-2" : "h-7";
+    const size = compact ? "h-7 px-2 flex-auto" : "h-7 flex-1";
     return (
       <>
         {embedded && (
           <Button
             size="sm"
-            className={`${size} flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
+            className={`${size} min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
               cartState === "added"
                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                 : cartState === "error"
@@ -345,7 +364,7 @@ const TryOnOtherShades = ({
         <Button
           asChild
           size="sm"
-          className={`${compact ? "h-6 px-2" : "h-7 px-2.5"} flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background`}
+          className={`${compact ? "h-7 px-2 flex-auto" : "h-7 px-2.5 flex-1"} min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background`}
         >
           <a
             href={productUrl}
@@ -494,8 +513,10 @@ const TryOnOtherShades = ({
                 </div>
               </div>
               {/* The shade on the visitor's photo, beside the product itself. */}
-              <div className="grid grid-cols-2 gap-2">
-                {photoCard(shade, "w-full", false, true)}
+              {/* The try-on gets the larger share (and a taller 2:3 crop); the
+                  product column stays wide enough for its button row. */}
+              <div className="grid grid-cols-[11fr_9fr] gap-2">
+                {photoCard(shade, "w-full", false, true, "aspect-[2/3]")}
                 {productImage(shade)}
               </div>
             </div>

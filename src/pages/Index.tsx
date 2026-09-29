@@ -472,8 +472,10 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // askColorLook. Each one is only left by picking an answer. stackedResults
 // shows each top rec as its own card, stacked, with no "Other Shades to Try".
 // inlineBack puts each question step's Back button level with its title.
-// discountConsentTitle heads the optional archive opt-in with "Get 10% off"
-// instead of naming The Brown Skin Archive; the consent wording is unchanged.
+// discountConsentTitle frames the optional archive opt-in around the
+// discount: "Get 10% off" as its headline instead of naming The Brown Skin
+// Archive, a shorter email prompt, and no note under the field. The consent
+// wording is unchanged.
 const Index = ({
   askLipShape = false,
   askColorLook = false,
@@ -1230,20 +1232,26 @@ const Index = ({
                           <input
                             id="user-email"
                             type="email"
-                            aria-label="Enter email for 10% off as a thank you!"
+                            aria-label={discountConsentTitle ? "Enter email to receive discount code" : "Enter email for 10% off as a thank you!"}
                             value={userEmail}
                             onChange={(e) => { setUserEmail(e.target.value); setEmailError(false); }}
                             className={`w-full px-0 py-2 bg-transparent border-0 border-b ${emailError ? 'border-destructive' : 'border-foreground/20 focus:border-foreground'} text-foreground font-sans font-medium text-[12px] tracking-normal focus:outline-none transition-colors`} />
                           {!userEmail && (
                             <span aria-hidden="true" className="absolute left-0 top-1/2 -translate-y-1/2 pointer-events-none font-sans font-medium text-[12px] tracking-normal text-foreground/50 truncate w-full text-left">
-                              Enter email for <span className="text-green-700">10% off</span> as a thank you!
+                              {discountConsentTitle ? (
+                                "Enter email to receive discount code"
+                              ) : (
+                                <>Enter email for <span className="text-green-700">10% off</span> as a thank you!</>
+                              )}
                             </span>
                           )}
                         </div>
                         {emailError && <p className="text-destructive text-[9px] font-sans font-medium tracking-normal mt-2">Please enter your email address to receive your discount code.</p>}
-                        <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
-                          Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
-                        </p>
+                        {!discountConsentTitle && (
+                          <p className="font-display text-[12px] leading-[15px] text-muted-foreground mt-2">
+                            Double-check your email! It's where your code lands, and how we find your pic if you ever ask us to delete it.
+                          </p>
+                        )}
                       </div>
                     </div>
                     </>
