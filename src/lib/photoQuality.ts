@@ -89,7 +89,7 @@ export const THRESHOLDS = {
 // both. Falls back to THRESHOLDS.lumaMin/Max for an unknown tone.
 export const LUMA_BANDS: Record<string, { min: number; max: number }> = {
   "light-brown": { min: 0.38, max: 0.88 },
-  "medium-brown": { min: 0.32, max: 0.82 },
+  "medium-brown": { min: 0.4, max: 0.82 },
   "deep-brown": { min: 0.26, max: 0.75 },
   "rich-brown": { min: 0.2, max: 0.68 },
   "full-brown": { min: 0.16, max: 0.62 },
