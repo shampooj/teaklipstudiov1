@@ -9,10 +9,21 @@ export interface QuizVersionDef {
   key: string;
   label: string;
   description: string;
+  // Steps this version adds to the Analytics funnel, shown when filtering to it.
+  extraFunnelSteps?: { key: string; label: string; after: string }[];
 }
 
 export const QUIZ_VERSIONS: QuizVersionDef[] = [
   { key: "v1", label: "Version 1", description: "The original quiz: skin tone, lip tone, then a selfie or model." },
+  {
+    key: "v2",
+    label: "Version 2",
+    description: "Version 1 plus two required questions after lip tone (lip shape, then preferred color look), and results as stacked cards, one per top rec.",
+    extraFunnelSteps: [
+      { key: "lip_shape_selected", label: "Lip Shape Selected", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", after: "lip_shape_selected" },
+    ],
+  },
 ];
 
 // Served when nothing is on, the settings can't be read, or a session's events

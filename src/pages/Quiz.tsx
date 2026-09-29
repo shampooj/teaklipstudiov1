@@ -13,12 +13,20 @@ import {
 // tagged with the version (see useQuizTracking).
 const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,
+  v2: () => <Index askLipShape askColorLook stackedResults inlineBack />,
+};
+
+// ?quiz_version=v2 forces a built version, on or off, so it can be reviewed
+// before it gets traffic. Its events are tagged with that version as usual.
+const previewVersion = (): string | null => {
+  const key = new URLSearchParams(window.location.search).get("quiz_version");
+  return key && VERSION_PAGES[key] ? key : null;
 };
 
 // Picked once per page load, so navigating away and back keeps the version.
 // With only one version built there is nothing to split: serve it right away
 // instead of waiting on the settings read.
-let resolved: string | null = QUIZ_VERSIONS.length === 1 ? QUIZ_VERSIONS[0].key : null;
+let resolved: string | null = previewVersion() ?? (QUIZ_VERSIONS.length === 1 ? QUIZ_VERSIONS[0].key : null);
 if (resolved) setCurrentQuizVersion(resolved);
 
 const Quiz = () => {

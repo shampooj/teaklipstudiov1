@@ -3,6 +3,7 @@ import { Check, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation } from "@/data/lipstickRecommendations";
 import { shareLook, downloadLook } from "@/lib/shareLook";
+import { shopifyImg } from "@/lib/shopifyImg";
 import teakLogo from "@/assets/teak-logo.png";
 import { useShadeSettings, ShadeSetting } from "@/hooks/useShadeSettings";
 import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
@@ -21,6 +22,12 @@ interface Props {
   addToCart: (variantId: string, variantName: string, source: string) => void;
   recommendations: Recommendation[];
   complexionType: number | null;
+  // Quiz v2: every top rec is rendered up front as its own card, stacked,
+  // each with its own buttons; "Other Shades to Try" is hidden.
+  stacked?: boolean;
+  // Extra classes for the "Top Recs" title, e.g. padding to clear a Back
+  // button placed level with it.
+  titleClassName?: string;
 }
 
 const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
@@ -40,9 +47,36 @@ interface Shade {
   setting: ShadeSetting;
 }
 
+// "$28" for whole amounts, "$28.50" otherwise, in the store's currency.
+const formatPrice = (amount: string | null | undefined, currency: string | null | undefined): string | null => {
+  const n = Number(amount);
+  if (!amount || !Number.isFinite(n)) return null;
+  const whole = Number.isInteger(n);
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currency || "USD",
+      minimumFractionDigits: whole ? 0 : 2,
+      maximumFractionDigits: whole ? 0 : 2,
+    }).format(n);
+  } catch {
+    return `$${whole ? n : n.toFixed(2)}`;
+  }
+};
+
+const toSpec = (shade: Shade): ShadeSnapshotSpec => ({
+  key: shade.name,
+  hex: shade.setting.hex,
+  finish: shade.setting.finish,
+  opacity: shade.setting.opacity,
+  gloss: shade.setting.gloss,
+  shineIntensity: shade.setting.shine_intensity,
+  shineScale: shade.setting.shine_scale,
+});
+
 // The unified try-on card: one photo, one swatch strip with the founders'
-// picks pinned first, arrows that tour the picks, and contextual category
-// copy for whichever shade is on the lips.
+// picks pinned first, and contextual category copy for whichever shade is on
+// the lips. In stacked mode (quiz v2) each pick gets its own card instead.
 const TryOnOtherShades = ({
   userFace,
   skinTone,
@@ -54,6 +88,8 @@ const TryOnOtherShades = ({
   addToCart,
   recommendations,
   complexionType,
+  stacked: stackedProp = false,
+  titleClassName = "",
 }: Props) => {
   const { data: settings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
   const { data: swatches } = useShadeSwatches();
@@ -109,38 +145,43 @@ const TryOnOtherShades = ({
     return map;
   }, [recommendations]);
 
+  // Stacked mode needs picks to show; with none it falls back to the single
+  // photo and the full swatch list.
+  const stacked = stackedProp && pickNames.length > 0;
+
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
   const active = activeName ? shadesByName[activeName] : undefined;
-  const activeImg = active ? variantImages[active.variantId] : null;
 
   const selectShade = (name: string) => {
     setSelectedName(name);
     trackEvent("shade_selected", { variant_name: name, is_pick: pickNames.includes(name) });
   };
 
-  const activeSpecs = useMemo<ShadeSnapshotSpec[]>(
+  // Stacked mode renders every pick up front, in order, through the shared
+  // snapshot queue; otherwise only the shade on the lips is rendered.
+  const snapshotSpecs = useMemo<ShadeSnapshotSpec[]>(
     () =>
-      active
-        ? [{
-            key: active.name,
-            hex: active.setting.hex,
-            finish: active.setting.finish,
-            opacity: active.setting.opacity,
-            gloss: active.setting.gloss,
-            shineIntensity: active.setting.shine_intensity,
-            shineScale: active.setting.shine_scale,
-          }]
+      stacked
+        ? pickNames.flatMap((n) => (shadesByName[n] ? [toSpec(shadesByName[n])] : []))
+        : active
+        ? [toSpec(active)]
         : [],
-    [active],
+    [stacked, pickNames, shadesByName, active],
   );
-  const snapshots = useBanubaSnapshots(userFace, activeSpecs);
-  const activeSnapshot = active ? snapshots[active.name] : undefined;
-  const productUrl = active && activeImg?.productHandle
-    ? `https://nupoora-784.myshopify.com/products/${activeImg.productHandle}?variant=${active.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}`
-    : "#";
+  const snapshots = useBanubaSnapshots(userFace, snapshotSpecs);
 
   if (!settings || !active) return null;
+
+  const snapshotFor = (shade: Shade) => snapshots[shade.name] ?? undefined;
+  const productUrlFor = (shade: Shade) => {
+    const handle = variantImages[shade.variantId]?.productHandle;
+    return handle
+      ? `https://nupoora-784.myshopify.com/products/${handle}?variant=${shade.variantId}&quiz_session_id=${encodeURIComponent(sessionId)}`
+      : "#";
+  };
+  const productTitleFor = (shade: Shade) => variantImages[shade.variantId]?.productTitle ?? shade.formula;
+  const source = stacked ? "stacked_cards" : "unified_try_on";
 
   const swatch = (name: string) => {
     const shade = shadesByName[name];
@@ -170,16 +211,281 @@ const TryOnOtherShades = ({
     );
   };
 
+  // Photo plus the same branded bar composeBrandedImage draws on the
+  // downloaded/shared file, so what's on screen is what gets saved. Every
+  // dimension is a % of the image width (cqw), mirroring the canvas
+  // proportions in src/lib/shareLook.ts.
+  // showBar: false shows the photo alone (stacked mode, where the card names
+  // the shade itself); downloaded/shared files still get the branded bar.
+  const photoCard = (shade: Shade, className = "w-full max-w-sm", showBar = true) => (
+    <div className={`mx-auto ${className}`} style={{ containerType: "inline-size" }}>
+      <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
+        <img
+          src={snapshotFor(shade) ?? userFace}
+          alt={`${shade.label} on your photo`}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      {showBar && (
+        <div
+          className="w-full bg-white text-black flex items-start justify-between font-display leading-none"
+          style={{ height: "19cqw", padding: "4.56cqw 5cqw 0" }}
+        >
+          <div>
+            <img src={teakLogo} alt="TEAK" style={{ height: "5cqw", width: "auto" }} />
+            <p style={{ fontSize: "2.8cqw", marginTop: "1.8cqw" }}>Virtual Lip Studio</p>
+          </div>
+          <div className="text-right">
+            <p style={{ fontSize: "4.2cqw" }}>{shade.name}</p>
+            <p style={{ fontSize: "2.6cqw", marginTop: "1.6cqw", color: "#595959" }}>
+              {productTitleFor(shade)}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  // The shade's product photo from the store, linking to its product page,
+  // with the buy buttons laid over its bottom edge. When the shade has a smear
+  // swatch among its images, the cell splits side by side: main photo left,
+  // smear right.
+  const productImage = (shade: Shade) => {
+    const img = variantImages[shade.variantId];
+    const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
+    return (
+      <div className="relative w-full aspect-[3/4] overflow-hidden">
+        <a
+          href={productUrlFor(shade)}
+          target={embedded ? "_top" : undefined}
+          onClick={() => trackProductClick(shade)}
+          aria-label={`View ${shade.label}`}
+          className="flex w-full h-full gap-2 bg-background"
+        >
+          {img?.imageUrl && (
+            <img
+              src={shopifyImg(img.imageUrl, 480)}
+              alt={img.altText ?? shade.label}
+              loading="lazy"
+              className="h-full flex-1 min-w-0 object-cover bg-muted"
+            />
+          )}
+          {smear && (
+            <img
+              src={shopifyImg(smear.url, 480)}
+              alt={smear.altText ?? `${shade.name} swatch`}
+              loading="lazy"
+              className="h-full flex-1 min-w-0 object-cover bg-muted"
+            />
+          )}
+        </a>
+        {/* grid, not flex, so the buttons' flex-1 sizing doesn't apply here. */}
+        <div className="absolute inset-x-2 bottom-2 grid gap-1.5">{buyButtons(shade)}</div>
+      </div>
+    );
+  };
+
+  const trackProductClick = (shade: Shade) =>
+    trackEvent("product_clicked", { variant_id: shade.variantId, variant_name: shade.name, source, product_handle: variantImages[shade.variantId]?.productHandle });
+
+  // Add to Cart (embedded only) and View Product for one shade.
+  const buyButtons = (shade: Shade) => {
+    const productUrl = productUrlFor(shade);
+    const cartState = cartStates[shade.variantId];
+    return (
+      <>
+        {embedded && (
+          <Button
+            size="sm"
+            className={`h-7 flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
+              cartState === "added"
+                ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
+                : cartState === "error"
+                ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
+                : "bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground"
+            }`}
+            disabled={cartState === "adding" || cartState === "added"}
+            onClick={() => addToCart(shade.variantId, shade.name, source)}
+          >
+            {cartState === "adding" ? (
+              <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
+            ) : cartState === "added" ? (
+              <><Check className="w-2.5 h-2.5" /> Added</>
+            ) : cartState === "error" ? (
+              <>Failed</>
+            ) : (
+              <>Add to Cart</>
+            )}
+          </Button>
+        )}
+        <Button
+          asChild
+          size="sm"
+          className="h-7 flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+        >
+          <a
+            href={productUrl}
+            // Same-window navigation: embedded, escape the iframe and take
+            // the whole store page to the product (Back restores the quiz
+            // via the browser's back/forward cache); standalone, navigate in
+            // place. No new windows — disorienting on mobile.
+            target={embedded ? "_top" : undefined}
+            className="truncate"
+            onClick={() => trackProductClick(shade)}
+          >
+            View Product
+          </a>
+        </Button>
+      </>
+    );
+  };
+
+  // Share and Download for one shade.
+  const shareButtons = (shade: Shade) => {
+    const snapshot = snapshotFor(shade);
+    const productUrl = productUrlFor(shade);
+    const brand = { logoUrl: teakLogo, shadeName: shade.name, productTitle: productTitleFor(shade) };
+    return (
+      <>
+        <Button
+          size="sm"
+          aria-label={`Share ${shade.label}`}
+          className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
+          onClick={() => {
+            trackEvent("share_clicked", { variant_id: shade.variantId, variant_name: shade.name, source });
+            void shareLook({
+              text: `What do you think of ${shade.label} on me?`,
+              url: productUrl,
+              imageUrl: snapshot,
+              brand,
+            });
+          }}
+        >
+          <Share2 className="w-2.5 h-2.5" />
+        </Button>
+        <Button
+          size="sm"
+          aria-label={`Download ${shade.label} on your photo`}
+          className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
+          disabled={!snapshot}
+          onClick={() => {
+            if (!snapshot) return;
+            trackEvent("download_clicked", { variant_id: shade.variantId, variant_name: shade.name, source });
+            void downloadLook({
+              imageUrl: snapshot,
+              filename: `teak-${shade.name.toLowerCase()}.jpg`,
+              brand,
+            });
+          }}
+        >
+          <Download className="w-2.5 h-2.5" />
+        </Button>
+      </>
+    );
+  };
+
+  const actionButtons = (shade: Shade) => (
+    <div className="w-full flex flex-wrap gap-2">
+      {buyButtons(shade)}
+      {shareButtons(shade)}
+    </div>
+  );
+
+  const shippingNote = (
+    <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
+      Buy 2+ Lipsticks for Free U.S. Standard Shipping
+    </p>
+  );
+
+  const conciergeNote = (
+    <>
+      <p className="w-full mt-2.5 pt-3.5 border-t border-foreground/20 font-display text-[12px] leading-[15px] tracking-normal text-foreground text-center">
+        Feeling unsure? Email a selfie to{" "}
+        <a
+          href="mailto:hello@teakbeauty.com"
+          className="underline hover:text-muted-foreground transition-colors"
+          onClick={() => trackEvent("concierge_email_clicked", { variant_name: stacked ? null : active.name, source })}
+        >
+          hello@teakbeauty.com
+        </a>{" "}
+        for shade recs from trained color specialists at Teak's free Color Concierge
+      </p>
+    </>
+  );
+
+  const footer = (
+    <>
+      {shippingNote}
+      {conciergeNote}
+    </>
+  );
+
+  const title = (
+    // Stacked (v2) scales the title down on phones (Pegasus Large, same
+    // 28:29 ratio) so it stays on one line beside the Back button.
+    <span
+      className={`mt-1 mb-2.5 font-display text-foreground text-center ${
+        stacked ? "text-[21px] leading-[22px] sm:text-[28px] sm:leading-[29px]" : "text-[28px] leading-[29px]"
+      } ${titleClassName}`}
+    >
+      Top Recs for{" "}
+      {complexionType !== null ? (
+        <span className="text-green-700 whitespace-nowrap">Complexion {complexionType}</span>
+      ) : (
+        "You"
+      )}
+    </span>
+  );
+
+  if (stacked) {
+    return (
+      <div className="w-full max-w-sm mx-auto flex flex-col gap-4">
+        <div className="flex flex-col items-center">
+          {title}
+          {/* Shipping offer up front, before the recs, rather than in the footer. */}
+          {shippingNote}
+        </div>
+        {pickNames.map((name) => {
+          const shade = shadesByName[name];
+          if (!shade) return null;
+          return (
+            <div key={name} className="flex flex-col gap-2.5 bg-background border border-foreground p-4">
+              {/* Two-line header: category tag, then shade, formula and price on
+                  one line. Buy buttons sit on the product photo. */}
+              <div>
+                <p className="mb-1.5 font-sans font-medium text-[9px] leading-[10.5px] uppercase tracking-normal text-muted-foreground truncate">
+                  {(categoryByName[name] ?? []).join(" · ").replace(/"/g, "")}
+                </p>
+                <div className="flex items-baseline justify-between gap-3">
+                  <p className="flex flex-wrap items-baseline gap-x-2 min-w-0">
+                    <span className="font-display text-[18px] leading-[18px] text-foreground">{shade.name}</span>
+                    <span className="font-display text-[12px] leading-[13px] text-muted-foreground">{productTitleFor(shade)}</span>
+                  </p>
+                  {(() => {
+                    const img = variantImages[shade.variantId];
+                    const price = formatPrice(img?.price, img?.currencyCode);
+                    return price ? (
+                      <span className="shrink-0 font-display text-[12px] leading-[13px] text-foreground">{price}</span>
+                    ) : null;
+                  })()}
+                </div>
+              </div>
+              {/* The shade on the visitor's photo, beside the product itself. */}
+              <div className="grid grid-cols-2 gap-2">
+                {photoCard(shade, "w-full", false)}
+                {productImage(shade)}
+              </div>
+            </div>
+          );
+        })}
+        <div className="flex flex-col items-center gap-1">{conciergeNote}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-sm mx-auto flex flex-col gap-2.5 bg-background border border-foreground p-4">
-      <span className="mt-1 mb-2.5 font-display text-[28px] leading-[29px] text-foreground text-center">
-        Top Recs for{" "}
-        {complexionType !== null ? (
-          <span className="text-green-700">Complexion {complexionType}</span>
-        ) : (
-          "You"
-        )}
-      </span>
+      {title}
 
       <div className="w-full flex flex-col gap-4 px-1">
         {pickNames.length > 0 && (
@@ -204,127 +510,11 @@ const TryOnOtherShades = ({
         </div>
       </div>
 
-      {/* Photo plus the same branded bar composeBrandedImage draws on the
-          downloaded/shared file, so what's on screen is what gets saved.
-          Every dimension is a % of the image width (cqw), mirroring the
-          canvas proportions in src/lib/shareLook.ts. */}
-      <div className="w-full mx-auto max-w-sm" style={{ containerType: "inline-size" }}>
-        <div className="w-full aspect-[3/4] overflow-hidden bg-muted relative">
-          <img
-            src={activeSnapshot ?? userFace}
-            alt={`${active.label} on your photo`}
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div
-          className="w-full bg-white text-black flex items-start justify-between font-display leading-none"
-          style={{ height: "19cqw", padding: "4.56cqw 5cqw 0" }}
-        >
-          <div>
-            <img src={teakLogo} alt="TEAK" style={{ height: "5cqw", width: "auto" }} />
-            <p style={{ fontSize: "2.8cqw", marginTop: "1.8cqw" }}>Virtual Lip Studio</p>
-          </div>
-          <div className="text-right">
-            <p style={{ fontSize: "4.2cqw" }}>{active.name}</p>
-            <p style={{ fontSize: "2.6cqw", marginTop: "1.6cqw", color: "#595959" }}>
-              {activeImg?.productTitle ?? active.formula}
-            </p>
-          </div>
-        </div>
-      </div>
+      {photoCard(active)}
 
       <div className="flex flex-col items-center gap-1">
-        <div className="w-full flex flex-wrap gap-2">
-          {embedded && (
-            <Button
-              size="sm"
-              className={`h-7 flex-1 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
-                cartStates[active.variantId] === "added"
-                  ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
-                  : cartStates[active.variantId] === "error"
-                  ? "bg-red-700 text-white hover:bg-red-700 border border-red-700"
-                  : "bg-foreground text-background border border-foreground hover:bg-background hover:text-foreground"
-              }`}
-              disabled={cartStates[active.variantId] === "adding" || cartStates[active.variantId] === "added"}
-              onClick={() => addToCart(active.variantId, active.name, "unified_try_on")}
-            >
-              {cartStates[active.variantId] === "adding" ? (
-                <><span className="w-2.5 h-2.5 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" /> Adding…</>
-              ) : cartStates[active.variantId] === "added" ? (
-                <><Check className="w-2.5 h-2.5" /> Added</>
-              ) : cartStates[active.variantId] === "error" ? (
-                <>Failed</>
-              ) : (
-                <>Add to Cart</>
-              )}
-            </Button>
-          )}
-          <Button
-            asChild
-            size="sm"
-            className="h-7 flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
-          >
-            <a
-              href={productUrl}
-              // Same-window navigation: embedded, escape the iframe and take
-              // the whole store page to the product (Back restores the quiz
-              // via the browser's back/forward cache); standalone, navigate in
-              // place. No new windows — disorienting on mobile.
-              target={embedded ? "_top" : undefined}
-              className="truncate"
-              onClick={() => trackEvent("product_clicked", { variant_id: active.variantId, variant_name: active.name, source: "unified_try_on", product_handle: activeImg?.productHandle })}
-            >
-              View Product
-            </a>
-          </Button>
-          <Button
-            size="sm"
-            aria-label={`Share ${active.label}`}
-            className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
-            onClick={() => {
-              trackEvent("share_clicked", { variant_id: active.variantId, variant_name: active.name, source: "unified_try_on" });
-              void shareLook({
-                text: `What do you think of ${active.label} on me?`,
-                url: productUrl,
-                imageUrl: activeSnapshot,
-                brand: { logoUrl: teakLogo, shadeName: active.name, productTitle: activeImg?.productTitle ?? active.formula },
-              });
-            }}
-          >
-            <Share2 className="w-2.5 h-2.5" />
-          </Button>
-          <Button
-            size="sm"
-            aria-label={`Download ${active.label} on your photo`}
-            className="h-7 px-2 bg-transparent hover:bg-transparent text-foreground hover:text-muted-foreground border-0"
-            disabled={!activeSnapshot}
-            onClick={() => {
-              if (!activeSnapshot) return;
-              trackEvent("download_clicked", { variant_id: active.variantId, variant_name: active.name, source: "unified_try_on" });
-              void downloadLook({
-                imageUrl: activeSnapshot,
-                filename: `teak-${active.name.toLowerCase()}.jpg`,
-                brand: { logoUrl: teakLogo, shadeName: active.name, productTitle: activeImg?.productTitle ?? active.formula },
-              });
-            }}
-          >
-            <Download className="w-2.5 h-2.5" />
-          </Button>
-        </div>
-        <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
-          Buy 2+ Lipsticks for Free U.S. Standard Shipping
-        </p>
-        <p className="w-full mt-2.5 pt-3.5 border-t border-foreground/20 font-display text-[12px] leading-[15px] tracking-normal text-foreground text-center">
-          Feeling unsure? Email a selfie to{" "}
-          <a
-            href="mailto:hello@teakbeauty.com"
-            className="underline hover:text-muted-foreground transition-colors"
-            onClick={() => trackEvent("concierge_email_clicked", { variant_name: active.name, source: "unified_try_on" })}
-          >
-            hello@teakbeauty.com
-          </a>{" "}
-          for shade recs from trained color specialists at Teak's free Color Concierge
-        </p>
+        {actionButtons(active)}
+        {footer}
       </div>
     </div>
   );

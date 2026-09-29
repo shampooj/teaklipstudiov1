@@ -9,6 +9,8 @@ import WebFeaturesTab from "@/components/admin/WebFeaturesTab";
 import ComplexionPie from "@/components/admin/analytics/ComplexionPie";
 import PhotoQualityPanel from "@/components/admin/analytics/PhotoQualityPanel";
 import TryOnMethodPanel from "@/components/admin/analytics/TryOnMethodPanel";
+import LipShapePanel from "@/components/admin/analytics/LipShapePanel";
+import ColorLookPanel from "@/components/admin/analytics/ColorLookPanel";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import QuizVersionsTab from "@/components/admin/QuizVersionsTab";
 import { DEFAULT_QUIZ_VERSION, QUIZ_VERSIONS } from "@/lib/quizVersions";
@@ -240,14 +242,20 @@ const Dashboard = () => {
       sessionsByEvent.get(e.event_name)!.add(e.session_id);
     });
     const firstCount = sessionsByEvent.get("quiz_started")?.size || 0;
-    return FUNNEL_STEPS.map((step, i) => {
+    // Steps a version adds (e.g. v2's lip shape) only show when filtering to
+    // that version; mixed with versions that skip them, "from previous" breaks.
+    const steps = [...FUNNEL_STEPS];
+    for (const extra of QUIZ_VERSIONS.find((v) => v.key === quizVersionFilter)?.extraFunnelSteps ?? []) {
+      steps.splice(steps.findIndex((s) => s.key === extra.after) + 1, 0, { key: extra.key, label: extra.label });
+    }
+    return steps.map((step, i) => {
       const count = sessionsByEvent.get(step.key)?.size || 0;
-      const prevCount = i === 0 ? count : (sessionsByEvent.get(FUNNEL_STEPS[i - 1].key)?.size || 0);
+      const prevCount = i === 0 ? count : (sessionsByEvent.get(steps[i - 1].key)?.size || 0);
       const conversionFromPrev = prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : "—";
       const conversionFromStart = firstCount > 0 ? ((count / firstCount) * 100).toFixed(1) : "—";
       return { ...step, count, conversionFromPrev, conversionFromStart };
     });
-  }, [versionEvents]);
+  }, [versionEvents, quizVersionFilter]);
 
   const fetchData = useCallback(async () => {
     if (!authReady || !authUserId) return;
@@ -883,6 +891,10 @@ const Dashboard = () => {
 
             {/* Model image vs live selfie vs uploaded photo, per session */}
             <TryOnMethodPanel events={versionEvents} />
+
+            {/* Quiz v2 answers: lip shape and color look; each hidden when there are none */}
+            <LipShapePanel events={versionEvents} />
+            <ColorLookPanel events={versionEvents} />
 
             {/* Photo quality gate: pass rate, reasons, overrides, source split, per-check drill-down */}
             <PhotoQualityPanel events={versionEvents} />
