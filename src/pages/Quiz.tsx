@@ -13,7 +13,7 @@ import {
 // tagged with the version (see useQuizTracking).
 const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,
-  v2: () => <Index askLipShape askColorLook stackedResults inlineBack />,
+  v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed
