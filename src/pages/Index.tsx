@@ -60,18 +60,33 @@ import nupoora from "@/assets/nupoora.jpg";
 // Fallback roster entries whose photos are AI-generated (see AI_MODEL_IMAGE_KEYS).
 const FALLBACK_AI_AVATAR_IDS = new Set(["avatar-geeta", "avatar-apoorva"]);
 // Top-of-step Back control. Lives above each step's title so it is never
-// pushed below the fold on long mobile pages.
-const BackButton = ({ onClick }: { onClick: () => void }) => (
-  <div className="w-full flex justify-start">
-    <Button
-      onClick={onClick}
-      size="lg"
-      variant="outline"
-      className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
-      <ArrowLeft className="w-3 h-3" /> Back
-    </Button>
-  </div>
-);
+// pushed below the fold on long mobile pages. inline (quiz v2) instead pins it
+// to the top-left of the step's (relative) container, level with the title,
+// which then needs INLINE_BACK_PAD on both sides; on phones it shrinks to a
+// round arrow so the centered title keeps its width.
+const INLINE_BACK_PAD = "px-10 sm:px-24";
+const BackButton = ({ onClick, inline = false }: { onClick: () => void; inline?: boolean }) =>
+  inline ? (
+    <div className="absolute left-0 top-0 z-10">
+      <Button
+        onClick={onClick}
+        variant="outline"
+        aria-label="Back"
+        className="font-sans font-medium text-[9px] uppercase h-8 w-8 p-0 sm:w-auto sm:px-4 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+        <ArrowLeft className="w-3 h-3" /> <span className="hidden sm:inline">Back</span>
+      </Button>
+    </div>
+  ) : (
+    <div className="w-full flex justify-start">
+      <Button
+        onClick={onClick}
+        size="lg"
+        variant="outline"
+        className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
+        <ArrowLeft className="w-3 h-3" /> Back
+      </Button>
+    </div>
+  );
 
 const AVATAR_OPTIONS = [
   { id: "avatar-6", url: stMaseray },
@@ -454,8 +469,17 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 
 // Quiz v2 adds two required questions after lip tone: askLipShape, then
-// askColorLook. Each one is only left by picking an answer.
-const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: boolean; askColorLook?: boolean }) => {
+// askColorLook. Each one is only left by picking an answer. stackedResults
+// shows each top rec as its own card, stacked, with no "Other Shades to Try".
+// inlineBack puts each question step's Back button level with its title.
+const Index = ({
+  askLipShape = false,
+  askColorLook = false,
+  stackedResults = false,
+  inlineBack = false,
+}: { askLipShape?: boolean; askColorLook?: boolean; stackedResults?: boolean; inlineBack?: boolean }) => {
+  // Title padding that keeps centered text clear of an inline Back button.
+  const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
   const [state, setState] = useState<AppState>("landing");
   const [skinTone, setSkinTone] = useState<string>("");
   const [lipTone, setLipTone] = useState<string>("");
@@ -537,6 +561,9 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
   );
 
   const recommendations = useRecommendations(effectiveSkinTone, effectiveLipTone);
+  // Results put Back level with the "Top Recs" title only in the stacked
+  // layout; the fallback boxed layout (no recs) keeps it above.
+  const inlineResultsBack = inlineBack && stackedResults && recommendations.length > 0;
   // Same query key as the unified try-on card, so its data is warm at reveal.
   const { data: shadeSettings } = useShadeSettings(ALL_VARIANT_NAMES, effectiveSkinTone, effectiveLipTone);
 
@@ -806,10 +833,10 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <BackButton onClick={() => setState("landing")} />
+              className="relative flex flex-col items-center gap-8">
+                <BackButton inline={inlineBack} onClick={() => setState("landing")} />
                 <div className="text-center w-full">
-                  <p className="font-display text-[28px] leading-[29px] text-foreground">
+                  <p className={`font-display text-[28px] leading-[29px] text-foreground${titlePad}`}>
                     What's your general skintone?
                   </p>
                   <div className="mt-8 flex flex-col gap-5 w-full max-w-md mx-auto">
@@ -852,13 +879,13 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <BackButton onClick={() => setState("skin-tone")} />
+              className="relative flex flex-col items-center gap-8">
+                <BackButton inline={inlineBack} onClick={() => setState("skin-tone")} />
                 <div className="text-center w-full">
-                  <p className="font-display text-[18px] leading-[18px] text-foreground">
+                  <p className={`font-display text-[18px] leading-[18px] text-foreground${titlePad}`}>
                     Take a look in the mirror!
                   </p>
-                  <p className="mt-3 font-display text-[28px] leading-[29px] text-foreground">
+                  <p className={`mt-3 font-display text-[28px] leading-[29px] text-foreground${titlePad}`}>
                     What is your current natural lip tone?
                   </p>
                   <p className="font-display text-[12px] leading-[15px] text-foreground mt-3 max-w-md mx-auto">
@@ -893,10 +920,10 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <BackButton onClick={() => setState("lip-tone")} />
+              className="relative flex flex-col items-center gap-8">
+                <BackButton inline={inlineBack} onClick={() => setState("lip-tone")} />
                 <div className="text-center w-full">
-                  <p className="font-display text-[28px] leading-[29px] text-foreground">
+                  <p className={`font-display text-[28px] leading-[29px] text-foreground${titlePad}`}>
                     What is your lip shape?
                   </p>
                   <div className="mt-8 grid grid-cols-3 gap-3 w-full max-w-md mx-auto">
@@ -926,10 +953,10 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <BackButton onClick={() => setState(askLipShape ? "lip-shape" : "lip-tone")} />
+              className="relative flex flex-col items-center gap-8">
+                <BackButton inline={inlineBack} onClick={() => setState(askLipShape ? "lip-shape" : "lip-tone")} />
                 <div className="text-center w-full">
-                  <p className="font-display text-[28px] leading-[29px] text-foreground">
+                  <p className={`font-display text-[28px] leading-[29px] text-foreground${titlePad}`}>
                     What is your preferred lipstick color look?
                   </p>
                   <div className="mt-8 flex flex-col gap-3 w-full max-w-md mx-auto">
@@ -956,13 +983,15 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.3 }}>
-                <div className="mb-6">
-                  <BackButton onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState(stepBeforeUpload); } }} />
+              transition={{ duration: 0.3 }}
+              className="relative">
+                {/* Inline only while choosing: over a selfie preview it would cover the photo. */}
+                <div className={inlineBack && !originalImage ? "" : "mb-6"}>
+                  <BackButton inline={inlineBack && !originalImage} onClick={() => { if (originalImage) { setOriginalImage(null); } else { setState(stepBeforeUpload); } }} />
                 </div>
                 {!originalImage ?
               <>
-                <h2 className="font-display text-[28px] leading-[29px] text-foreground text-center mb-6">
+                <h2 className={`font-display text-[28px] leading-[29px] text-foreground text-center mb-6${titlePad}`}>
                   Who would you like to see our recommended lipstick shades on?
                 </h2>
                 <div className="flex flex-col gap-4">
@@ -1370,10 +1399,14 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="flex flex-col items-center gap-8">
-                <div className="w-full max-w-lg">
-                  <BackButton onClick={() => {setOriginalImage(null);setState("idle");}} />
-                </div>
+              className="relative flex flex-col items-center gap-8">
+                {inlineResultsBack ? (
+                  <BackButton inline onClick={() => {setOriginalImage(null);setState("idle");}} />
+                ) : (
+                  <div className="w-full max-w-lg">
+                    <BackButton onClick={() => {setOriginalImage(null);setState("idle");}} />
+                  </div>
+                )}
                 <div className="w-full max-w-lg flex flex-col gap-5">
                   {originalImage && (
                     <TryOnOtherShades
@@ -1387,6 +1420,9 @@ const Index = ({ askLipShape = false, askColorLook = false }: { askLipShape?: bo
                       addToCart={addToCart}
                       recommendations={recommendations}
                       complexionType={getComplexionType(effectiveSkinTone, effectiveLipTone)}
+                      stacked={stackedResults}
+                      // On phones the title spans the width; pad it clear of the round Back button.
+                      titleClassName={inlineResultsBack ? "px-10 sm:px-0" : ""}
                     />
                   )}
 
