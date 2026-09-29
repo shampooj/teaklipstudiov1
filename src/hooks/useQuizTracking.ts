@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { getCurrentQuizVersion } from "@/lib/quizVersions";
 
 // In-memory only — no device storage is touched, which keeps the anonymous
 // first-party funnel events outside cookie-consent requirements. The quiz is a
@@ -24,7 +25,8 @@ export const useQuizTracking = () => {
         .insert({
           session_id: sessionIdRef.current,
           event_name: eventName,
-          event_data: eventData,
+          // Tags every event with the quiz version this visitor was served.
+          event_data: { ...eventData, quiz_version: getCurrentQuizVersion() },
         } as any)
         .then(({ error }) => {
           if (error) console.error("Failed to track event:", eventName, error);

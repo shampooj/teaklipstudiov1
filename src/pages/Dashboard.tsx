@@ -8,7 +8,10 @@ import ShadesTab from "@/components/admin/ShadesTab";
 import WebFeaturesTab from "@/components/admin/WebFeaturesTab";
 import ComplexionPie from "@/components/admin/analytics/ComplexionPie";
 import PhotoQualityPanel from "@/components/admin/analytics/PhotoQualityPanel";
+import TryOnMethodPanel from "@/components/admin/analytics/TryOnMethodPanel";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
+import QuizVersionsTab from "@/components/admin/QuizVersionsTab";
+import { DEFAULT_QUIZ_VERSION, QUIZ_VERSIONS } from "@/lib/quizVersions";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
 import skinDeepBrown from "@/assets/skin-deep-brown.jpg";
@@ -146,6 +149,7 @@ const Dashboard = () => {
   const [funnelDateTo, setFunnelDateTo] = useState<Date>(new Date());
   const [quizEvents, setQuizEvents] = useState<{ event_name: string; session_id: string; created_at: string; event_data: any }[]>([]);
   const [funnelLoading, setFunnelLoading] = useState(false);
+  const [quizVersionFilter, setQuizVersionFilter] = useState<string>("all");
 
   const fetchFunnelData = useCallback(async () => {
     if (!authReady || !authUserId) return;
@@ -216,9 +220,22 @@ const Dashboard = () => {
     });
   }, [adminLabels, funnelDateFrom, funnelDateTo]);
 
+  // Events for the selected quiz version. A session's version comes from the
+  // quiz_version its quiz events carry; Shopify webhook events carry none and
+  // follow their session. Sessions from before versioning count as the default.
+  const versionEvents = useMemo(() => {
+    if (quizVersionFilter === "all") return quizEvents;
+    const versionBySession = new Map<string, string>();
+    for (const e of quizEvents) {
+      const v = e.event_data?.quiz_version;
+      if (typeof v === "string" && !versionBySession.has(e.session_id)) versionBySession.set(e.session_id, v);
+    }
+    return quizEvents.filter((e) => (versionBySession.get(e.session_id) ?? DEFAULT_QUIZ_VERSION) === quizVersionFilter);
+  }, [quizEvents, quizVersionFilter]);
+
   const funnelData = useMemo(() => {
     const sessionsByEvent = new Map<string, Set<string>>();
-    quizEvents.forEach((e) => {
+    versionEvents.forEach((e) => {
       if (!sessionsByEvent.has(e.event_name)) sessionsByEvent.set(e.event_name, new Set());
       sessionsByEvent.get(e.event_name)!.add(e.session_id);
     });
@@ -230,7 +247,7 @@ const Dashboard = () => {
       const conversionFromStart = firstCount > 0 ? ((count / firstCount) * 100).toFixed(1) : "—";
       return { ...step, count, conversionFromPrev, conversionFromStart };
     });
-  }, [quizEvents]);
+  }, [versionEvents]);
 
   const fetchData = useCallback(async () => {
     if (!authReady || !authUserId) return;
@@ -486,7 +503,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations" | "web-features">("labeling");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations" | "web-features" | "quiz-versions">("labeling");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
@@ -549,6 +566,12 @@ const Dashboard = () => {
               Web Features
             </button>
             <button
+              onClick={() => setActiveTab("quiz-versions")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "quiz-versions" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Quiz Versions
+            </button>
+            <button
               onClick={() => setActiveTab("data")}
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "data" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
@@ -587,6 +610,17 @@ const Dashboard = () => {
                   <Calendar mode="single" selected={funnelDateTo} onSelect={(d) => d && setFunnelDateTo(d)} initialFocus className={cn("p-3 pointer-events-auto")} />
                 </PopoverContent>
               </Popover>
+              <Select value={quizVersionFilter} onValueChange={setQuizVersionFilter}>
+                <SelectTrigger className="h-9 w-auto min-w-[140px] text-[10px] border-foreground/20" aria-label="Quiz version">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all" className="text-xs">All quiz versions</SelectItem>
+                  {QUIZ_VERSIONS.map((v) => (
+                    <SelectItem key={v.key} value={v.key} className="text-xs">{v.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Stats row */}
@@ -600,7 +634,7 @@ const Dashboard = () => {
               <div className="border border-border rounded-2xl p-5 w-full sm:max-w-xs">
                 <p className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1">Total Revenue</p>
                 <p className="text-3xl font-medium" style={{ fontFamily: "'Wolpe Pegasus', serif" }}>
-                  ${quizEvents
+                  ${versionEvents
                     .filter((e) => e.event_name === "checkout_completed" && e.event_data?.total_price)
                     .reduce((sum, e) => sum + parseFloat(e.event_data.total_price || "0"), 0)
                     .toFixed(2)}
@@ -844,11 +878,14 @@ const Dashboard = () => {
               })()}
 
               {/* Complexion types reached on the results screen, per session */}
-              <ComplexionPie events={quizEvents} />
+              <ComplexionPie events={versionEvents} />
             </div>
 
+            {/* Model image vs live selfie vs uploaded photo, per session */}
+            <TryOnMethodPanel events={versionEvents} />
+
             {/* Photo quality gate: pass rate, reasons, overrides, source split, per-check drill-down */}
-            <PhotoQualityPanel events={quizEvents} />
+            <PhotoQualityPanel events={versionEvents} />
           </>
         )}
 
@@ -1107,6 +1144,8 @@ const Dashboard = () => {
         {activeTab === "recommendations" && <RecommendationsTab />}
 
         {activeTab === "web-features" && <WebFeaturesTab />}
+
+        {activeTab === "quiz-versions" && <QuizVersionsTab />}
 
         {activeTab === "data" && (
           <>
