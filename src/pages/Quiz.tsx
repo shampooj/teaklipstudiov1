@@ -11,8 +11,8 @@ import {
 // The quiz route. Picks this visitor's version from the admin's on/off switches
 // and traffic weights, then renders that version's page. Every tracked event is
 // tagged with the version (see useQuizTracking).
-// Model tiles Version 2 offers (roster image names).
-const V2_MODELS = ["aashi", "charithra", "cynthia", "maseray", "nero", "sanna", "tanvi", "terushka"] as const;
+// Model tiles Version 2 offers (roster image names), in display order.
+const V2_MODELS = ["terushka", "aashi", "cynthia", "maseray", "nero", "sanna", "tanvi", "charithra"] as const;
 
 const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,

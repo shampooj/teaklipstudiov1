@@ -476,8 +476,8 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // askColorLook. Each one is only left by picking an answer. stackedResults
 // shows each top rec as its own card, stacked, with no "Other Shades to Try".
 // inlineBack puts each question step's Back button level with its title.
-// modelNames limits the model tiles to these roster models (by name); the
-// admin roster's Display switch still applies on top.
+// modelNames limits the model tiles to these roster models (by name), shown
+// in the list's order; the admin roster's Display switch still applies.
 // discountConsentTitle frames the optional archive opt-in around the
 // discount: "Get 10% off" as its headline instead of naming The Brown Skin
 // Archive, a shorter email prompt, and no note under the field. The consent
@@ -579,7 +579,10 @@ const Index = ({
           }));
     if (!modelNames) return all;
     const allowed = new Set(modelNames);
-    const picked = all.filter((a) => a.name && allowed.has(a.name));
+    const order = new Map(modelNames.map((n, i) => [n, i]));
+    const picked = all
+      .filter((a) => a.name && allowed.has(a.name))
+      .sort((a, b) => order.get(a.name!)! - order.get(b.name!)!);
     // Never leave the step without models (e.g. all of them switched off in admin).
     return picked.length > 0 ? picked : all;
   }, [quizModels, modelNames]);
