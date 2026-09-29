@@ -472,12 +472,21 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // askColorLook. Each one is only left by picking an answer. stackedResults
 // shows each top rec as its own card, stacked, with no "Other Shades to Try".
 // inlineBack puts each question step's Back button level with its title.
+// discountConsentTitle heads the optional archive opt-in with "Get 10% off"
+// instead of naming The Brown Skin Archive; the consent wording is unchanged.
 const Index = ({
   askLipShape = false,
   askColorLook = false,
   stackedResults = false,
   inlineBack = false,
-}: { askLipShape?: boolean; askColorLook?: boolean; stackedResults?: boolean; inlineBack?: boolean }) => {
+  discountConsentTitle = false,
+}: {
+  askLipShape?: boolean;
+  askColorLook?: boolean;
+  stackedResults?: boolean;
+  inlineBack?: boolean;
+  discountConsentTitle?: boolean;
+}) => {
   // Title padding that keeps centered text clear of an inline Back button.
   const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
   const [state, setState] = useState<AppState>("landing");
@@ -1188,19 +1197,25 @@ const Index = ({
                           className="shrink-0 h-4 w-4 mt-1 rounded-none border border-foreground/40 data-[state=checked]:bg-foreground data-[state=checked]:border-foreground" />
                         <span className="block">
                           <span className="block font-display text-[18px] leading-[18px] text-foreground tracking-normal">
-                            Add my pic to{" "}
-                            <a
-                              href="https://teakbeauty.com/pages/the-brown-skin-archive"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline hover:text-muted-foreground transition-colors"
-                              // New tab + no propagation: following the link must
-                              // neither toggle the consent checkbox nor lose the
-                              // quiz-taker's progress.
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              The Brown Skin Archive
-                            </a>
+                            {discountConsentTitle ? (
+                              "Get 10% off"
+                            ) : (
+                              <>
+                                Add my pic to{" "}
+                                <a
+                                  href="https://teakbeauty.com/pages/the-brown-skin-archive"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="underline hover:text-muted-foreground transition-colors"
+                                  // New tab + no propagation: following the link must
+                                  // neither toggle the consent checkbox nor lose the
+                                  // quiz-taker's progress.
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  The Brown Skin Archive
+                                </a>
+                              </>
+                            )}
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
                             Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity).
