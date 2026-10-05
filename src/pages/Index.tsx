@@ -1359,16 +1359,6 @@ const Index = ({
                         }
                       })();
 
-                    // Save quiz selections when consent is given
-                    supabase.rpc("insert_customer_submission" as any, {
-                      p_variant_id: "research-selections",
-                      p_skin_tone: skinTone,
-                      p_lip_tone: lipTone,
-                      p_shirt: shirt || null,
-                    }).then(({ error }: any) => {
-                      if (error) console.error("Failed to save research selections:", error);
-                    });
-
                       // The code is emailed via Klaviyo rather than shown
                       // on-screen — a real address gets the reward, a mistyped
                       // one silently doesn't.

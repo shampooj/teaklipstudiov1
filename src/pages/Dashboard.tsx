@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
-import { ChevronLeft, ChevronRight, LogOut, User } from "lucide-react";
+import { ChevronLeft, ChevronRight, Info, LogOut, User } from "lucide-react";
+import { Tooltip as HoverTip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import teakLogo from "@/assets/teak-logo.png";
@@ -187,20 +188,26 @@ const Dashboard = () => {
     setFunnelLoading(false);
   }, [authReady, authUserId, funnelDateFrom, funnelDateTo]);
 
+  const IMAGE_SELECTED = "image_selected";
   const FUNNEL_STEPS = [
-    { key: "quiz_started", label: "Quiz Started" },
-    { key: "skin_tone_selected", label: "Skin Tone Selected" },
-    { key: "lip_tone_selected", label: "Lip Tone Selected" },
-    { key: "selfie_uploaded", label: "Selfie Uploaded" },
-    { key: "results_viewed", label: "Results Viewed" },
-    { key: "product_clicked", label: "Product Clicked" },
-    { key: "add_to_cart", label: "Add to Cart" },
+    // quiz_started is the historical name of the page-load event; the
+    // "Let's Go" click is take_quiz_clicked (tracked since 2026-08-17).
+    { key: "quiz_started", label: "Viewed Quiz Homepage", definition: "Loaded the quiz landing page. Counts every visit, including ones that leave without starting." },
+    { key: "take_quiz_clicked", label: "Quiz Started", definition: "Clicked \"Let's Go\" on the quiz homepage." },
+    { key: "skin_tone_selected", label: "Skin Tone Selected", definition: "Picked a skin tone on the first question." },
+    { key: "lip_tone_selected", label: "Lip Tone Selected", definition: "Picked a natural lip tone." },
+    // Derived, not a raw event: took or uploaded a selfie, or picked a model
+    // image (computed in funnelData).
+    { key: IMAGE_SELECTED, label: "Image Selected", definition: "Took a selfie with the camera, uploaded a photo from their library, or picked a model image." },
+    { key: "results_viewed", label: "Results Viewed", definition: "Reached the shade recommendations, on their own photo or a model." },
+    { key: "product_clicked", label: "Product Clicked", definition: "Clicked through to a recommended shade's product page (photo or View Product)." },
+    { key: "add_to_cart", label: "Add to Cart", definition: "Pressed Add to Cart on a recommended shade (only offered when the quiz is embedded in the store)." },
     // From the theme-wide click tracker (docs/shopify-checkout-click-tracker.html)
-    { key: "checkout_clicked", label: "Clicked Checkout" },
+    { key: "checkout_clicked", label: "Clicked Checkout", definition: "Pressed a checkout button anywhere on the store after taking the quiz." },
     // From Shopify webhooks: checkouts/create fires once contact info is
     // entered and continued (not on checkout-page load); orders/create on payment.
-    { key: "checkout_initiated", label: "Started Filling In Checkout" },
-    { key: "checkout_completed", label: "Paid" },
+    { key: "checkout_initiated", label: "Started Filling In Checkout", definition: "Entered contact info on Shopify checkout and continued. Just opening checkout doesn't count." },
+    { key: "checkout_completed", label: "Paid", definition: "Placed a paid order on Shopify." },
   ];
 
   // Filter data and adminLabels by date range
@@ -240,13 +247,19 @@ const Dashboard = () => {
     versionEvents.forEach((e) => {
       if (!sessionsByEvent.has(e.event_name)) sessionsByEvent.set(e.event_name, new Set());
       sessionsByEvent.get(e.event_name)!.add(e.session_id);
+      // A model pick has no event of its own; it's the results_viewed fired
+      // with skipped_selfie (same signal TryOnMethodPanel uses).
+      if (e.event_name === "selfie_uploaded" || (e.event_name === "results_viewed" && e.event_data?.skipped_selfie === true)) {
+        if (!sessionsByEvent.has(IMAGE_SELECTED)) sessionsByEvent.set(IMAGE_SELECTED, new Set());
+        sessionsByEvent.get(IMAGE_SELECTED)!.add(e.session_id);
+      }
     });
     const firstCount = sessionsByEvent.get("quiz_started")?.size || 0;
     // Steps a version adds (e.g. v2's lip shape) only show when filtering to
     // that version; mixed with versions that skip them, "from previous" breaks.
     const steps = [...FUNNEL_STEPS];
     for (const extra of QUIZ_VERSIONS.find((v) => v.key === quizVersionFilter)?.extraFunnelSteps ?? []) {
-      steps.splice(steps.findIndex((s) => s.key === extra.after) + 1, 0, { key: extra.key, label: extra.label });
+      steps.splice(steps.findIndex((s) => s.key === extra.after) + 1, 0, { key: extra.key, label: extra.label, definition: extra.definition });
     }
     return steps.map((step, i) => {
       const count = sessionsByEvent.get(step.key)?.size || 0;
@@ -262,8 +275,12 @@ const Dashboard = () => {
 
     setLoading(true);
     const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
+      // research-selections rows were a duplicate of each consent-upload's
+      // tones (no image, no email), written until 2026-10-05; skipping them
+      // keeps the counts and tone charts at one row per customer.
       (supabase.from as any)("customer_submissions")
         .select("*")
+        .neq("variant_id", "research-selections")
         .order("created_at", { ascending: false }),
       (supabase.from as any)("admin_labels").select("*"),
       (supabase.from as any)("profiles").select("id, email"),
@@ -685,7 +702,19 @@ const Dashboard = () => {
                       <TableBody>
                         {funnelData.map((step) => (
                           <TableRow key={step.key}>
-                            <TableCell className="text-xs">{step.label}</TableCell>
+                            <TableCell className="text-xs">
+                              <span className="inline-flex items-center gap-1">
+                                {step.label}
+                                <HoverTip>
+                                  <TooltipTrigger asChild>
+                                    <button type="button" aria-label={`What "${step.label}" means`} className="text-muted-foreground hover:text-foreground">
+                                      <Info className="h-3 w-3" />
+                                    </button>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-[240px] text-xs">{step.definition}</TooltipContent>
+                                </HoverTip>
+                              </span>
+                            </TableCell>
                             <TableCell className="text-xs text-right font-medium">{step.count}</TableCell>
                             <TableCell className="text-xs text-right">{step.conversionFromPrev === "—" ? "—" : `${step.conversionFromPrev}%`}</TableCell>
                             <TableCell className="text-xs text-right">{step.conversionFromStart === "—" ? "—" : `${step.conversionFromStart}%`}</TableCell>
