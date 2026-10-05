@@ -1,6 +1,8 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import goodPhotoExample from "@/assets/photo-examples/web/good-photo-example.jpg";
+// Face crop matching the bad example's framing; good-photo-example.jpg is the
+// uncropped derivative of the same original.
+import goodPhotoExample from "@/assets/photo-examples/web/good-photo-example-face-crop.jpg";
 import badPhotoExample from "@/assets/photo-examples/web/bad-photo-example.jpg";
 
 // Shown once per visit, the first time the quiz-taker reaches for the camera
@@ -10,8 +12,8 @@ import badPhotoExample from "@/assets/photo-examples/web/bad-photo-example.jpg";
 
 const EXAMPLES = [
   // caption is the image alt text only; nothing is printed under the photos
-  { src: goodPhotoExample, ok: true, tag: "Use a photo like this", caption: "Daytime window light, evenly lit" },
-  { src: badPhotoExample, ok: false, tag: "Not like this", caption: "Indoor lamp light, shadows across the face, warm color cast" },
+  { src: goodPhotoExample, ok: true, tags: ["Use a bright photo like this", "Use a no-lipstick photo"], caption: "Daytime window light, evenly lit" },
+  { src: badPhotoExample, ok: false, tags: ["Not like this"], caption: "Indoor lamp light, shadows across the face, warm color cast" },
 ];
 
 interface Props {
@@ -33,18 +35,18 @@ const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
           Quick tips for an accurate try-on
         </DialogTitle>
       </DialogHeader>
-      <div className="flex flex-col gap-1.5 font-display text-[12px] leading-[15px] text-foreground">
-        <p>The lipstick colors render most accurately on a photo taken in daytime window light.</p>
-        <p>Make sure to use a pic with no lipstick on, too!</p>
-      </div>
       <div className="grid grid-cols-2 gap-3">
         {EXAMPLES.map((ex) => (
-          <figure key={ex.tag}>
+          <figure key={ex.tags[0]}>
             <div className={`relative aspect-[3/4] overflow-hidden border ${ex.ok ? "border-foreground" : "border-foreground/30"}`}>
               <img src={ex.src} alt={ex.caption} className={`w-full h-full object-cover ${ex.ok ? "" : "grayscale-[35%]"}`} />
-              <span className={`absolute top-2 left-2 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal ${ex.ok ? "bg-foreground text-background" : "bg-background/90 text-foreground"}`}>
-                {ex.tag}
-              </span>
+              <div className="absolute top-2 left-2 right-2 flex flex-col items-start gap-1">
+                {ex.tags.map((tag) => (
+                  <span key={tag} className={`px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal ${ex.ok ? "bg-foreground text-background" : "bg-background/90 text-foreground"}`}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </figure>
         ))}
