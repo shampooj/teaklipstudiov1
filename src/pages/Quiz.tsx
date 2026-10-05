@@ -17,6 +17,8 @@ const V2_MODELS = ["terushka", "aashi", "cynthia", "maseray", "nero", "sanna", "
 const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,
   v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelNames={V2_MODELS} />,
+  // Version 2 with no selfie option: every model the admin roster displays.
+  v3: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelsOnly />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed
