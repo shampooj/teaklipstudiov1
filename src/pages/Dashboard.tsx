@@ -190,9 +190,8 @@ const Dashboard = () => {
 
   const IMAGE_SELECTED = "image_selected";
   const FUNNEL_STEPS = [
-    // quiz_started is the historical name of the page-load event; the
-    // "Let's Go" click is take_quiz_clicked (tracked since 2026-08-17).
-    { key: "quiz_started", label: "Viewed Quiz Homepage", definition: "Loaded the quiz landing page. Counts every visit, including ones that leave without starting." },
+    // The "Let's Go" click is take_quiz_clicked (tracked since 2026-08-17);
+    // quiz_started is the page-load event and isn't a funnel step.
     { key: "take_quiz_clicked", label: "Quiz Started", definition: "Clicked \"Let's Go\" on the quiz homepage." },
     { key: "skin_tone_selected", label: "Skin Tone Selected", definition: "Picked a skin tone on the first question." },
     { key: "lip_tone_selected", label: "Lip Tone Selected", definition: "Picked a natural lip tone." },
@@ -254,7 +253,7 @@ const Dashboard = () => {
         sessionsByEvent.get(IMAGE_SELECTED)!.add(e.session_id);
       }
     });
-    const firstCount = sessionsByEvent.get("quiz_started")?.size || 0;
+    const firstCount = sessionsByEvent.get(FUNNEL_STEPS[0].key)?.size || 0;
     // Steps a version adds (e.g. v2's lip shape) only show when filtering to
     // that version; mixed with versions that skip them, "from previous" breaks.
     const steps = [...FUNNEL_STEPS];
