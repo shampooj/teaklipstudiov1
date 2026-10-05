@@ -19,6 +19,8 @@ const VERSION_PAGES: Record<string, ComponentType> = {
   v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelNames={V2_MODELS} />,
   // Version 2 with no selfie option: every model the admin roster displays.
   v3: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelsOnly />,
+  // Version 3 with no photo step: product-only result cards.
+  v4: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle noPhoto />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed

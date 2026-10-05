@@ -11,6 +11,8 @@ export interface QuizVersionDef {
   description: string;
   // Steps this version adds to the Analytics funnel, shown when filtering to it.
   extraFunnelSteps?: { key: string; label: string; definition: string; after: string }[];
+  // Base funnel steps this version doesn't have, hidden when filtering to it.
+  omitFunnelSteps?: string[];
 }
 
 export const QUIZ_VERSIONS: QuizVersionDef[] = [
@@ -20,8 +22,8 @@ export const QUIZ_VERSIONS: QuizVersionDef[] = [
     label: "Version 2",
     description: "Version 1 plus two required questions after lip tone (lip shape, then preferred color look), and results as stacked cards, one per top rec.",
     extraFunnelSteps: [
-      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Version 2 only).", after: "lip_tone_selected" },
-      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Version 2 only).", after: "lip_shape_selected" },
+      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Versions 2–4).", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Versions 2–4).", after: "lip_shape_selected" },
     ],
   },
   {
@@ -29,9 +31,19 @@ export const QUIZ_VERSIONS: QuizVersionDef[] = [
     label: "Version 3",
     description: "Version 2 without the selfie option: the photo step shows every displayed model to choose from, with no camera or upload.",
     extraFunnelSteps: [
-      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Versions 2 and 3).", after: "lip_tone_selected" },
-      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Versions 2 and 3).", after: "lip_shape_selected" },
+      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Versions 2–4).", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Versions 2–4).", after: "lip_shape_selected" },
     ],
+  },
+  {
+    key: "v4",
+    label: "Version 4",
+    description: "Version 3 without the photo step: after the last question it goes straight to results, shown as product-only cards with no model or selfie.",
+    extraFunnelSteps: [
+      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Versions 2–4).", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Versions 2–4).", after: "lip_shape_selected" },
+    ],
+    omitFunnelSteps: ["image_selected"],
   },
 ];
 
