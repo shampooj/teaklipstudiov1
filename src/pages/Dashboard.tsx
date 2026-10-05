@@ -275,8 +275,12 @@ const Dashboard = () => {
 
     setLoading(true);
     const [{ data: rows, error }, { data: labels }, { data: profiles }, { data: aiCats }] = await Promise.all([
+      // research-selections rows were a duplicate of each consent-upload's
+      // tones (no image, no email), written until 2026-10-05; skipping them
+      // keeps the counts and tone charts at one row per customer.
       (supabase.from as any)("customer_submissions")
         .select("*")
+        .neq("variant_id", "research-selections")
         .order("created_at", { ascending: false }),
       (supabase.from as any)("admin_labels").select("*"),
       (supabase.from as any)("profiles").select("id, email"),
