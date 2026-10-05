@@ -482,6 +482,8 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // discount: "Get 10% off" as its headline instead of naming The Brown Skin
 // Archive, a shorter email prompt, and no note under the field. The consent
 // wording is unchanged.
+// modelsOnly drops the selfie camera and upload tiles, so the photo step
+// offers only the model tiles.
 const Index = ({
   askLipShape = false,
   askColorLook = false,
@@ -489,6 +491,7 @@ const Index = ({
   inlineBack = false,
   discountConsentTitle = false,
   modelNames,
+  modelsOnly = false,
 }: {
   askLipShape?: boolean;
   askColorLook?: boolean;
@@ -496,6 +499,7 @@ const Index = ({
   inlineBack?: boolean;
   discountConsentTitle?: boolean;
   modelNames?: readonly string[];
+  modelsOnly?: boolean;
 }) => {
   // Title padding that keeps centered text clear of an inline Back button.
   const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
@@ -1016,13 +1020,15 @@ const Index = ({
                 {!originalImage ?
               <>
                 <h2 className={`font-display text-[28px] leading-[29px] text-foreground text-center mb-6${titlePad}`}>
-                  Who would you like to see our recommended lipstick shades on?
+                  {modelsOnly
+                    ? "Which model's skin and lip tone most closely matches your own?"
+                    : "Who would you like to see our recommended lipstick shades on?"}
                 </h2>
                 <div className="flex flex-col gap-4">
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                     {/* Camera tile (mobile only): capture="user" opens the front
                         camera directly, so this path is fresh by construction. */}
-                    {mobile && (
+                    {mobile && !modelsOnly && (
                       <div
                         onClick={() => requestPhoto("camera")}
                         className="group relative aspect-[4/5] flex cursor-pointer border border-foreground bg-background text-center transition-colors hover:border-foreground/60">
@@ -1046,37 +1052,39 @@ const Index = ({
                         </div>
                       </div>
                     )}
-                    <div
-                      onDrop={handleDrop}
-                      onDragOver={(e) => e.preventDefault()}
-                      onClick={() => requestPhoto("library")}
-                      className="group relative aspect-[4/5] flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        // On iOS, `multiple` skips the Photo Library / Take
-                        // Photo / Choose File sheet and opens the Photo Library
-                        // directly (the camera has its own tile). Only the
-                        // first selected file is used. Desktop keeps the
-                        // normal single-select dialog.
-                        multiple={mobile}
-                        className="hidden"
-                        onChange={handleInputChange} />
-                      <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
-                        <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                        <div>
-                          <p className="font-display text-[18px] leading-[18px] text-foreground">
-                            Myself!
-                          </p>
-                          <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                            {mobile
-                              ? "Upload a well-lit pic from my files"
-                              : "Upload a selfie taken in front of a window during day for accurate results"}
-                          </p>
+                    {!modelsOnly && (
+                      <div
+                        onDrop={handleDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                        onClick={() => requestPhoto("library")}
+                        className="group relative aspect-[4/5] flex cursor-pointer border border-border bg-background text-center transition-colors hover:border-foreground/60">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          // On iOS, `multiple` skips the Photo Library / Take
+                          // Photo / Choose File sheet and opens the Photo Library
+                          // directly (the camera has its own tile). Only the
+                          // first selected file is used. Desktop keeps the
+                          // normal single-select dialog.
+                          multiple={mobile}
+                          className="hidden"
+                          onChange={handleInputChange} />
+                        <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
+                          <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                          <div>
+                            <p className="font-display text-[18px] leading-[18px] text-foreground">
+                              Myself!
+                            </p>
+                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                              {mobile
+                                ? "Upload a well-lit pic from my files"
+                                : "Upload a selfie taken in front of a window during day for accurate results"}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                     {avatarOptions.map((avatar) => (
                       <button
                         key={avatar.id}

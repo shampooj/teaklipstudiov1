@@ -24,6 +24,15 @@ export const QUIZ_VERSIONS: QuizVersionDef[] = [
       { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Version 2 only).", after: "lip_shape_selected" },
     ],
   },
+  {
+    key: "v3",
+    label: "Version 3",
+    description: "Version 2 without the selfie option: the photo step shows every displayed model to choose from, with no camera or upload.",
+    extraFunnelSteps: [
+      { key: "lip_shape_selected", label: "Lip Shape Selected", definition: "Picked a lip shape (Versions 2 and 3).", after: "lip_tone_selected" },
+      { key: "color_look_selected", label: "Color Look Selected", definition: "Picked a preferred color look: natural, bright pop, or both (Versions 2 and 3).", after: "lip_shape_selected" },
+    ],
+  },
 ];
 
 // Served when nothing is on, the settings can't be read, or a session's events
