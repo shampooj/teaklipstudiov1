@@ -308,7 +308,7 @@ const TryOnOtherShades = ({
               src={shopifyImg(img.imageUrl, 480)}
               alt={img.altText ?? shade.label}
               loading="lazy"
-              className="w-full flex-1 min-h-0 object-cover bg-muted"
+              className="w-full flex-1 min-h-0 object-contain bg-muted"
             />
           )}
           {smear && (
