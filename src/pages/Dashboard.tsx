@@ -256,8 +256,9 @@ const Dashboard = () => {
     const firstCount = sessionsByEvent.get(FUNNEL_STEPS[0].key)?.size || 0;
     // Steps a version adds (e.g. v2's lip shape) only show when filtering to
     // that version; mixed with versions that skip them, "from previous" breaks.
-    const steps = [...FUNNEL_STEPS];
-    for (const extra of QUIZ_VERSIONS.find((v) => v.key === quizVersionFilter)?.extraFunnelSteps ?? []) {
+    const versionDef = QUIZ_VERSIONS.find((v) => v.key === quizVersionFilter);
+    const steps = FUNNEL_STEPS.filter((s) => !versionDef?.omitFunnelSteps?.includes(s.key));
+    for (const extra of versionDef?.extraFunnelSteps ?? []) {
       steps.splice(steps.findIndex((s) => s.key === extra.after) + 1, 0, { key: extra.key, label: extra.label, definition: extra.definition });
     }
     return steps.map((step, i) => {

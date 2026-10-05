@@ -484,6 +484,8 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // wording is unchanged.
 // modelsOnly drops the selfie camera and upload tiles, so the photo step
 // offers only the model tiles.
+// noPhoto skips the photo step: the last question goes straight to results
+// that follow the quiz-taker's own tones, shown as product-only cards.
 const Index = ({
   askLipShape = false,
   askColorLook = false,
@@ -492,6 +494,7 @@ const Index = ({
   discountConsentTitle = false,
   modelNames,
   modelsOnly = false,
+  noPhoto = false,
 }: {
   askLipShape?: boolean;
   askColorLook?: boolean;
@@ -500,6 +503,7 @@ const Index = ({
   discountConsentTitle?: boolean;
   modelNames?: readonly string[];
   modelsOnly?: boolean;
+  noPhoto?: boolean;
 }) => {
   // Title padding that keeps centered text clear of an inline Back button.
   const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
@@ -634,6 +638,7 @@ const Index = ({
     !recsLoading &&
     shadeSettings !== undefined &&
     (recommendations.length === 0 ||
+      !originalImage ||
       shadeSpecs.every((s) => banubaSnapshots[s.key] !== undefined));
 
   // Hold the "Gathering…" screen until every card image is settled, with a
@@ -667,7 +672,7 @@ const Index = ({
         ? SKIN_TONES.flatMap((t) => [...t.samples])
         : state === "skin-tone"
         ? LIP_TONE_ROWS.flatMap((t) => [...t.images])
-        : state === stepBeforeUpload
+        : state === stepBeforeUpload && !noPhoto
         ? avatarOptions.map((a) => a.url)
         : [];
     const timer = window.setTimeout(() => {
@@ -679,7 +684,17 @@ const Index = ({
       }
     }, 400);
     return () => window.clearTimeout(timer);
-  }, [state, avatarOptions, stepBeforeUpload]);
+  }, [state, avatarOptions, stepBeforeUpload, noPhoto]);
+
+  // No photo step: whichever question comes last hands off to "idle" as
+  // usual, and this sends it on to results instead.
+  useEffect(() => {
+    if (!noPhoto || state !== "idle") return;
+    trackEvent("results_viewed", { skin_tone: skinTone, lip_tone: lipTone, complexion_type: getComplexionType(skinTone, lipTone), no_photo: true, ...(lipShape && { lip_shape: lipShape }), ...(colorLook && { color_look: colorLook }) });
+    setState("analyzing");
+    setAnalysisDone(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [noPhoto, state]);
 
   // Framed on the storefront: report content height so the theme sizes the
   // iframe to fit and all scrolling happens on the parent page.
@@ -1005,7 +1020,7 @@ const Index = ({
             }
 
             {/* Step 3: Upload */}
-            {state === "idle" &&
+            {state === "idle" && !noPhoto &&
             <motion.div
               key="upload"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -1435,16 +1450,16 @@ const Index = ({
               transition={{ duration: 0.3 }}
               className="relative flex flex-col items-center gap-8">
                 {inlineResultsBack ? (
-                  <BackButton inline onClick={() => {setOriginalImage(null);setState("idle");}} />
+                  <BackButton inline onClick={() => {setOriginalImage(null);setState(noPhoto ? stepBeforeUpload : "idle");}} />
                 ) : (
                   <div className="w-full max-w-lg">
-                    <BackButton onClick={() => {setOriginalImage(null);setState("idle");}} />
+                    <BackButton onClick={() => {setOriginalImage(null);setState(noPhoto ? stepBeforeUpload : "idle");}} />
                   </div>
                 )}
                 <div className="w-full max-w-lg flex flex-col gap-5">
-                  {originalImage && (
+                  {(originalImage || noPhoto) && (
                     <TryOnOtherShades
-                      userFace={originalImage!}
+                      userFace={originalImage}
                       skinTone={effectiveSkinTone}
                       lipTone={effectiveLipTone}
                       sessionId={sessionId}

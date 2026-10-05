@@ -10,9 +10,11 @@ import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import { useVariantImages } from "@/hooks/useVariantImages";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface Props {
-  userFace: string;
+  // The face to try shades on; null (quiz v4) shows products only.
+  userFace: string | null;
   skinTone: string;
   lipTone: string;
   sessionId: string;
@@ -153,6 +155,9 @@ const TryOnOtherShades = ({
   // Stacked cards whose try-on is flipped to the bare photo by a tap
   // (touch screens; mouse users get it on hover instead).
   const [bareShown, setBareShown] = useState<Record<string, boolean>>({});
+  // Product-only cards whose photo is flipped to the smear by a tap (touch
+  // screens; mouse users get it on hover instead).
+  const [smearShown, setSmearShown] = useState<Record<string, boolean>>({});
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
   const active = activeName ? shadesByName[activeName] : undefined;
 
@@ -177,6 +182,7 @@ const TryOnOtherShades = ({
   if (!settings || !active) return null;
 
   const snapshotFor = (shade: Shade) => snapshots[shade.name] ?? undefined;
+  const bareFace = userFace ?? undefined;
   const productUrlFor = (shade: Shade) => {
     const handle = variantImages[shade.variantId]?.productHandle;
     return handle
@@ -246,7 +252,7 @@ const TryOnOtherShades = ({
         }
       >
         <img
-          src={snapshotFor(shade) ?? userFace}
+          src={snapshotFor(shade) ?? bareFace}
           alt={`${shade.label} on your photo`}
           draggable={compareBare ? false : undefined}
           className="w-full h-full object-cover"
@@ -254,7 +260,7 @@ const TryOnOtherShades = ({
         {compareBare && snapshotFor(shade) && (
           <>
             <img
-              src={userFace}
+              src={bareFace}
               alt=""
               aria-hidden="true"
               draggable={false}
@@ -321,6 +327,59 @@ const TryOnOtherShades = ({
           )}
         </a>
       </div>
+    );
+  };
+
+  // Without a try-on photo (quiz v4): the product photo, filling a 4:5 frame
+  // so every card's photo is the same size (packshots are mostly 4:5; the odd
+  // landscape one is cropped to its middle), with the smear fading in over it
+  // on hover. On touch screens a tap flips between the
+  // two (tap again to go back) instead of opening the product page.
+  const productOnlyImage = (shade: Shade) => {
+    const img = variantImages[shade.variantId];
+    const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
+    const showSmear = !!smear && !!smearShown[shade.name];
+    return (
+      <a
+        href={productUrlFor(shade)}
+        target={embedded ? "_top" : undefined}
+        onClick={(e) => {
+          if (smear && window.matchMedia("(hover: none)").matches) {
+            e.preventDefault();
+            const next = !smearShown[shade.name];
+            setSmearShown((prev) => ({ ...prev, [shade.name]: next }));
+            trackEvent("smear_toggled", { variant_name: shade.name, showing_smear: next, source });
+            return;
+          }
+          trackProductClick(shade);
+        }}
+        aria-label={`View ${shade.label}`}
+        className="group relative block w-full aspect-[4/5] overflow-hidden bg-muted select-none"
+      >
+        {img?.imageUrl && (
+          <img
+            src={shopifyImg(img.imageUrl, 480)}
+            alt={img.altText ?? shade.label}
+            loading="lazy"
+            draggable={false}
+            className="w-full h-full object-cover"
+          />
+        )}
+        {smear && (
+          <>
+            <img
+              src={shopifyImg(smear.url, 480)}
+              alt={smear.altText ?? `${shade.name} swatch`}
+              loading="lazy"
+              draggable={false}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${showSmear ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100`}
+            />
+            <span className={`absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground transition-opacity duration-200 ${showSmear ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100 pointer-events-none`}>
+              Swatch
+            </span>
+          </>
+        )}
+      </a>
     );
   };
 
@@ -426,7 +485,7 @@ const TryOnOtherShades = ({
   const actionButtons = (shade: Shade) => (
     <div className="w-full flex flex-wrap gap-2">
       {buyButtons(shade)}
-      {shareButtons(shade)}
+      {userFace && shareButtons(shade)}
     </div>
   );
 
@@ -475,6 +534,54 @@ const TryOnOtherShades = ({
       )}
     </span>
   );
+
+  // No photo (quiz v4): smaller product-only cards in a carousel. Two fit
+  // from sm up; on phones the next card peeks in to show there's more.
+  // Arrows at every width, and phones can also swipe.
+  if (stacked && !userFace) {
+    return (
+      <div className="w-full flex flex-col gap-4">
+        <div className="flex flex-col items-center">
+          {title}
+          {shippingNote}
+        </div>
+        <Carousel opts={{ align: "start" }} className="w-full sm:px-10">
+          <CarouselContent className="-ml-3">
+            {pickNames.map((name) => {
+              const shade = shadesByName[name];
+              if (!shade) return null;
+              const img = variantImages[shade.variantId];
+              const price = formatPrice(img?.price, img?.currencyCode);
+              return (
+                <CarouselItem key={name} className="pl-3 basis-[78%] sm:basis-1/2">
+                  <div className="h-full flex flex-col gap-2.5 bg-background border border-foreground p-3">
+                    {/* What the shade was picked as, e.g. "My Lips But Better". */}
+                    <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground">
+                      {(categoryByName[name] ?? []).join(" · ")}
+                    </p>
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="font-display text-[18px] leading-[18px] text-foreground">{shade.name}</span>
+                      {price && <span className="shrink-0 font-display text-[12px] leading-[13px] text-foreground">{price}</span>}
+                    </div>
+                    <span className="-mt-1 font-display text-[12px] leading-[13px] text-muted-foreground">{productTitleFor(shade)}</span>
+                    {productOnlyImage(shade)}
+                    <div className="mt-auto flex flex-col gap-2">{buyButtons(shade)}</div>
+                  </div>
+                </CarouselItem>
+              );
+            })}
+          </CarouselContent>
+          {/* Centered under the cards on narrow screens; beside them from sm up
+              (the wrapper isn't positioned, so there they place against the carousel). */}
+          <div className="mt-3 flex justify-center gap-3 sm:mt-0">
+            <CarouselPrevious className="static translate-y-0 sm:absolute sm:left-0 sm:top-1/2 sm:-translate-y-1/2 border-foreground disabled:opacity-30" />
+            <CarouselNext className="static translate-y-0 sm:absolute sm:right-0 sm:top-1/2 sm:-translate-y-1/2 border-foreground disabled:opacity-30" />
+          </div>
+        </Carousel>
+        <div className="flex flex-col items-center gap-1">{conciergeNote}</div>
+      </div>
+    );
+  }
 
   if (stacked) {
     return (
@@ -550,7 +657,7 @@ const TryOnOtherShades = ({
         </div>
       </div>
 
-      {photoCard(active)}
+      {userFace && photoCard(active)}
 
       <div className="flex flex-col items-center gap-1">
         {actionButtons(active)}
