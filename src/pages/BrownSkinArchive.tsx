@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import LearnMoreDialog from "@/components/LearnMoreDialog";
 import { isMobileDevice } from "@/lib/device";
 import { isEmbedded } from "@/lib/cartAdd";
-import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
+import { useEmbedAutoHeight, useScrollTopOnStepChange } from "@/hooks/useEmbedAutoHeight";
 import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
 import { recordImageColorimetry } from "@/lib/colorimetry";
 import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
@@ -99,10 +99,7 @@ const BrownSkinArchive = () => {
   // iframe to fit; ask the parent to scroll up when the view or step changes.
   const embedded = useMemo(isEmbedded, []);
   useEmbedAutoHeight(embedded);
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (embedded) postEmbedScrollTop();
-  }, [view, step, embedded]);
+  useScrollTopOnStepChange(embedded, `${view}|${step}`);
 
   const handleFile = useCallback((file: File) => {
     // Some mobile camera captures arrive with an empty MIME type — treat

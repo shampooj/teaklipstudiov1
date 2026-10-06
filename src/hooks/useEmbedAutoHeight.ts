@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 // Auto-height embed plumbing: when framed on the Shopify storefront, the app
 // reports its content height so the theme can size the iframe to fit exactly.
@@ -39,3 +39,17 @@ export function useEmbedAutoHeight(enabled: boolean) {
 export const postEmbedScrollTop = () => {
   window.parent?.postMessage({ type: "embed-scroll-top" }, "*");
 };
+
+// Each step should open at the top: scroll there when the step changes.
+// Not on first load: embedded, that would yank the store page down to the
+// iframe as soon as a shopper lands on the page. Compares against the last
+// step (not a first-run flag) so StrictMode's double effect doesn't fire it.
+export function useScrollTopOnStepChange(embedded: boolean, step: string) {
+  const lastStep = useRef(step);
+  useEffect(() => {
+    if (lastStep.current === step) return;
+    lastStep.current = step;
+    window.scrollTo(0, 0);
+    if (embedded) postEmbedScrollTop();
+  }, [step, embedded]);
+}
