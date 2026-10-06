@@ -22,7 +22,7 @@ import LipShapeSketch, { LIP_SHAPES, type LipShape } from "@/components/LipShape
 import { COLOR_LOOKS, type ColorLook } from "@/data/colorLooks";
 import { useQuizTracking } from "@/hooks/useQuizTracking";
 import { useDisplayedQuizModels } from "@/hooks/useQuizModels";
-import { useEmbedAutoHeight, postEmbedScrollTop } from "@/hooks/useEmbedAutoHeight";
+import { useEmbedAutoHeight, useScrollTopOnStepChange } from "@/hooks/useEmbedAutoHeight";
 import { recordImageColorimetry } from "@/lib/colorimetry";
 import { checkPhotoQuality, type PhotoCheckOutcome } from "@/lib/photoQualityCheck";
 import teakLogo from "@/assets/teak-logo.png";
@@ -701,11 +701,8 @@ const Index = ({
   useEmbedAutoHeight(embedded);
 
   // Each quiz step should open at the top of the page. Embedded, the inner
-  // page has no scroll position — ask the parent to scroll to the iframe top.
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    if (embedded) postEmbedScrollTop();
-  }, [state, embedded]);
+  // page has no scroll position — the parent scrolls to the iframe top.
+  useScrollTopOnStepChange(embedded, state);
 
   // Selfies require the biometric consent checkbox before results (face
   // mapping only runs on the results screen); stock avatars skip the review
