@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState, type ComponentProps } from "react";
 import { Check, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation } from "@/data/lipstickRecommendations";
@@ -64,6 +64,15 @@ const formatPrice = (amount: string | null | undefined, currency: string | null 
   } catch {
     return `$${whole ? n : n.toFixed(2)}`;
   }
+};
+
+// A tap rarely lands perfectly still; a few px of sideways wobble starts a
+// carousel drag, which cancels the touch so phones never fire the click.
+// Touches that begin on the buy buttons don't drag (the card around them
+// still swipes).
+const carouselOpts: ComponentProps<typeof Carousel>["opts"] = {
+  align: "start",
+  watchDrag: (_api, evt) => !(evt.target instanceof Element && evt.target.closest("[data-no-drag]")),
 };
 
 const toSpec = (shade: Shade): ShadeSnapshotSpec => ({
@@ -158,6 +167,10 @@ const TryOnOtherShades = ({
   // Product-only cards whose photo is flipped to the smear by a tap (touch
   // screens; mouse users get it on hover instead).
   const [smearShown, setSmearShown] = useState<Record<string, boolean>>({});
+  // Where and when the current touch on a product photo began. The flip is
+  // driven by the touch itself, not the click: a tap that wobbles a few px
+  // sideways starts a carousel drag, and phones then drop the click.
+  const photoTouch = useRef<{ x: number; y: number; t: number } | null>(null);
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
   const active = activeName ? shadesByName[activeName] : undefined;
 
@@ -343,12 +356,24 @@ const TryOnOtherShades = ({
       <a
         href={productUrlFor(shade)}
         target={embedded ? "_top" : undefined}
+        onPointerDown={(e) => {
+          photoTouch.current = e.pointerType === "touch" ? { x: e.clientX, y: e.clientY, t: e.timeStamp } : null;
+        }}
+        onPointerUp={(e) => {
+          const start = photoTouch.current;
+          photoTouch.current = null;
+          // Under 10px and half a second is a tap; anything more is a swipe.
+          if (!smear || !start || e.pointerType !== "touch") return;
+          if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10 || e.timeStamp - start.t > 500) return;
+          const next = !smearShown[shade.name];
+          setSmearShown((prev) => ({ ...prev, [shade.name]: next }));
+          trackEvent("smear_toggled", { variant_name: shade.name, showing_smear: next, source });
+        }}
         onClick={(e) => {
+          // On touch screens a tap flips to the smear (above) instead of
+          // opening the product page.
           if (smear && window.matchMedia("(hover: none)").matches) {
             e.preventDefault();
-            const next = !smearShown[shade.name];
-            setSmearShown((prev) => ({ ...prev, [shade.name]: next }));
-            trackEvent("smear_toggled", { variant_name: shade.name, showing_smear: next, source });
             return;
           }
           trackProductClick(shade);
@@ -387,7 +412,9 @@ const TryOnOtherShades = ({
     trackEvent("product_clicked", { variant_id: shade.variantId, variant_name: shade.name, source, product_handle: variantImages[shade.variantId]?.productHandle });
 
   // Add to Cart (embedded only) and View Product for one shade.
-  const buyButtons = (shade: Shade) => {
+  // height: the v4 carousel passes a taller phone height (44px, a
+  // comfortable touch target); elsewhere the buttons stay 28px.
+  const buyButtons = (shade: Shade, height = "h-7") => {
     const productUrl = productUrlFor(shade);
     const cartState = cartStates[shade.variantId];
     return (
@@ -395,7 +422,7 @@ const TryOnOtherShades = ({
         {embedded && (
           <Button
             size="sm"
-            className={`h-7 flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
+            className={`${height} flex-1 min-w-0 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full transition-all duration-300 ${
               cartState === "added"
                 ? "bg-green-700 text-white hover:bg-green-700 border border-green-700"
                 : cartState === "error"
@@ -419,7 +446,7 @@ const TryOnOtherShades = ({
         <Button
           asChild
           size="sm"
-          className="h-7 flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background"
+          className={`${height} flex-1 min-w-0 px-2.5 font-sans font-medium text-[9px] uppercase tracking-normal rounded-full bg-background text-foreground border border-foreground hover:bg-foreground hover:text-background`}
         >
           <a
             href={productUrl}
@@ -545,7 +572,7 @@ const TryOnOtherShades = ({
           {title}
           {shippingNote}
         </div>
-        <Carousel opts={{ align: "start" }} className="w-full sm:px-10">
+        <Carousel opts={carouselOpts} className="w-full sm:px-10">
           <CarouselContent className="-ml-3">
             {pickNames.map((name) => {
               const shade = shadesByName[name];
@@ -565,7 +592,11 @@ const TryOnOtherShades = ({
                     </div>
                     <span className="-mt-1 font-display text-[12px] leading-[13px] text-muted-foreground">{productTitleFor(shade)}</span>
                     {productOnlyImage(shade)}
-                    <div className="mt-auto flex flex-col gap-2">{buyButtons(shade)}</div>
+                    {/* Side by side on phones, where one card fills the width;
+                        stacked from sm up, where two narrower cards share it.
+                        The buttons' flex-1 splits a row's width but would squash
+                        their height in a column, so it's dropped there. */}
+                    <div data-no-drag className="mt-auto flex gap-2 sm:flex-col sm:[&>*]:flex-none">{buyButtons(shade, "h-11 sm:h-7")}</div>
                   </div>
                 </CarouselItem>
               );
