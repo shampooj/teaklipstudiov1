@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type ComponentProps } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { Check, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation } from "@/data/lipstickRecommendations";
@@ -10,7 +10,7 @@ import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import { useVariantImages } from "@/hooks/useVariantImages";
 import { useBanubaSnapshots } from "@/hooks/useBanubaSnapshots";
 import type { ShadeSnapshotSpec } from "@/lib/banubaSnapshots";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, type CarouselApi } from "@/components/ui/carousel";
 
 interface Props {
   // The face to try shades on; null (quiz v4) shows products only.
@@ -171,6 +171,26 @@ const TryOnOtherShades = ({
   // driven by the touch itself, not the click: a tap that wobbles a few px
   // sideways starts a carousel drag, and phones then drop the click.
   const photoTouch = useRef<{ x: number; y: number; t: number } | null>(null);
+
+  // After a drag, Embla swallows the next click inside the carousel (so a
+  // drag that ends on a link doesn't follow it) and only forgets that when
+  // the next drag starts. Touches on the buy buttons never start one (see
+  // carouselOpts), so after a swipe the first tap on Add to Cart or View
+  // Product was eaten. A finger swipe produces no click of its own, so
+  // spend that pending swallow on a no-op click once each drag ends. A
+  // mouse drag's real click fires before this timeout and is swallowed as
+  // intended; this one then finds nothing pending.
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  useEffect(() => {
+    if (!carouselApi) return;
+    const clearPendingSwallow = () => {
+      window.setTimeout(() => carouselApi.rootNode().dispatchEvent(new MouseEvent("click", { bubbles: false })), 0);
+    };
+    carouselApi.on("pointerUp", clearPendingSwallow);
+    return () => {
+      carouselApi.off("pointerUp", clearPendingSwallow);
+    };
+  }, [carouselApi]);
   const activeName = selectedName ?? pickNames[0] ?? ALL_VARIANT_NAMES[0] ?? null;
   const active = activeName ? shadesByName[activeName] : undefined;
 
@@ -572,7 +592,7 @@ const TryOnOtherShades = ({
           {title}
           {shippingNote}
         </div>
-        <Carousel opts={carouselOpts} className="w-full sm:px-10">
+        <Carousel opts={carouselOpts} setApi={setCarouselApi} className="w-full sm:px-10">
           <CarouselContent className="-ml-3">
             {pickNames.map((name) => {
               const shade = shadesByName[name];
