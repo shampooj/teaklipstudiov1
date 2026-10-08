@@ -29,6 +29,17 @@ serve(async (req) => {
       );
     }
 
+    // Paused until the data policy covers sending customer photos to
+    // Google: no photo leaves this function unless the
+    // AI_CATEGORIZATION_ENABLED secret is "true" (unset today). The quiz no
+    // longer calls this; the guard also covers older cached quiz pages.
+    if (Deno.env.get("AI_CATEGORIZATION_ENABLED") !== "true") {
+      return new Response(
+        JSON.stringify({ skipped: true, reason: "AI categorization is paused" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
     if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is not configured");
 
