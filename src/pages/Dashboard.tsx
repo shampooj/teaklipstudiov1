@@ -96,6 +96,7 @@ import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { detectLipCrop, LipCropResult } from "@/lib/lipCrop";
+import { loadSubmissionImage } from "@/lib/submissionImage";
 
 interface AdminLabel {
   id: string;
@@ -117,6 +118,9 @@ interface Submission {
   variant_id: string;
   image_id: string | null;
   image_url: string | null;
+  // The storage path image_url was signed from, for re-signing and HEIC
+  // conversion on the labeling card (null for legacy full-URL rows).
+  image_path: string | null;
   skin_tone: string | null;
   lip_tone: string | null;
   email: string | null;
@@ -338,6 +342,7 @@ const Dashboard = () => {
       return {
         ...r,
         image_url: submissionUrlMap.get(r.id) ?? r.image_url,
+        image_path: r.image_url && !r.image_url.startsWith("http") ? r.image_url : null,
         is_labeled: !!label,
         admin_lip_tone_category: label?.admin_lip_tone_category ?? null,
         admin_skin_tone_category: label?.admin_skin_tone_category ?? null,
@@ -407,27 +412,48 @@ const Dashboard = () => {
   const [lipCropLoading, setLipCropLoading] = useState(false);
   const [displayLipCrop, setDisplayLipCrop] = useState(false);
 
+  // The photo as shown on the card: re-signed if its link expired and
+  // converted from HEIC if needed (see loadSubmissionImage). The lip crop
+  // reads the same copy.
+  const [displayImage, setDisplayImage] = useState<{ status: "loading" | "ready" | "failed"; url: string | null }>({ status: "loading", url: null });
+
   useEffect(() => {
     setLipCrop(null);
     setDisplayLipCrop(false);
-    const url = currentImage?.image_url;
-    if (!url) return;
+    const path = currentImage?.image_path;
+    const signedUrl = currentImage?.image_url ?? null;
+    if (!path && !signedUrl) {
+      setDisplayImage({ status: "failed", url: null });
+      return;
+    }
     let cancelled = false;
+    let objectUrl: string | null = null;
+    setDisplayImage({ status: "loading", url: null });
     setLipCropLoading(true);
-    detectLipCrop(url)
-      .then((crop) => {
-        if (!cancelled) setLipCrop(crop);
+    (path ? loadSubmissionImage(path, signedUrl) : Promise.resolve(signedUrl!))
+      .then((url) => {
+        if (path) objectUrl = url;
+        if (cancelled) return;
+        setDisplayImage({ status: "ready", url });
+        return detectLipCrop(url).then((crop) => {
+          if (!cancelled) setLipCrop(crop);
+        });
       })
       .catch((err) => {
-        console.error("Lip crop detection failed:", err);
+        console.error("Submission image or lip crop failed:", err);
+        if (!cancelled) setDisplayImage((prev) => (prev.status === "ready" ? prev : { status: "failed", url: null }));
       })
       .finally(() => {
         if (!cancelled) setLipCropLoading(false);
       });
     return () => {
       cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [currentImage?.id, currentImage?.image_url]);
+    // Not image_url: it's re-signed on every data refresh, and the loader
+    // re-signs on its own when needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentImage?.id, currentImage?.image_path]);
 
   const handleSaveLabel = async () => {
     if (!currentImage || !selectedCategory || !selectedSkinTone || !authUserId) return;
@@ -950,12 +976,16 @@ const Dashboard = () => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   {/* Submission image */}
                   <div className="flex-shrink-0">
-                    {currentImage.image_url ? (
+                    {displayImage.status === "ready" && displayImage.url ? (
                       <img
-                        src={currentImage.image_url}
+                        src={displayImage.url}
                         alt="Submission"
                         className="w-full sm:w-48 max-h-64 object-contain rounded-md border border-border"
                       />
+                    ) : displayImage.status === "loading" ? (
+                      <div className="w-full sm:w-48 aspect-[3/4] rounded-md border border-border bg-background/60 flex items-center justify-center">
+                        <p className="text-[9px] text-muted-foreground animate-pulse">Loading photo…</p>
+                      </div>
                     ) : (
                       <p className="text-muted-foreground text-[9px]">No image available</p>
                     )}
