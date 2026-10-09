@@ -1,5 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
 // Face crop matching the bad example's framing; good-photo-example.jpg is the
 // uncropped derivative of the same original.
 import goodPhotoExample from "@/assets/photo-examples/web/good-photo-example-face-crop.jpg";
@@ -12,7 +13,7 @@ import badPhotoExample from "@/assets/photo-examples/web/bad-photo-example.jpg";
 
 const EXAMPLES = [
   // caption is the image alt text only; nothing is printed under the photos
-  { src: goodPhotoExample, ok: true, tags: ["Use a bright photo like this", "Use a no-lipstick photo"], caption: "Daytime window light, evenly lit" },
+  { src: goodPhotoExample, ok: true, tags: ["Bright lighting", "No lipstick"], caption: "Daytime window light, evenly lit" },
   { src: badPhotoExample, ok: false, tags: ["Not like this"], caption: "Indoor lamp light, shadows across the face, warm color cast" },
 ];
 
@@ -21,18 +22,24 @@ interface Props {
   embedded: boolean;
   onGotIt: () => void;
   onDismiss: () => void;
+  // Versions with no try-on pass their own title instead of the default
+  // "accurate try-on" one.
+  title?: string;
 }
 
-const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
+const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss, title = "Quick tips for an accurate try-on" }: Props) => (
   <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
     <DialogContent
+      // Opening would focus "Got it!" and draw its focus ring for tap and
+      // mouse users too; keyboard users still get the ring once they tab.
+      onOpenAutoFocus={(e) => e.preventDefault()}
       className={`max-w-md rounded-none sm:rounded-none border border-foreground bg-background overflow-y-auto ${
         embedded ? "top-6 translate-y-0 max-h-[560px]" : "max-h-[85vh]"
       }`}
     >
       <DialogHeader>
         <DialogTitle className="font-display font-normal text-[18px] leading-[18px] text-left tracking-normal">
-          Quick tips for an accurate try-on
+          {title}
         </DialogTitle>
       </DialogHeader>
       <div className="grid grid-cols-2 gap-3">
@@ -40,9 +47,15 @@ const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
           <figure key={ex.tags[0]}>
             <div className={`relative aspect-[3/4] overflow-hidden border ${ex.ok ? "border-foreground" : "border-foreground/30"}`}>
               <img src={ex.src} alt={ex.caption} className={`w-full h-full object-cover ${ex.ok ? "" : "grayscale-[35%]"}`} />
-              <div className="absolute top-2 left-2 right-2 flex flex-col items-start gap-1">
+              {/* Do / don't badge: green check on the good example, red X on the bad. */}
+              <span
+                aria-hidden="true"
+                className={`absolute top-2 right-2 flex h-6 w-6 items-center justify-center text-white ${ex.ok ? "bg-green-700" : "bg-red-700"}`}>
+                {ex.ok ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : <X className="h-3.5 w-3.5" strokeWidth={3} />}
+              </span>
+              <div className="absolute top-2 left-2 right-10 flex flex-col items-start gap-1">
                 {ex.tags.map((tag) => (
-                  <span key={tag} className={`px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal ${ex.ok ? "bg-foreground text-background" : "bg-background/90 text-foreground"}`}>
+                  <span key={tag} className="px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal bg-background text-foreground">
                     {tag}
                   </span>
                 ))}

@@ -18,9 +18,12 @@ const VERSION_PAGES: Record<string, ComponentType> = {
   v1: Index,
   v2: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelNames={V2_MODELS} />,
   // Version 2 with no selfie option: every model the admin roster displays.
-  v3: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelsOnly />,
+  v3: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle modelsOnly landingTopRecsOnly />,
   // Version 3 with no photo step: product-only result cards.
-  v4: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle noPhoto />,
+  v4: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle noPhoto landingTopRecsOnly />,
+  // Version 4 with a selfie step: selfie only (no models), saving it with an
+  // email is required before results, and results stay product-only.
+  v5: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle selfieOnly requireEmail productOnlyResults landingTopRecsOnly analyzingMessage="Analyzing skin tone" />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed

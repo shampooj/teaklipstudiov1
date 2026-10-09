@@ -32,6 +32,10 @@ import { SKIN_TONES, LIP_TONE_ROWS } from "@/data/toneOptions";
 import landingCynthia from "@/assets/landing/web/cynthia-results.jpg";
 import landingNoreen from "@/assets/landing/web/noreen-results.jpg";
 import landingMaseray from "@/assets/landing/web/maseray-results.jpg";
+// The same cards with the "Other Shades to Try" section cut out.
+import landingCynthiaTopRecs from "@/assets/landing/web/cynthia-results-top-recs-only.jpg";
+import landingNoreenTopRecs from "@/assets/landing/web/noreen-results-top-recs-only.jpg";
+import landingMaserayTopRecs from "@/assets/landing/web/maseray-results-top-recs-only.jpg";
 import PhotoTipsDialog from "@/components/PhotoTipsDialog";
 import cynthia from "@/assets/cynthia.jpg";
 import anastasia from "@/assets/anastasia.jpg";
@@ -472,6 +476,9 @@ const createDiscountCode = (skinTone: string, lipTone: string) => {
 // library picks qualify when the file's lastModified is within this window.
 const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 
+// How long the analyzingMessage loading screen shows, at least.
+const ANALYZING_MIN_MS = 5000;
+
 // Quiz v2 adds two required questions after lip tone: askLipShape, then
 // askColorLook. Each one is only left by picking an answer. stackedResults
 // shows each top rec as its own card, stacked, with no "Other Shades to Try".
@@ -484,6 +491,17 @@ const FRESH_CAPTURE_WINDOW_MS = 5 * 60 * 1000;
 // wording is unchanged.
 // modelsOnly drops the selfie camera and upload tiles, so the photo step
 // offers only the model tiles.
+// landingTopRecsOnly shows the landing page's example results cards without
+// their "Other Shades to Try" section (versions whose results have none).
+// analyzingMessage replaces "Gathering lip recommendations..." on the loading
+// screen (with animated dots) and holds it for at least ANALYZING_MIN_MS.
+// selfieOnly drops the model tiles, so the photo step is camera/upload only.
+// requireEmail makes saving the photo with an email the required step before
+// results, offered for every selfie (not just fresh phone captures). It
+// replaces the "lipstick previews" checkbox, so only pair it with
+// productOnlyResults, where no previews are made.
+// productOnlyResults shows the product-only results cards even when a selfie
+// was given: no try-on runs on the photo.
 // noPhoto skips the photo step: the last question goes straight to results
 // that follow the quiz-taker's own tones, shown as product-only cards.
 const Index = ({
@@ -495,6 +513,11 @@ const Index = ({
   modelNames,
   modelsOnly = false,
   noPhoto = false,
+  selfieOnly = false,
+  requireEmail = false,
+  productOnlyResults = false,
+  landingTopRecsOnly = false,
+  analyzingMessage,
 }: {
   askLipShape?: boolean;
   askColorLook?: boolean;
@@ -504,6 +527,11 @@ const Index = ({
   modelNames?: readonly string[];
   modelsOnly?: boolean;
   noPhoto?: boolean;
+  selfieOnly?: boolean;
+  requireEmail?: boolean;
+  productOnlyResults?: boolean;
+  landingTopRecsOnly?: boolean;
+  analyzingMessage?: string;
 }) => {
   // Title padding that keeps centered text clear of an inline Back button.
   const titlePad = inlineBack ? ` ${INLINE_BACK_PAD}` : "";
@@ -596,6 +624,8 @@ const Index = ({
   }, [quizModels, modelNames]);
 
   const recommendations = useRecommendations(effectiveSkinTone, effectiveLipTone);
+  // The photo the results try shades on; null shows product-only cards.
+  const tryOnImage = productOnlyResults ? null : originalImage;
   // Results put Back level with the "Top Recs" title only in the stacked
   // layout; the fallback boxed layout (no recs) keeps it above.
   const inlineResultsBack = inlineBack && stackedResults && recommendations.length > 0;
@@ -629,7 +659,7 @@ const Index = ({
   // Snapshots start rendering during the "Gathering…" screen so the results
   // page can appear with every card image already in place.
   const banubaSnapshots = useBanubaSnapshots(
-    state === "analyzing" || state === "uploaded" ? originalImage : null,
+    state === "analyzing" || state === "uploaded" ? tryOnImage : null,
     shadeSpecs,
   );
 
@@ -638,24 +668,36 @@ const Index = ({
     !recsLoading &&
     shadeSettings !== undefined &&
     (recommendations.length === 0 ||
-      !originalImage ||
+      !tryOnImage ||
       shadeSpecs.every((s) => banubaSnapshots[s.key] !== undefined));
 
-  // Hold the "Gathering…" screen until every card image is settled, with a
-  // safety cap so a stuck loader can't trap the user there.
+  // When the "Gathering…" screen appeared, for its minimum time (v5).
+  const analyzingSince = useRef(0);
+  useEffect(() => {
+    if (state === "analyzing") analyzingSince.current = Date.now();
+  }, [state]);
+
+  // Hold the "Gathering…" screen until every card image is settled (and, in
+  // v5, for at least ANALYZING_MIN_MS), with a safety cap so a stuck loader
+  // can't trap the user there.
   useEffect(() => {
     if (state !== "analyzing" || !analysisDone) return;
+    const reveal = () => {
+      setState("uploaded");
+      setAnalysisDone(false);
+    };
     if (resultsReady) {
-      setState("uploaded");
-      setAnalysisDone(false);
-      return;
+      const wait = analyzingMessage ? ANALYZING_MIN_MS - (Date.now() - analyzingSince.current) : 0;
+      if (wait <= 0) {
+        reveal();
+        return;
+      }
+      const t = window.setTimeout(reveal, wait);
+      return () => window.clearTimeout(t);
     }
-    const t = window.setTimeout(() => {
-      setState("uploaded");
-      setAnalysisDone(false);
-    }, 30_000);
+    const t = window.setTimeout(reveal, 30_000);
     return () => window.clearTimeout(t);
-  }, [state, analysisDone, resultsReady]);
+  }, [state, analysisDone, resultsReady, analyzingMessage]);
 
   // Track quiz_started once on mount
   useEffect(() => {
@@ -816,6 +858,14 @@ const Index = ({
   };
 
 
+  // Version 5's photo step has no page title; each tile carries it.
+  const selfieTileTitle = (title: string) => (
+    <>
+      <p className="font-display text-[18px] leading-[18px] text-foreground">{title}</p>
+      <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">for Skin Tone Analysis</p>
+    </>
+  );
+
   return (
     // quiz-zoom: the quiz is a single ~512px column, which reads fine as a
     // standalone tab but tiny inside the store's 1275px-wide embed. On wide
@@ -845,7 +895,10 @@ const Index = ({
                 </p>
               </div>
               <div className="w-full max-w-lg grid grid-cols-3 gap-2 sm:gap-3">
-                {[landingCynthia, landingNoreen, landingMaseray].map((src, i) => (
+                {(landingTopRecsOnly
+                  ? [landingCynthiaTopRecs, landingNoreenTopRecs, landingMaserayTopRecs]
+                  : [landingCynthia, landingNoreen, landingMaseray]
+                ).map((src, i) => (
                   <img
                     key={i}
                     src={src}
@@ -1031,13 +1084,19 @@ const Index = ({
                 </div>
                 {!originalImage ?
               <>
-                <h2 className={`font-display text-[28px] leading-[29px] text-foreground text-center mb-6${titlePad}`}>
-                  {modelsOnly
-                    ? "Which model's skin and lip tone most closely matches your own?"
-                    : "Who would you like to see our recommended lipstick shades on?"}
-                </h2>
+                {/* Version 5 (selfieOnly) titles the tiles themselves instead. */}
+                {!selfieOnly && (
+                  <h2 className={`font-display text-[28px] leading-[29px] text-foreground text-center mb-6${titlePad}`}>
+                    {modelsOnly
+                      ? "Which model's skin and lip tone most closely matches your own?"
+                      : "Who would you like to see our recommended lipstick shades on?"}
+                  </h2>
+                )}
                 <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                  <div className={selfieOnly
+                    // Just the camera and upload tiles (upload alone on desktop), centered.
+                    ? `grid gap-4 mx-auto w-full ${mobile ? "grid-cols-2 max-w-sm" : "grid-cols-1 max-w-[220px]"}`
+                    : "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"}>
                     {/* Camera tile (mobile only): capture="user" opens the front
                         camera directly, so this path is fresh by construction. */}
                     {mobile && !modelsOnly && (
@@ -1054,12 +1113,17 @@ const Index = ({
                         <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
                           <Camera className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                           <div>
-                            <p className="font-display text-[18px] leading-[18px] text-foreground">
-                              Myself!
-                            </p>
-                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                              Take a selfie in front of a window during day for most accurate results
-                            </p>
+                            {/* Version 5 (selfieOnly): the step's title, in the tile. */}
+                            {selfieOnly ? selfieTileTitle("Take a No Makeup Selfie") : (
+                              <>
+                                <p className="font-display text-[18px] leading-[18px] text-foreground">
+                                  Myself!
+                                </p>
+                                <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                                  Take a selfie in front of a window during day for most accurate results
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1085,19 +1149,23 @@ const Index = ({
                         <div className="m-auto flex flex-col items-center gap-2.5 px-4 py-4">
                           <Upload className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                           <div>
-                            <p className="font-display text-[18px] leading-[18px] text-foreground">
-                              Myself!
-                            </p>
-                            <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
-                              {mobile
-                                ? "Upload a well-lit pic from my files"
-                                : "Upload a selfie taken in front of a window during day for accurate results"}
-                            </p>
+                            {selfieOnly ? selfieTileTitle("Upload a No Makeup Selfie") : (
+                              <>
+                                <p className="font-display text-[18px] leading-[18px] text-foreground">
+                                  Myself!
+                                </p>
+                                <p className="mt-2 font-display text-[12px] leading-[16px] text-foreground">
+                                  {mobile
+                                    ? "Upload a well-lit pic from my files"
+                                    : "Upload a selfie taken in front of a window during day for accurate results"}
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
                     )}
-                    {avatarOptions.map((avatar) => (
+                    {!selfieOnly && avatarOptions.map((avatar) => (
                       <button
                         key={avatar.id}
                         type="button"
@@ -1148,11 +1216,13 @@ const Index = ({
                     className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
                     Retake
                   </button>
+                  {!selfieOnly && (
                   <button
                     onClick={() => {setOriginalImage(null); setBiometricChecked(false);}}
                     className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground underline hover:text-muted-foreground transition-colors">
                     Use A Model Instead
                   </button>
+                  )}
                 </div>
               </div>
               }
@@ -1196,6 +1266,9 @@ const Index = ({
                   <div className="mt-6 max-w-md mx-auto">
 
                   <div className="border border-foreground p-5">
+                    {/* requireEmail replaces this with the save consent below
+                        (only paired with product-only results: no previews). */}
+                    {!requireEmail && (
                     <label htmlFor="biometric-consent" className="flex items-start gap-4 cursor-pointer select-none">
                       <Checkbox
                         id="biometric-consent"
@@ -1211,15 +1284,19 @@ const Index = ({
                         </span>
                       </span>
                     </label>
+                    )}
 
                     {/* The research opt-in is only offered for selfies taken on a
                         mobile device just now — camera-roll uploads and desktop
-                        files only get the on-device try-on. */}
-                    {freshMobileCapture && (
+                        files only get the on-device try-on. With requireEmail it's
+                        the required step, for every selfie. */}
+                    {(freshMobileCapture || requireEmail) && (
                     <>
+                    {!requireEmail && (
                     <p className="font-sans font-medium text-[9px] uppercase tracking-normal text-foreground mb-4 mt-6 pt-6 border-t border-foreground/20">
                       Optional
                     </p>
+                    )}
                     <div className="select-none">
                       <label htmlFor="consent" className="flex items-start gap-4 cursor-pointer group">
                         <Checkbox
@@ -1253,7 +1330,9 @@ const Index = ({
                             )}
                           </span>
                           <span className="mt-2 block font-display text-[12px] leading-[15px] tracking-normal text-foreground">
-                            Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity).
+                            {requireEmail
+                              ? "Teak can store my photo, quiz selections, and email to use for skin tone analysis (which might suggest ethnicity)."
+                              : "Teak can save my photo, quiz selections, and email to help create better products for brown skin, and use AI to analyze my skin tone (which might suggest ethnicity)."}
                           </span>
                         </span>
                       </label>
@@ -1322,18 +1401,9 @@ const Index = ({
                       void (async () => {
                         try {
                           const sourceImage = originalImage!;
-                          const img = new Image();
-                          img.crossOrigin = "anonymous";
-                          await new Promise<void>((resolve, reject) => {
-                            img.onload = () => resolve();
-                            img.onerror = reject;
-                            img.src = sourceImage;
-                          });
 
                           // Store the original file bytes untouched — research
-                          // wants full resolution, so no downscaling here. (The
-                          // AI categorization payload below is still resized to
-                          // keep the edge-function request small.)
+                          // wants full resolution, so no downscaling here.
                           const blob = await (await fetch(sourceImage)).blob();
                           const contentType = blob.type || "image/jpeg";
                           const ext = contentType.split("/")[1]?.split("+")[0] || "jpg";
@@ -1361,15 +1431,10 @@ const Index = ({
                           if (!insertError) {
                             if (submissionId) {
                               void recordImageColorimetry(submissionId, sourceImage);
-                              const c = document.createElement("canvas");
-                              c.width = Math.min(img.width, 1024);
-                              c.height = Math.round(img.height * (c.width / img.width));
-                              const cx = c.getContext("2d")!;
-                              cx.drawImage(img, 0, 0, c.width, c.height);
-                              const base64 = c.toDataURL("image/jpeg", 0.7);
-                              supabase.functions.invoke("categorize-skin-lip", {
-                                body: { imageBase64: base64, submissionId }
-                              }).catch((err) => console.error("AI categorization failed:", err));
+                              // AI tone categorization (categorize-skin-lip,
+                              // Gemini) is paused until the data policy covers
+                              // sending photos to a third party; tones are
+                              // labeled by hand in /admin meanwhile.
                             }
                           } else {
                             console.error("Failed to save submission:", insertError);
@@ -1399,7 +1464,7 @@ const Index = ({
                   }}
                   size="lg"
                   variant="outline"
-                  disabled={!biometricChecked}
+                  disabled={requireEmail ? !consentChecked || !userEmail.trim() : !biometricChecked}
                   className="font-sans font-medium text-[9px] uppercase h-8 tracking-normal gap-2 rounded-full border-foreground hover:bg-foreground hover:text-background">
                   Get My Results <ArrowRight className="h-3 w-3" />
                     </Button>
@@ -1427,12 +1492,28 @@ const Index = ({
                   </div>
               }
                 <div className="flex flex-col items-center gap-3">
-                  <motion.p
-                    className="text-foreground font-display text-[18px] leading-[18px]"
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                    Gathering lip recommendations...
-                  </motion.p>
+                  {analyzingMessage ? (
+                    <p className="text-foreground font-display text-[18px] leading-[18px]">
+                      {analyzingMessage}
+                      {/* The dots flash in turn, on a loop. */}
+                      {[0, 1, 2].map((i) => (
+                        <motion.span
+                          key={i}
+                          aria-hidden="true"
+                          animate={{ opacity: [0, 1, 1, 0] }}
+                          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2, times: [0, 0.2, 0.7, 1] }}>
+                          .
+                        </motion.span>
+                      ))}
+                    </p>
+                  ) : (
+                    <motion.p
+                      className="text-foreground font-display text-[18px] leading-[18px]"
+                      animate={{ opacity: [0.5, 1, 0.5] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                      Gathering lip recommendations...
+                    </motion.p>
+                  )}
                 </div>
               </motion.div>
             }
@@ -1456,7 +1537,7 @@ const Index = ({
                 <div className="w-full max-w-lg flex flex-col gap-5">
                   {(originalImage || noPhoto) && (
                     <TryOnOtherShades
-                      userFace={originalImage}
+                      userFace={tryOnImage}
                       skinTone={effectiveSkinTone}
                       lipTone={effectiveLipTone}
                       sessionId={sessionId}
@@ -1469,30 +1550,12 @@ const Index = ({
                       stacked={stackedResults}
                       // On phones the title spans the width; pad it clear of the round Back button.
                       titleClassName={inlineResultsBack ? "px-10 sm:px-0" : ""}
+                      discountEmail={discountEmail}
                     />
                   )}
 
 
 
-                  {discountEmail && (
-                    // Stacked full-width on mobile; equal halves from sm up
-                    // (min-w-0 stops the long email from stealing width).
-                    <div className="flex flex-col sm:flex-row sm:items-stretch gap-3">
-                      <div className="flex-1 min-w-0 bg-background border-2 border-foreground p-4 text-center flex flex-col items-center justify-center">
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mb-1">Your 10% off code</p>
-                        <p className="font-display text-[18px] leading-[22px] text-foreground tracking-normal break-words w-full">
-                          On its way to <span className="text-green-700">{discountEmail}</span>
-                        </p>
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal mt-1">Give it a few minutes · Check spam if it's hiding</p>
-                      </div>
-                      {/* Hidden on phones: the results card already carries the
-                          free-shipping line, so this box only earns its space
-                          side by side with the code on wider screens. */}
-                      <div className="hidden sm:flex flex-1 min-w-0 bg-background border-2 border-foreground p-4 items-center justify-center text-center">
-                        <p className="font-sans font-medium text-[9px] text-muted-foreground uppercase tracking-normal">Free U.S. Standard Shipping for Any 2+ Lipsticks</p>
-                      </div>
-                    </div>
-                  )}
 
                 </div>
               </motion.div>
@@ -1505,6 +1568,7 @@ const Index = ({
       <PhotoTipsDialog
         open={photoTipsFor !== null}
         embedded={embedded}
+        title={productOnlyResults ? "Tips for a Good Pic" : undefined}
         onDismiss={() => setPhotoTipsFor(null)}
         onGotIt={() => {
           const kind = photoTipsFor;

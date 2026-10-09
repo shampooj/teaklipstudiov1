@@ -138,17 +138,8 @@ const BrownSkinArchive = () => {
     const sourceImage = photo!;
     void (async () => {
       try {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        await new Promise<void>((resolve, reject) => {
-          img.onload = () => resolve();
-          img.onerror = reject;
-          img.src = sourceImage;
-        });
-
         // Store the original file bytes untouched — research wants full
-        // resolution, so no downscaling here. (The AI categorization payload
-        // below is still resized to keep the edge-function request small.)
+        // resolution, so no downscaling here.
         const blob = await (await fetch(sourceImage)).blob();
         const contentType = blob.type || "image/jpeg";
         const ext = contentType.split("/")[1]?.split("+")[0] || "jpg";
@@ -176,15 +167,7 @@ const BrownSkinArchive = () => {
         if (!insertError) {
           if (submissionId) {
             void recordImageColorimetry(submissionId, sourceImage);
-            const c = document.createElement("canvas");
-            c.width = Math.min(img.width, 1024);
-            c.height = Math.round(img.height * (c.width / img.width));
-            const cx = c.getContext("2d")!;
-            cx.drawImage(img, 0, 0, c.width, c.height);
-            const base64 = c.toDataURL("image/jpeg", 0.7);
-            supabase.functions.invoke("categorize-skin-lip", {
-              body: { imageBase64: base64, submissionId }
-            }).catch((err) => console.error("AI categorization failed:", err));
+            // AI tone categorization is paused (see Index.tsx).
           }
         } else {
           console.error("Failed to save submission:", insertError);
