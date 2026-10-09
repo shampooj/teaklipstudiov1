@@ -1568,7 +1568,7 @@ const Index = ({
       <PhotoTipsDialog
         open={photoTipsFor !== null}
         embedded={embedded}
-        showTitle={!productOnlyResults}
+        title={productOnlyResults ? "Tips for a Good Pic" : undefined}
         onDismiss={() => setPhotoTipsFor(null)}
         onGotIt={() => {
           const kind = photoTipsFor;
