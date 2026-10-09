@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
 import { Check, Download, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation } from "@/data/lipstickRecommendations";
+import { PRODUCT_DETAILS, VARIANT_MAP, Recommendation, SKIN_TONE_IDS } from "@/data/lipstickRecommendations";
+import { useDisplayedQuizModels, type QuizModel } from "@/hooks/useQuizModels";
 import { shareLook, downloadLook } from "@/lib/shareLook";
 import { shopifyImg } from "@/lib/shopifyImg";
 import teakLogo from "@/assets/teak-logo.png";
@@ -30,6 +31,9 @@ interface Props {
   // Extra classes for the "Top Recs" title, e.g. padding to clear a Back
   // button placed level with it.
   titleClassName?: string;
+  // Where the 10% off code was sent, if they opted in; shown under the
+  // free-shipping line.
+  discountEmail?: string | null;
 }
 
 const ALL_VARIANT_NAMES = Object.keys(VARIANT_MAP);
@@ -75,6 +79,27 @@ const carouselOpts: ComponentProps<typeof Carousel>["opts"] = {
   watchDrag: (_api, evt) => !(evt.target instanceof Element && evt.target.closest("[data-no-drag]")),
 };
 
+// Without the shopper's own photo, shades are tried on the displayed model
+// whose admin-labeled complexion is closest to their answers: same skin tone
+// if possible (then the next tone over), same lip tone breaking ties. No
+// model within one skin tone means no try-on (cards fall back to the smear).
+const closestModel = (models: QuizModel[] | undefined, skinTone: string, lipTone: string): QuizModel | null => {
+  const want = SKIN_TONE_IDS.indexOf(skinTone as (typeof SKIN_TONE_IDS)[number]);
+  if (!models || want < 0) return null;
+  let best: QuizModel | null = null;
+  let bestScore = Infinity;
+  for (const m of models) {
+    const have = SKIN_TONE_IDS.indexOf(m.skin_tone as (typeof SKIN_TONE_IDS)[number]);
+    if (have < 0 || Math.abs(have - want) > 1) continue;
+    const score = Math.abs(have - want) * 2 + (m.lip_tone === lipTone ? 0 : 1);
+    if (score < bestScore) {
+      best = m;
+      bestScore = score;
+    }
+  }
+  return best;
+};
+
 const toSpec = (shade: Shade): ShadeSnapshotSpec => ({
   key: shade.name,
   hex: shade.setting.hex,
@@ -101,6 +126,7 @@ const TryOnOtherShades = ({
   complexionType,
   stacked: stackedProp = false,
   titleClassName = "",
+  discountEmail = null,
 }: Props) => {
   const { data: settings } = useShadeSettings(ALL_VARIANT_NAMES, skinTone, lipTone);
   const { data: swatches } = useShadeSwatches();
@@ -164,9 +190,9 @@ const TryOnOtherShades = ({
   // Stacked cards whose try-on is flipped to the bare photo by a tap
   // (touch screens; mouse users get it on hover instead).
   const [bareShown, setBareShown] = useState<Record<string, boolean>>({});
-  // Product-only cards whose photo is flipped to the smear by a tap (touch
-  // screens; mouse users get it on hover instead).
-  const [smearShown, setSmearShown] = useState<Record<string, boolean>>({});
+  // Product-only cards whose photo is flipped to its overlay (model try-on or
+  // smear) by a tap (touch screens; mouse users get it on hover instead).
+  const [overlayShown, setOverlayShown] = useState<Record<string, boolean>>({});
   // Where and when the current touch on a product photo began. The flip is
   // driven by the touch itself, not the click: a tap that wobbles a few px
   // sideways starts a carousel drag, and phones then drop the click.
@@ -210,7 +236,12 @@ const TryOnOtherShades = ({
         : [],
     [stacked, pickNames, shadesByName, active],
   );
-  const snapshots = useBanubaSnapshots(userFace, snapshotSpecs);
+  const { data: quizModels } = useDisplayedQuizModels();
+  const previewModel = useMemo(
+    () => (userFace ? null : closestModel(quizModels, skinTone, lipTone)),
+    [userFace, quizModels, skinTone, lipTone],
+  );
+  const snapshots = useBanubaSnapshots(userFace ?? previewModel?.url ?? null, snapshotSpecs);
 
   if (!settings || !active) return null;
 
@@ -363,15 +394,23 @@ const TryOnOtherShades = ({
     );
   };
 
-  // Without a try-on photo (quiz v4): the product photo, filling a 4:5 frame
-  // so every card's photo is the same size (packshots are mostly 4:5; the odd
-  // landscape one is cropped to its middle), with the smear fading in over it
-  // on hover. On touch screens a tap flips between the
-  // two (tap again to go back) instead of opening the product page.
+  // Without a try-on photo (quiz v4/v5): the product photo, filling a 4:5
+  // frame so every card's photo is the same size (packshots are mostly 4:5;
+  // the odd landscape one is cropped to its middle). On hover the shade on
+  // the closest-complexion model fades in over it (previewModel), or the
+  // smear when there's no model try-on (none close enough, still rendering,
+  // or failed). On touch screens a tap flips between the two (tap again to
+  // go back) instead of opening the product page.
   const productOnlyImage = (shade: Shade) => {
     const img = variantImages[shade.variantId];
-    const smear = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
-    const showSmear = !!smear && !!smearShown[shade.name];
+    const smearImage = img?.metaImages.find((m) => /smear/i.test(m.url.split("/").pop() ?? ""));
+    const modelTryOn = previewModel ? snapshotFor(shade) : undefined;
+    const overlay = modelTryOn
+      ? { src: modelTryOn, alt: `${shade.label} on a model`, tag: "On a model", kind: "model_try_on" }
+      : smearImage
+      ? { src: shopifyImg(smearImage.url, 480), alt: smearImage.altText ?? `${shade.name} swatch`, tag: "Swatch", kind: "smear" }
+      : null;
+    const showOverlay = !!overlay && !!overlayShown[shade.name];
     return (
       <a
         href={productUrlFor(shade)}
@@ -383,16 +422,16 @@ const TryOnOtherShades = ({
           const start = photoTouch.current;
           photoTouch.current = null;
           // Under 10px and half a second is a tap; anything more is a swipe.
-          if (!smear || !start || e.pointerType !== "touch") return;
+          if (!overlay || !start || e.pointerType !== "touch") return;
           if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 10 || e.timeStamp - start.t > 500) return;
-          const next = !smearShown[shade.name];
-          setSmearShown((prev) => ({ ...prev, [shade.name]: next }));
-          trackEvent("smear_toggled", { variant_name: shade.name, showing_smear: next, source });
+          const next = !overlayShown[shade.name];
+          setOverlayShown((prev) => ({ ...prev, [shade.name]: next }));
+          trackEvent("smear_toggled", { variant_name: shade.name, showing_smear: next, overlay: overlay?.kind, source });
         }}
         onClick={(e) => {
-          // On touch screens a tap flips to the smear (above) instead of
+          // On touch screens a tap flips to the overlay (above) instead of
           // opening the product page.
-          if (smear && window.matchMedia("(hover: none)").matches) {
+          if (overlay && window.matchMedia("(hover: none)").matches) {
             e.preventDefault();
             return;
           }
@@ -410,17 +449,17 @@ const TryOnOtherShades = ({
             className="w-full h-full object-cover"
           />
         )}
-        {smear && (
+        {overlay && (
           <>
             <img
-              src={shopifyImg(smear.url, 480)}
-              alt={smear.altText ?? `${shade.name} swatch`}
+              src={overlay.src}
+              alt={overlay.alt}
               loading="lazy"
               draggable={false}
-              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${showSmear ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100`}
+              className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${showOverlay ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100`}
             />
-            <span className={`absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground transition-opacity duration-200 ${showSmear ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100 pointer-events-none`}>
-              Swatch
+            <span className={`absolute top-1.5 left-1.5 rounded-full bg-background/85 px-2 py-0.5 font-sans font-medium text-[9px] uppercase tracking-normal text-foreground transition-opacity duration-200 ${showOverlay ? "opacity-100" : "opacity-0"} [@media(hover:hover)]:group-hover:opacity-100 pointer-events-none`}>
+              {overlay.tag}
             </span>
           </>
         )}
@@ -537,9 +576,16 @@ const TryOnOtherShades = ({
   );
 
   const shippingNote = (
-    <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
-      Buy 2+ Lipsticks for Free U.S. Standard Shipping
-    </p>
+    <>
+      <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-foreground text-center">
+        Buy 2+ Lipsticks for Free U.S. Standard Shipping
+      </p>
+      {discountEmail && (
+        <p className="w-full mt-1 font-display text-[12px] leading-[13px] tracking-normal text-green-700 text-center break-words">
+          Your 10% off code is on its way to {discountEmail}
+        </p>
+      )}
+    </>
   );
 
   const conciergeNote = (

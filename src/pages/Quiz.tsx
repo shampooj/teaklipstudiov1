@@ -23,7 +23,7 @@ const VERSION_PAGES: Record<string, ComponentType> = {
   v4: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle noPhoto landingTopRecsOnly />,
   // Version 4 with a selfie step: selfie only (no models), saving it with an
   // email is required before results, and results stay product-only.
-  v5: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle selfieOnly requireEmail productOnlyResults landingTopRecsOnly />,
+  v5: () => <Index askLipShape askColorLook stackedResults inlineBack discountConsentTitle selfieOnly requireEmail productOnlyResults landingTopRecsOnly analyzingMessage="Analyzing skin tone" />,
 };
 
 // ?quiz_version=v2 forces a built version, on or off, so it can be reviewed

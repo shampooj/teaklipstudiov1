@@ -21,9 +21,12 @@ interface Props {
   embedded: boolean;
   onGotIt: () => void;
   onDismiss: () => void;
+  // false hides the "accurate try-on" title (versions with no try-on); it
+  // stays for screen readers, which need the dialog named.
+  showTitle?: boolean;
 }
 
-const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
+const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss, showTitle = true }: Props) => (
   <Dialog open={open} onOpenChange={(o) => { if (!o) onDismiss(); }}>
     <DialogContent
       className={`max-w-md rounded-none sm:rounded-none border border-foreground bg-background overflow-y-auto ${
@@ -31,7 +34,7 @@ const PhotoTipsDialog = ({ open, embedded, onGotIt, onDismiss }: Props) => (
       }`}
     >
       <DialogHeader>
-        <DialogTitle className="font-display font-normal text-[18px] leading-[18px] text-left tracking-normal">
+        <DialogTitle className={showTitle ? "font-display font-normal text-[18px] leading-[18px] text-left tracking-normal" : "sr-only"}>
           Quick tips for an accurate try-on
         </DialogTitle>
       </DialogHeader>
