@@ -14,6 +14,7 @@ import LipShapePanel from "@/components/admin/analytics/LipShapePanel";
 import ColorLookPanel from "@/components/admin/analytics/ColorLookPanel";
 import RecommendationsTab from "@/components/admin/RecommendationsTab";
 import QuizVersionsTab from "@/components/admin/QuizVersionsTab";
+import TryOnStudioTab from "@/components/admin/TryOnStudioTab";
 import { DEFAULT_QUIZ_VERSION, QUIZ_VERSIONS } from "@/lib/quizVersions";
 import skinLightBrown from "@/assets/skin-light-brown.jpg";
 import skinMediumBrown from "@/assets/skin-medium-brown.jpg";
@@ -554,7 +555,7 @@ const Dashboard = () => {
     );
   }, [labeledSubmissions, labelSearch]);
 
-  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations" | "web-features" | "quiz-versions">("labeling");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "labeling" | "data" | "shades" | "recommendations" | "web-features" | "quiz-versions" | "try-on-studio">("labeling");
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 md:p-10 font-sans" style={{ fontFamily: "'ABC ROM', sans-serif" }}>
@@ -621,6 +622,12 @@ const Dashboard = () => {
               className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "quiz-versions" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
             >
               Quiz Versions
+            </button>
+            <button
+              onClick={() => setActiveTab("try-on-studio")}
+              className={`text-[10px] uppercase tracking-widest pb-1 border-b-2 transition-colors ${activeTab === "try-on-studio" ? "border-foreground text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
+            >
+              Try-On Studio
             </button>
             <button
               onClick={() => setActiveTab("data")}
@@ -1217,6 +1224,7 @@ const Dashboard = () => {
         {activeTab === "web-features" && <WebFeaturesTab />}
 
         {activeTab === "quiz-versions" && <QuizVersionsTab />}
+        {activeTab === "try-on-studio" && <TryOnStudioTab />}
 
         {activeTab === "data" && (
           <>

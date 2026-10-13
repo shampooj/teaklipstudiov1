@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_DETAILS, getComplexionType } from "@/data/lipstickRecommendations";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import { Pencil, X } from "lucide-react";
 import BanubaInlinePreview from "./BanubaInlinePreview";
 import ErrorBoundary from "./ErrorBoundary";
 import SwatchColorPicker from "./SwatchColorPicker";
+import { Field, SliderField } from "./settingFields";
 import ShadeRenderGallery, { type GalleryItem } from "./ShadeRenderGallery";
 import { useShadeSwatches, swatchColor } from "@/hooks/useShadeSwatches";
 import { VARIANT_MAP } from "@/data/lipstickRecommendations";
@@ -87,55 +88,6 @@ const LIP_TONES = [
 ] as const;
 
 type Finish = BanubaFinish;
-
-// Labelled control cell for the per-tone card grid.
-const Field = ({ label, children }: { label: string; children: ReactNode }) => (
-  <label className="block space-y-1">
-    <span className="block text-[9px] uppercase tracking-widest text-muted-foreground">{label}</span>
-    {children}
-  </label>
-);
-
-const SliderField = ({
-  label,
-  value,
-  onChange,
-  max = 1,
-  step = 0.05,
-  disabled = false,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-  max?: number;
-  step?: number;
-  disabled?: boolean;
-}) => (
-  <Field label={label}>
-    <div className="flex items-center gap-2">
-      <input
-        type="range"
-        min={0}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="flex-1 min-w-0 accent-foreground disabled:opacity-40"
-      />
-      <Input
-        type="number"
-        min={0}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="h-7 w-16 shrink-0 text-[10px] rounded-md"
-      />
-    </div>
-  </Field>
-);
 
 const SKIN_TONES = [
   { id: "light-brown", label: "Light Brown" },
