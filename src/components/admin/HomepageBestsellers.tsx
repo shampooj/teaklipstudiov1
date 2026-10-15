@@ -29,6 +29,32 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 const BUCKET = "web-features";
 
+// Card photos show at roughly 300px wide (2x on retina), so uploads are
+// stored as an 800px-wide web copy: WebP where the browser can encode it,
+// else JPEG. A 1080x1350 PNG drops from ~2MB to ~100KB. The original file
+// stays wherever it was uploaded from.
+const WEB_PHOTO_WIDTH = 800;
+const toWebPhoto = async (source: Blob): Promise<{ blob: Blob; ext: string }> => {
+  const bitmap = await createImageBitmap(source);
+  const scale = Math.min(1, WEB_PHOTO_WIDTH / bitmap.width);
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d")!;
+  // Cards sit on white; flatten any transparency onto it (JPEG has no alpha).
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const encode = (type: string) => new Promise<Blob | null>((r) => canvas.toBlob(r, type, 0.85));
+  const webp = await encode("image/webp");
+  // Browsers that can't encode WebP hand back a PNG instead.
+  if (webp && webp.type === "image/webp") return { blob: webp, ext: "webp" };
+  const jpeg = await encode("image/jpeg");
+  if (!jpeg) throw new Error("Could not compress the image");
+  return { blob: jpeg, ext: "jpg" };
+};
+
 // The preview iframe is served from this app's origin, so alias the theme's
 // font names to the app's own font files.
 const PREVIEW_FONT_CSS = `
@@ -129,12 +155,7 @@ const HomepageBestsellers = () => {
     }
     setUploadingId(item.variantId);
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `bestsellers/${item.variantId}-${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from(BUCKET).upload(path, file, { contentType: file.type, upsert: false });
-      if (error) throw error;
-      const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
-      if (item.imagePath) await supabase.storage.from(BUCKET).remove([item.imagePath]).catch(() => {});
+      const { url, path } = await storeWebPhoto(item, file);
       updateItem(item.variantId, { imageUrl: url, imagePath: path });
     } catch (e: any) {
       toast.error(e?.message ?? "Upload failed");
@@ -143,11 +164,47 @@ const HomepageBestsellers = () => {
     }
   };
 
+  // Compress and store a card photo; returns its public URL and path. The
+  // previous upload is left in storage: the snippet pasted in the theme bakes
+  // in the image URLs it was copied with and paints those first, so deleting
+  // them would flash broken images until the live config loads.
+  const storeWebPhoto = async (item: BestsellerItem, source: Blob) => {
+    const { blob, ext } = await toWebPhoto(source);
+    // "-web-" marks a compressed copy (see needsOptimizing).
+    const path = `bestsellers/${item.variantId}-web-${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from(BUCKET).upload(path, blob, { contentType: blob.type, upsert: false });
+    if (error) throw error;
+    return { url: supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl, path };
+  };
+
+  // One-off fix for photos uploaded before compression: re-store each
+  // uploaded card photo as a web copy. Product photos (Shopify CDN) are
+  // already resized by Shopify and are left alone.
+  const [optimizing, setOptimizing] = useState(false);
+  const needsOptimizing = config.items.filter((it) => it.imagePath && !it.imagePath.includes("-web-"));
+  const optimizePhotos = async () => {
+    setOptimizing(true);
+    let done = 0;
+    try {
+      for (const it of needsOptimizing) {
+        const res = await fetch(it.imageUrl);
+        if (!res.ok) throw new Error(`Couldn't load the photo for ${it.variantTitle}`);
+        const { url, path } = await storeWebPhoto(it, await res.blob());
+        updateItem(it.variantId, { imageUrl: url, imagePath: path });
+        done++;
+      }
+      toast.success(`Optimized ${done} photo${done === 1 ? "" : "s"}. Save changes to publish them.`);
+    } catch (e: any) {
+      toast.error(e?.message ?? "Optimizing failed");
+    } finally {
+      setOptimizing(false);
+    }
+  };
+
   const revertToProductPhoto = async (item: BestsellerItem) => {
     const p = products.data?.find((x) => x.handle === item.productHandle);
     const v = p?.variants.find((x) => x.id === item.variantId);
     const url = v?.imageUrl ?? p?.imageUrl ?? "";
-    if (item.imagePath) await supabase.storage.from(BUCKET).remove([item.imagePath]).catch(() => {});
     updateItem(item.variantId, { imageUrl: url, imagePath: null });
   };
 
@@ -374,6 +431,17 @@ const HomepageBestsellers = () => {
           >
             {saving ? "Saving…" : dirty ? "Save changes" : "Saved"}
           </Button>
+          {needsOptimizing.length > 0 && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void optimizePhotos()}
+              disabled={optimizing}
+              className="h-8 rounded-full text-[9px] uppercase tracking-normal px-4"
+            >
+              {optimizing ? "Optimizing…" : `Optimize ${needsOptimizing.length} photo${needsOptimizing.length === 1 ? "" : "s"}`}
+            </Button>
+          )}
           {dirty && <span className="text-[10px] text-muted-foreground">Unsaved changes. The preview below shows them; the snippet uses what's saved.</span>}
         </div>
       </div>
